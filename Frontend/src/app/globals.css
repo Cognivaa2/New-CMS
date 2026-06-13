@@ -1,0 +1,159 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: "SF Pro Regular";
+  src: url("../../public/SFPRODISPLAYREGULAR.OTF") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Medium";
+  src: url("../../public/SFPRODISPLAYMEDIUM.OTF") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SF Pro Bold";
+  src: url("../../public/SFPRODISPLAYBOLD.OTF") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-sfpro {
+  font-family: "SF Pro Regular", system-ui, sans-serif;
+}
+
+.font-sfpro-medium {
+  font-family: "SF Pro Medium", system-ui, sans-serif;
+}
+
+.font-sfpro-bold {
+  font-family: "SF Pro Bold", system-ui, sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c5cbd8, #97accc);
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9ca3af, #4b5563);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #becbdd transparent;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3f3f46, #27272a);
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #52525b, #3f3f46);
+}
+
+.dark * {
+  scrollbar-color: #3f3f46 transparent;
+}
+
+::placeholder {
+  font-family: 'SF Pro Medium', sans-serif;
+}
+
+@keyframes slideUp {
+  0%   {  transform: translateY(100%); }
+  100% {  transform: translateY(0); }
+}
+
+@utility animate-slideUp {
+  animation: slideUp 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+
+
+
+[data-sonner-toaster] {
+  --transition-duration: 600ms !important; 
+  --transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+[data-sonner-toast][data-front="false"] {
+  opacity: 0.5 !important;
+}
+
+[data-sonner-toast] {
+  font-family: "SF Pro Regular", system-ui, sans-serif !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-family: "SF Pro Medium", system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-family: "SF Pro Regular", system-ui, sans-serif !important;
+  font-size: 0.8125rem !important;
+  margin-top: 2px !important;
+  color: #a1a1aa !important; 
+}
+
+.dark [data-sonner-toast] [data-description] {
+  color: #52525b !important; 
+}
+
+
+
+/* Smooth drag animation */
+[data-rfd-draggable-context-id] {
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+[data-rfd-drag-handle-context-id] {
+  cursor: grab;
+}
+[data-rfd-drag-handle-context-id]:active {
+  cursor: grabbing;
+}
+[data-rfd-placeholder-context-id] {
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 1rem;
+}
+.dark [data-rfd-placeholder-context-id] {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+.dragging-active {
+  user-select: none;
+}
+
+
+
+
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
