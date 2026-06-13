@@ -334,7 +334,7 @@ export default function PayablesPage() {
         <SummaryCards cards={summaryCards} isLoading={isSummaryLoading} />
 
 
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] w-fit">
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] lg:w-fit">
           {PAYABLE_TABS.map((tab) => {
             const count = tabCounts[tab] ?? 0
             return (

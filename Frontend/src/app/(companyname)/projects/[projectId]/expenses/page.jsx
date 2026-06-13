@@ -351,7 +351,7 @@ export default function ExpensesPage() {
           isLoading={isDashLoading}
         />
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] w-fit">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] lg:w-fit">
           {EXPENSE_TABS.map((tab) => {
             const isActive = activeTab === tab
             return (

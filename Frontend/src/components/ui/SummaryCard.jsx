@@ -1,6 +1,6 @@
 export default function SummaryCard({ item }) {
   return (
-    <div className={`p-6 rounded-4xl transition-all duration-300 font-sfpro flex flex-col justify-center min-h-40 ${item.colorClass}`}>
+    <div className={`p-6 rounded-2xl transition-all duration-300 font-sfpro flex flex-col justify-center min-h-30 ${item.colorClass}`}>
       <h2 className="text-[34px] font-sfpro-bold leading-none mb-2 text-gray-800 dark:text-gray-100">
         {item.value}
       </h2>

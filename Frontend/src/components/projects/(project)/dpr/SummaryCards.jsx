@@ -43,7 +43,7 @@ export default function SummaryCards({ cards = [], isLoading = false }) {
         return (
           <div
             key={card.id}
-            className={`${card.colorClass} rounded-3xl p-8 flex flex-col relative overflow-hidden transition-colors duration-300`}
+            className={`${card.colorClass} rounded-2xl p-8 flex flex-col relative overflow-hidden transition-colors duration-300`}
           >
             <div className="flex items-center gap-3 mb-4">
               <span className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">

@@ -1,7 +1,8 @@
 // components/ui/StatsGrid.jsx
+// rounded-[1.75rem] 5,26
 function StatCard({ value, label, sublabel, icon: Icon }) {
   return (
-    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-center">
+    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md flex flex-col justify-center">
       <div className="flex items-center gap-2.5 mb-3">
         <span className="text-[32px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">
           {value}
@@ -22,7 +23,7 @@ function StatCard({ value, label, sublabel, icon: Icon }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-5 shadow-sm animate-pulse flex flex-col gap-3">
+    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm animate-pulse flex flex-col gap-3">
       <div className="h-9 w-20 bg-zinc-200 dark:bg-zinc-700 rounded-lg" />
       <div className="h-4 w-28 bg-zinc-100 dark:bg-zinc-800 rounded-md" />
       <div className="h-3 w-32 bg-zinc-100 dark:bg-zinc-800 rounded-md" />

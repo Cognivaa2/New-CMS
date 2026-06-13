@@ -93,6 +93,26 @@ function getReconciliationHeaders() {
   return { ...getAuthHeaders(), "x-company-id": companyId };
 }
 
+function formatIndianCompact(num) {
+  if (num == null || isNaN(num)) return "0";
+  const abs = Math.abs(num);
+  const sign = num < 0 ? "-" : "";
+
+  if (abs >= 1_00_00_000) {
+    const val = abs / 1_00_00_000;
+    return `${sign}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(2)}Cr`;
+  }
+  if (abs >= 1_00_000) {
+    const val = abs / 1_00_000;
+    return `${sign}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(2)}L`;
+  }
+  if (abs >= 1_000) {
+    const val = abs / 1_000;
+    return `${sign}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}K`;
+  }
+  return `${sign}${abs.toLocaleString("en-IN")}`;
+}
+
 function mapMaterialSummary(summary = {}) {
   return [
     {
@@ -150,7 +170,7 @@ function mapInventorySummary(summary = {}) {
     },
     {
       id: 2,
-      value: `₹${(summary.totalInventoryValue ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalInventoryValue ?? 0)}`,
       label: "Inventory Value",
       subLabel: "Current valuation",
       icon: "currency",
@@ -181,7 +201,9 @@ function mapInventorySummary(summary = {}) {
       colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
     },
   ];
-} function mapPurchaseSummary(summary = {}) {
+}
+
+function mapPurchaseSummary(summary = {}) {
   return [
     {
       id: 1,
@@ -193,7 +215,7 @@ function mapInventorySummary(summary = {}) {
     },
     {
       id: 2,
-      value: `₹${(summary.totalOrderValue ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalOrderValue ?? 0)}`,
       label: "Total Order Value",
       subLabel: "Committed amount",
       icon: "currency",
@@ -201,7 +223,7 @@ function mapInventorySummary(summary = {}) {
     },
     {
       id: 3,
-      value: `₹${(summary.totalPaidValue ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalPaidValue ?? 0)}`,
       label: "Total Paid",
       subLabel: "Settled amount",
       icon: "paid",
@@ -209,7 +231,7 @@ function mapInventorySummary(summary = {}) {
     },
     {
       id: 4,
-      value: `₹${(summary.totalOutstandingAmount ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalOutstandingAmount ?? 0)}`,
       label: "Outstanding",
       subLabel: "Pending balance",
       icon: "balance",
@@ -238,7 +260,7 @@ function mapFinancialSummary(summary = {}) {
     },
     {
       id: 2,
-      value: `₹${(summary.totalCommittedAmount ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalCommittedAmount ?? 0)}`,
       label: "Committed Amount",
       subLabel: "Total PO value",
       icon: "currency",
@@ -246,7 +268,7 @@ function mapFinancialSummary(summary = {}) {
     },
     {
       id: 3,
-      value: `₹${(summary.totalPaidAmount ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalPaidAmount ?? 0)}`,
       label: "Total Paid",
       subLabel: "Settled amount",
       icon: "paid",
@@ -254,7 +276,7 @@ function mapFinancialSummary(summary = {}) {
     },
     {
       id: 4,
-      value: `₹${(summary.totalNetPayable ?? 0).toLocaleString("en-IN")}`,
+      value: `₹${formatIndianCompact(summary.totalNetPayable ?? 0)}`,
       label: "Net Payable",
       subLabel: "After deductions",
       icon: "balance",
