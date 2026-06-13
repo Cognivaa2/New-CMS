@@ -732,41 +732,326 @@ export const buildExpenseReportWorkbook = async (financialData, allExpenses, com
 };
 
 
-export const convertMilestoneCommitmentToActual = async (opts, session = null) => {
-    const { sourceId, milestoneId, resolvedBy, resolvedReason } = opts;
-    const filter = {
+
+// export const convertMilestoneCommitmentToActual = async (opts, session = null) => {
+//     const { sourceId, milestoneId, resolvedBy, resolvedReason } = opts;
+//     const filter = {
+//         sourceModel: "WorkOrder",
+//         sourceId: new mongoose.Types.ObjectId(sourceId),
+//         milestoneId: new mongoose.Types.ObjectId(milestoneId),
+//         status: "Committed",
+//         isDeleted: false,
+//     };
+//     const updateOpts = session ? { session } : {};
+//     const result = await Expense.updateMany(
+//         filter,
+//         {
+//             $set: {
+//                 status: "Actual",
+//                 paidAt: new Date(),
+//                 paidBy: resolvedBy || null,
+//                 paymentRemarks: resolvedReason || "Milestone triggered — commitment converted to actual",
+//             },
+//         },
+//         updateOpts
+//     );
+//     logger.info("[expenseHelper] Milestone commitment converted to actual", {
+//         sourceId,
+//         milestoneId,
+//         matchedCount: result.matchedCount,
+//         modifiedCount: result.modifiedCount,
+//     });
+//     return result;
+// };
+
+
+// export const revertActualToCommitted = async (opts, session = null) => {
+//     const { sourceId, milestoneId, revertedBy, revertReason } = opts;
+//     const filter = {
+//         sourceModel: "WorkOrder",
+//         sourceId: new mongoose.Types.ObjectId(sourceId),
+//         status: { $in: ["Actual", "Paid"] },
+//         isDeleted: false,
+//     };
+//     if (milestoneId) {
+//         filter.milestoneId = new mongoose.Types.ObjectId(milestoneId);
+//     } else {
+//         filter.milestoneId = null;
+//     }
+//     const updateOpts = session ? { session } : {};
+//     const result = await Expense.updateMany(
+//         filter,
+//         {
+//             $set: {
+//                 status: "Committed",
+//                 paymentRemarks: revertReason || "WO progress regressed — actual reverted to committed",
+//                 updatedBy: revertedBy || null,
+//             },
+//             $unset: {
+//                 paidAt: "",
+//                 paidBy: "",
+//             },
+//         },
+//         updateOpts
+//     );
+//     logger.info("[expenseHelper] Expense(s) reverted from Actual → Committed", {
+//         sourceId,
+//         milestoneId: milestoneId || null,
+//         matchedCount: result.matchedCount,
+//         modifiedCount: result.modifiedCount,
+//         revertReason,
+//     });
+//     return result;
+// };
+
+
+
+export const createWOCommitmentExpense = async (opts, session = null) => {
+    const {
+        companyId, projectId, woId, woNumber,
+        totalContractValue, vendorId, vendorName,
+        phaseId, createdBy,
+    } = opts;
+    const existing = await Expense.findOne(
+        {
+            sourceModel: "WorkOrder",
+            sourceId: new mongoose.Types.ObjectId(woId),
+            status: "Committed",
+            isDeleted: false,
+        },
+        null,
+        session ? { session } : {}
+    ).lean();
+    if (existing) {
+        logger.warn("[expenseHelper] createWOCommitmentExpense: committed entry already exists — skipped", {
+            woId, existingId: existing._id,
+        });
+        return existing;
+    }
+    const expenseNumber = await generateExpenseNumber(companyId);
+    const docData = {
+        companyId,
+        projectId: new mongoose.Types.ObjectId(projectId),
+        expenseNumber,
+        type: "WO_Commitment",
+        category: "Contractor",
+        status: "Committed",
+        amount: parseFloat(totalContractValue.toFixed(2)),
+        amountSnapshot: parseFloat(totalContractValue.toFixed(2)),
+        description: `Work Order ${woNumber} — contractor commitment`,
+        expenseDate: new Date(),
         sourceModel: "WorkOrder",
-        sourceId: new mongoose.Types.ObjectId(sourceId),
-        milestoneId: new mongoose.Types.ObjectId(milestoneId),
+        sourceId: new mongoose.Types.ObjectId(woId),
+        sourceNumber: woNumber,
+        vendorId: vendorId || null,
+        vendorName: vendorName || null,
+        phaseId: phaseId || null,
+        milestoneId: null,
+        milestoneTitle: null,
+        createdBy: createdBy || null,
+    };
+    const createOpts = session ? { session } : {};
+    const [expense] = await Expense.create([docData], createOpts);
+    logger.info("[expenseHelper] WO committed expense created", {
+        expenseId: expense._id, expenseNumber, woId, amount: expense.amount,
+    });
+    return expense;
+};
+
+
+
+export const triggerMilestoneExpense = async (opts) => {
+    const {
+        sourceId, woNumber, projectId, companyId,
+        milestoneAmount, milestoneTitle,
+        vendorId, vendorName, phaseId,
+        resolvedBy, resolvedReason,
+    } = opts;
+    const woObjectId = new mongoose.Types.ObjectId(sourceId);
+    const committed = await Expense.findOne({
+        sourceModel: "WorkOrder",
+        sourceId: woObjectId,
         status: "Committed",
         isDeleted: false,
-    };
-    const updateOpts = session ? { session } : {};
-    const result = await Expense.updateMany(
-        filter,
-        {
+    }).lean();
+
+    if (committed) {
+        const newCommitted = parseFloat((committed.amount - milestoneAmount).toFixed(2));
+        if (newCommitted <= 0) {
+            await Expense.findByIdAndDelete(committed._id);
+            logger.info("[expenseHelper] triggerMilestoneExpense: committed entry fully settled and deleted", {
+                sourceId, woNumber, committedId: committed._id,
+            });
+        } else {
+            await Expense.findByIdAndUpdate(committed._id, {
+                $set: {
+                    amount: newCommitted,
+                    "lastAmountUpdate.previousAmount": committed.amount,
+                    "lastAmountUpdate.updatedAt": new Date(),
+                    "lastAmountUpdate.updatedBy": resolvedBy || null,
+                    "lastAmountUpdate.reason": `Milestone "${milestoneTitle}" triggered — committed reduced by ${milestoneAmount}`,
+                },
+            });
+            logger.info("[expenseHelper] triggerMilestoneExpense: committed entry reduced", {
+                sourceId, woNumber, previous: committed.amount, newCommitted, milestoneAmount,
+            });
+        }
+    } else {
+        logger.warn("[expenseHelper] triggerMilestoneExpense: no committed entry found to reduce", {
+            sourceId, woNumber,
+        });
+    }
+    const existingActual = await Expense.findOne({
+        sourceModel: "WorkOrder",
+        sourceId: woObjectId,
+        status: "Actual",
+        isDeleted: false,
+    }).lean();
+    if (existingActual) {
+        const newActual = parseFloat((existingActual.amount + milestoneAmount).toFixed(2));
+        await Expense.findByIdAndUpdate(existingActual._id, {
             $set: {
-                status: "Actual",
+                amount: newActual,
                 paidAt: new Date(),
                 paidBy: resolvedBy || null,
-                paymentRemarks: resolvedReason || "Milestone triggered — commitment converted to actual",
+                paymentRemarks: resolvedReason || `Milestone "${milestoneTitle}" triggered`,
+                "lastAmountUpdate.previousAmount": existingActual.amount,
+                "lastAmountUpdate.updatedAt": new Date(),
+                "lastAmountUpdate.updatedBy": resolvedBy || null,
+                "lastAmountUpdate.reason": `Milestone "${milestoneTitle}" triggered — actual increased by ${milestoneAmount}`,
             },
-        },
-        updateOpts
-    );
-    logger.info("[expenseHelper] Milestone commitment converted to actual", {
-        sourceId,
-        milestoneId,
-        matchedCount: result.matchedCount,
-        modifiedCount: result.modifiedCount,
-    });
-    return result;
+        });
+        logger.info("[expenseHelper] triggerMilestoneExpense: actual entry updated", {
+            sourceId, woNumber, previous: existingActual.amount, newActual, milestoneAmount,
+        });
+    } else {
+        const expenseNumber = await generateExpenseNumber(companyId);
+        const [newActualDoc] = await Expense.create([{
+            companyId: new mongoose.Types.ObjectId(companyId),
+            projectId: new mongoose.Types.ObjectId(projectId),
+            expenseNumber,
+            type: "WO_Commitment",
+            category: "Contractor",
+            status: "Actual",
+            amount: parseFloat(milestoneAmount.toFixed(2)),
+            amountSnapshot: parseFloat(milestoneAmount.toFixed(2)),
+            description: `Work Order ${woNumber} — actual payments`,
+            expenseDate: new Date(),
+            sourceModel: "WorkOrder",
+            sourceId: woObjectId,
+            sourceNumber: woNumber,
+            vendorId: vendorId || null,
+            vendorName: vendorName || null,
+            phaseId: phaseId || null,
+            milestoneId: null,
+            milestoneTitle: null,
+            paidAt: new Date(),
+            paidBy: resolvedBy || null,
+            paymentRemarks: resolvedReason || `Milestone "${milestoneTitle}" triggered`,
+            createdBy: resolvedBy || null,
+        }]);
+        logger.info("[expenseHelper] triggerMilestoneExpense: actual entry created", {
+            sourceId, woNumber, expenseNumber, amount: milestoneAmount,
+        });
+    }
+};
+
+
+
+export const regressMilestoneExpense = async (opts) => {
+    const {
+        sourceId, woNumber, projectId, companyId,
+        milestoneAmount, milestoneTitle,
+        vendorId, vendorName, phaseId,
+        revertedBy, revertReason,
+    } = opts;
+    const woObjectId = new mongoose.Types.ObjectId(sourceId);
+    const actual = await Expense.findOne({
+        sourceModel: "WorkOrder",
+        sourceId: woObjectId,
+        status: "Actual",
+        isDeleted: false,
+    }).lean();
+    if (actual) {
+        const newActual = parseFloat((actual.amount - milestoneAmount).toFixed(2));
+        if (newActual <= 0) {
+            await Expense.findByIdAndDelete(actual._id);
+            logger.info("[expenseHelper] regressMilestoneExpense: actual entry fully reversed and deleted", {
+                sourceId, woNumber, actualId: actual._id,
+            });
+        } else {
+            await Expense.findByIdAndUpdate(actual._id, {
+                $set: {
+                    amount: newActual,
+                    "lastAmountUpdate.previousAmount": actual.amount,
+                    "lastAmountUpdate.updatedAt": new Date(),
+                    "lastAmountUpdate.updatedBy": revertedBy || null,
+                    "lastAmountUpdate.reason": `Milestone "${milestoneTitle}" regressed — actual reduced by ${milestoneAmount}`,
+                },
+            });
+            logger.info("[expenseHelper] regressMilestoneExpense: actual entry reduced", {
+                sourceId, woNumber, previous: actual.amount, newActual, milestoneAmount,
+            });
+        }
+    } else {
+        logger.warn("[expenseHelper] regressMilestoneExpense: no actual entry found to reduce", {
+            sourceId, woNumber,
+        });
+    }
+    const existingCommitted = await Expense.findOne({
+        sourceModel: "WorkOrder",
+        sourceId: woObjectId,
+        status: "Committed",
+        isDeleted: false,
+    }).lean();
+    if (existingCommitted) {
+        const newCommitted = parseFloat((existingCommitted.amount + milestoneAmount).toFixed(2));
+        await Expense.findByIdAndUpdate(existingCommitted._id, {
+            $set: {
+                amount: newCommitted,
+                "lastAmountUpdate.previousAmount": existingCommitted.amount,
+                "lastAmountUpdate.updatedAt": new Date(),
+                "lastAmountUpdate.updatedBy": revertedBy || null,
+                "lastAmountUpdate.reason": `Milestone "${milestoneTitle}" regressed — committed restored by ${milestoneAmount}`,
+            },
+        });
+        logger.info("[expenseHelper] regressMilestoneExpense: committed entry restored", {
+            sourceId, woNumber, previous: existingCommitted.amount, newCommitted, milestoneAmount,
+        });
+    } else {
+        const expenseNumber = await generateExpenseNumber(companyId);
+        await Expense.create([{
+            companyId: new mongoose.Types.ObjectId(companyId),
+            projectId: new mongoose.Types.ObjectId(projectId),
+            expenseNumber,
+            type: "WO_Commitment",
+            category: "Contractor",
+            status: "Committed",
+            amount: parseFloat(milestoneAmount.toFixed(2)),
+            amountSnapshot: parseFloat(milestoneAmount.toFixed(2)),
+            description: `Work Order ${woNumber} — contractor commitment (restored)`,
+            expenseDate: new Date(),
+            sourceModel: "WorkOrder",
+            sourceId: woObjectId,
+            sourceNumber: woNumber,
+            vendorId: vendorId || null,
+            vendorName: vendorName || null,
+            phaseId: phaseId || null,
+            milestoneId: null,
+            milestoneTitle: null,
+            createdBy: revertedBy || null,
+        }]);
+        logger.info("[expenseHelper] regressMilestoneExpense: committed entry recreated", {
+            sourceId, woNumber, expenseNumber, amount: milestoneAmount,
+        });
+    }
 };
 
 
 
 export const convertWOCommitmentToActual = async (opts, session = null) => {
     const { sourceId, resolvedBy, resolvedReason } = opts;
+
     const filter = {
         sourceModel: "WorkOrder",
         sourceId: new mongoose.Types.ObjectId(sourceId),
@@ -787,7 +1072,39 @@ export const convertWOCommitmentToActual = async (opts, session = null) => {
         },
         updateOpts
     );
-    logger.info("[expenseHelper] WO commitment converted to actual (no milestones)", {
+    logger.info("[expenseHelper] WO commitment converted to actual (non-milestone)", {
+        sourceId,
+        matchedCount: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+    });
+    return result;
+};
+
+
+
+export const revertWOActualToCommitted = async (opts, session = null) => {
+    const { sourceId, revertedBy, revertReason } = opts;
+    const filter = {
+        sourceModel: "WorkOrder",
+        sourceId: new mongoose.Types.ObjectId(sourceId),
+        milestoneId: null,
+        status: "Actual",
+        isDeleted: false,
+    };
+    const updateOpts = session ? { session } : {};
+    const result = await Expense.updateMany(
+        filter,
+        {
+            $set: {
+                status: "Committed",
+                paymentRemarks: revertReason || "WO regressed — actual reverted to committed",
+                updatedBy: revertedBy || null,
+            },
+            $unset: { paidAt: "", paidBy: "" },
+        },
+        updateOpts
+    );
+    logger.info("[expenseHelper] WO actual reverted to committed (non-milestone)", {
         sourceId,
         matchedCount: result.matchedCount,
         modifiedCount: result.modifiedCount,

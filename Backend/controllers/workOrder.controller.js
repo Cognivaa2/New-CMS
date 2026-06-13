@@ -8,11 +8,11 @@ import ApiResponse from "../utils/ApiResponse.js";
 import logger from "../utils/logger.utils.js";
 import { isValidObjectId, resolveCompany, resolveUserByKeycloak, generateWONumber, processWorkItems, processMilestones, enrichWOUsers, generateWOPdf, generateWCCPdf } from "../helpers/woHelper.js";
 import {
-    createExpenseEntry,
+    createWOCommitmentExpense,
     reverseExpenseEntry,
     recalcProjectHealth,
-    convertMilestoneCommitmentToActual,
     convertWOCommitmentToActual,
+    triggerMilestoneExpense
 } from "../helpers/expenseHelper.js";
 import { pushDprEvent } from "../helpers/dprHelper.js";
 import { createPayableFromWO, reversePayable } from "../helpers/payableHelper.js";
@@ -485,47 +485,17 @@ export const approveWO = async (req, res) => {
             },
             eventAt: new Date(),
         });
-        if (wo.hasMilestones && wo.milestones?.length > 0) {
-            for (const ms of wo.milestones) {
-                await createExpenseEntry({
-                    companyId,
-                    projectId: new mongoose.Types.ObjectId(projectId),
-                    type: "WO_Commitment",
-                    category: "Contractor",
-                    status: "Committed",
-                    amount: ms.paymentAmount,
-                    description: `WO ${wo.woNumber} — Milestone: ${ms.title} (${ms.triggerPercent}% trigger)`,
-                    expenseDate: new Date(),
-                    sourceModel: "WorkOrder",
-                    sourceId: wo._id,
-                    sourceNumber: wo.woNumber,
-                    vendorId: wo.vendorId,
-                    vendorName: wo.vendorName,
-                    phaseId: wo.phaseId || null,
-                    milestoneId: ms._id,
-                    milestoneTitle: ms.title,
-                    createdBy: actionUser._id,
-                }, session);
-            }
-        } else {
-            await createExpenseEntry({
-                companyId,
-                projectId: new mongoose.Types.ObjectId(projectId),
-                type: "WO_Commitment",
-                category: "Contractor",
-                status: "Committed",
-                amount: wo.totalContractValue,
-                description: `Work Order ${wo.woNumber} approved — contractor commitment`,
-                expenseDate: new Date(),
-                sourceModel: "WorkOrder",
-                sourceId: wo._id,
-                sourceNumber: wo.woNumber,
-                vendorId: wo.vendorId,
-                vendorName: wo.vendorName,
-                phaseId: wo.phaseId || null,
-                createdBy: actionUser._id,
-            }, session);
-        }
+        await createWOCommitmentExpense({
+            companyId,
+            projectId: new mongoose.Types.ObjectId(projectId),
+            woId: wo._id,
+            woNumber: wo.woNumber,
+            totalContractValue: wo.totalContractValue,
+            vendorId: wo.vendorId,
+            vendorName: wo.vendorName,
+            phaseId: wo.phaseId || null,
+            createdBy: actionUser._id,
+        }, session);
         await session.commitTransaction();
         session.endSession();
         const projectForNotif = await Project.findById(wo.projectId).select("projectName").lean();
@@ -690,8 +660,8 @@ export const cancelWO = async (req, res) => {
             sourceModel: "WorkOrder",
             sourceId: wo._id,
             reversedBy: actionUser._id,
-            reversalReason: `WO ${wo.woNumber} cancelled — commitment reversed`,
-            statusFilter: "Committed",
+            reversalReason: `WO ${wo.woNumber} cancelled`,
+            statusFilter: { $in: ["Committed", "Actual"] },
         }, session);
         await session.commitTransaction();
         session.endSession();
@@ -827,15 +797,22 @@ export const markWOComplete = async (req, res) => {
         if (wo.hasMilestones && previouslyPendingMilestones.length > 0) {
             for (const ms of previouslyPendingMilestones) {
                 try {
-                    await convertMilestoneCommitmentToActual({
+                    await triggerMilestoneExpense({
                         sourceId: wo._id,
-                        milestoneId: ms._id,
+                        woNumber: wo.woNumber,
+                        projectId: wo.projectId,
+                        companyId: wo.companyId,
+                        milestoneAmount: ms.paymentAmount,
+                        milestoneTitle: ms.title,
+                        vendorId: wo.vendorId,
+                        vendorName: wo.vendorName,
+                        phaseId: wo.phaseId || null,
                         resolvedBy: actionUser._id,
                         resolvedReason: `Milestone "${ms.title}" triggered — WO ${wo.woNumber} manually completed`,
                     });
                 } catch (err) {
-                    logger.error("markWOComplete: milestone expense conversion failed", {
-                        woId: wo._id, milestoneId: ms._id, error: err.message,
+                    logger.error("markWOComplete: milestone expense trigger failed", {
+                        woId: wo._id, milestoneTitle: ms.title, error: err.message,
                     });
                 }
             }
