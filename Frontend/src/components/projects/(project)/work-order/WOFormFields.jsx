@@ -251,6 +251,7 @@ function WorkItemRow({ item, index, onChange, onRemove, disabled, canRemove }) {
                             onChange(index, { ...item, quantity: parseFloat(e.target.value) || 0 })
                         }
                         disabled={disabled}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full h-8 px-2.5 rounded-lg text-[12.5px] font-sfpro bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#333] text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-[#414141] disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
@@ -279,6 +280,7 @@ function WorkItemRow({ item, index, onChange, onRemove, disabled, canRemove }) {
                             onChange(index, { ...item, unitRate: parseFloat(e.target.value) || 0 })
                         }
                         disabled={disabled}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full h-8 px-2.5 rounded-lg text-[12.5px] font-sfpro bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#333] text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-[#414141] disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
@@ -399,6 +401,7 @@ function MilestoneRow({ milestone, index, onChange, onRemove, disabled, canRemov
                             onChange(index, { ...milestone, triggerPercent: parseFloat(e.target.value) || 0 })
                         }
                         disabled={disabled}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full h-8 px-2.5 rounded-lg text-[12.5px] font-sfpro bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#333] text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-[#414141] disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
@@ -417,6 +420,7 @@ function MilestoneRow({ milestone, index, onChange, onRemove, disabled, canRemov
                             onChange(index, { ...milestone, paymentPercent: parseFloat(e.target.value) || 0 })
                         }
                         disabled={disabled}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full h-8 px-2.5 rounded-lg text-[12.5px] font-sfpro bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#333] text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:focus:ring-[#414141] disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                 </div>
