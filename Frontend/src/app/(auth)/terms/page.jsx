@@ -133,13 +133,11 @@ export default function TermsPage() {
     ];
 
     return (
-        <div className={`${mounted ? "animate-slideUp" : "opacity-0"} w-full max-w-225 rounded-[20px] p-px bg-[linear-gradient(180deg,#252525_0%,#0b0b0b_100%)]`}>
+        <div className={`${mounted ? "animate-slideUp" : "opacity-0"} w-full max-w-225 lg:max-w-400 rounded-[20px] p-px bg-[linear-gradient(180deg,#252525_0%,#0b0b0b_100%)]`}>
             <div className="w-full bg-[linear-gradient(135deg,#000000_0%,#1b1b1b_100%)] border border-white/[0.07] rounded-[20px] px-6 py-12 sm:px-16 sm:py-16 relative overflow-hidden">
 
-                {/* Inner border */}
                 <div className="pointer-events-none absolute inset-3 rounded-2xl border border-[#202020]" />
 
-                {/* Back link */}
                 <div className="relative z-10 mb-10">
                     <Link
                         href="/register"
@@ -155,9 +153,8 @@ export default function TermsPage() {
                     </Link>
                 </div>
 
-                {/* Header */}
                 <div className="relative z-10 text-center mb-14">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.07] mb-6">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/4 border border-white/7 mb-6">
                         <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>
@@ -168,33 +165,28 @@ export default function TermsPage() {
                     <p className="text-sm font-sfpro text-[#C2C2C2] leading-relaxed max-w-115 mx-auto">
                         Please review these terms carefully before using our Construction Management System. By creating an account, you agree to be bound by the conditions outlined below.
                     </p>
-                    <div className="mt-5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/[0.03]">
+                    <div className="mt-5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/[0.07] bg-white/3">
                         <div className="w-1.5 h-1.5 rounded-full bg-[#4ade80]" />
                         <span className="text-[11px] font-sfpro text-[#666]">Last updated: June 12, 2026</span>
                     </div>
                 </div>
 
-                {/* Divider */}
-                <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent mb-14 max-w-170 mx-auto" />
+                <div className="relative z-10 w-full h-px bg-linear-to-r from-transparent via-white/[0.07] to-transparent mb-14 max-w-170 mx-auto" />
 
-                {/* Terms Content */}
-                <div className="relative z-10 max-w-170 mx-auto space-y-4">
+                <div className="relative z-10 max-w-170 lg:max-w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {sections.map((section, index) => (
                         <div
                             key={index}
-                            className="group flex gap-5 sm:gap-7 rounded-xl border border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03] hover:border-white/[0.08] px-6 py-6 sm:px-8 sm:py-7 transition-all duration-300"
+                            className="group flex gap-5 sm:gap-7 rounded-xl border border-white/4 bg-white/1 hover:bg-white/3 hover:border-white/8 px-6 py-6 sm:px-8 sm:py-7 transition-all duration-300"
                         >
-                            {/* Section number */}
-                            <div className="flex-shrink-0 pt-0.5">
+                            <div className="shrink-0 pt-0.5">
                                 <span className="text-[11px] font-sfpro-bold text-[#333] tracking-widest uppercase tabular-nums">
                                     {section.id}
                                 </span>
                             </div>
 
-                            {/* Divider line */}
-                            <div className="flex-shrink-0 w-px bg-white/[0.06] group-hover:bg-white/[0.12] transition-colors duration-300" />
+                            <div className="shrink-0 w-px bg-white/6 group-hover:bg-white/12 transition-colors duration-300" />
 
-                            {/* Content */}
                             <div className="flex-1 min-w-0">
                                 <h2 className="text-sm sm:text-base font-sfpro-bold text-white mb-2.5 tracking-tight">
                                     {section.title}
@@ -207,14 +199,12 @@ export default function TermsPage() {
                     ))}
                 </div>
 
-                {/* Divider */}
-                <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/[0.07] to-transparent mt-14 mb-12 max-w-170 mx-auto" />
+                <div className="relative z-10 w-full h-px bg-linear-to-r from-transparent via-white/[0.07] to-transparent mt-14 mb-12 max-w-170 mx-auto" />
 
-                {/* Acknowledgment Section */}
                 <div className="relative z-10 max-w-170 mx-auto mb-10">
-                    <div className="rounded-xl border border-white/[0.07] bg-gradient-to-br from-white/[0.03] to-white/[0.01] px-8 py-8 sm:px-10">
+                    <div className="rounded-xl border border-white/[0.07] bg-linear-to-br from-white/3 to-white/1 px-8 py-8 sm:px-10">
                         <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
+                            <div className="hrink-0 w-10 h-10 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center">
                                 <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                                 </svg>
@@ -229,26 +219,6 @@ export default function TermsPage() {
                     </div>
                 </div>
 
-                {/* Contact Section */}
-                {/* <div className="relative z-10 max-w-170 mx-auto">
-                    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-8 py-8 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h3 className="text-base font-sfpro-bold text-white mb-1.5">Need Clarification?</h3>
-                            <p className="text-sm font-sfpro text-[#888] leading-relaxed">
-                                Our support team is ready to address any questions regarding these terms.
-                            </p>
-                        </div>
-                        <a
-                            href="mailto:support@example.com"
-                            className="flex-shrink-0 inline-flex items-center gap-2 bg-white text-[#0a0a0a] rounded-xl font-sfpro-bold text-sm px-6 py-3 hover:opacity-85 hover:-translate-y-px active:translate-y-0 active:opacity-95 transition-all duration-200 whitespace-nowrap"
-                        >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                            </svg>
-                            Contact Support
-                        </a>
-                    </div>
-                </div> */}
                 <div className="relative z-10 mb-10">
                     <Link
                         href="/register"
@@ -264,7 +234,6 @@ export default function TermsPage() {
                     </Link>
                 </div>
 
-                {/* Footer */}
                 <div className="relative z-10 mt-10 text-center">
                     <p className="text-xs font-sfpro text-[#444]">
                         © {new Date().getFullYear()} Construction Management System · All rights reserved.
