@@ -372,6 +372,38 @@ class NotificationService {
     static async emitUnreadCount(userId, companyId) {
         return emitUnreadCount(userId, companyId);
     }
+
+    static async notifySafetyInspectionCreated({ companyId, projectId, projectName, inspectionNumber, inspectionId, entryCount }) {
+        const allUserIds = await getCompanyUserIds(companyId);
+        if (!allUserIds.length) return;
+        await fanOutAndEmit(allUserIds, {
+            companyId,
+            projectId,
+            type: "SAFETY_INSPECTION_CREATED",
+            channel: "system",
+            title: "Safety Inspection Created",
+            message: `Inspection ${inspectionNumber} with ${entryCount} entr${entryCount === 1 ? "y" : "ies"} has been created for project "${projectName}". Go to the Safety tab to review.`,
+            refModel: "Safety",
+            refId: inspectionId,
+            metadata: { projectId, projectName, refNumber: inspectionNumber },
+        });
+    }
+
+    static async notifySafetyEntryResolved({ companyId, projectId, projectName, inspectionNumber, inspectionId, entryTitle }) {
+        const allUserIds = await getCompanyUserIds(companyId);
+        if (!allUserIds.length) return;
+        await fanOutAndEmit(allUserIds, {
+            companyId,
+            projectId,
+            type: "SAFETY_ENTRY_RESOLVED",
+            channel: "system",
+            title: "Safety Entry Resolved",
+            message: `Entry "${entryTitle}" in inspection ${inspectionNumber} for project "${projectName}" has been marked as resolved. Go to the Safety tab to view details.`,
+            refModel: "Safety",
+            refId: inspectionId,
+            metadata: { projectId, projectName, refNumber: inspectionNumber },
+        });
+    }
 }
 
 export default NotificationService;
