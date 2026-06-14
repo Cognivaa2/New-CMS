@@ -48,7 +48,8 @@ const MODULE_DESCRIPTIONS = {
   "project-tasks": "Manage daily tasks and assignments",
   "project-work-orders": "Project-level work orders",
   "project-payables": "Manage project payables and payments",
-  "project-three-way-match": "PO, GRN & invoice matching"
+  "project-three-way-match": "PO, GRN & invoice matching",
+  "project-safety": "Safety inspections and compliance tracking",
 }
 
 const ACTION_LABELS = {

@@ -26,10 +26,18 @@ const MODULE_DESCRIPTIONS = {
     "primary-users": "Manage users and access levels",
     "primary-vendors": "Manage vendors and suppliers",
     "primary-work-orders": "Work order creation and tracking",
+    "primary-finance": "Monitor company-wide financial operations, liabilities, payments and spending analytics.",
+    "primary-materials-requisition": "Material request and requisition management",
+    "primary-grn": "Goods receipt tracking and management",
+    "primary-stock-transfers": "Inter-warehouse stock transfer management",
+    "primary-payables": "Manage company payables and payments",
+    "primary-contra-entry": "Manage Inter-account fund transfers",
+    "primary-three-way-match": "PO, GRN & invoice matching",
+
     "project-documents": "Project documents and file management",
     "project-dpr": "Daily Progress Reports documentation",
     "project-expense": "Track and manage project expenses",
-    "project-consumption": "Track and manage project consumption",
+    "project-consumption": "Track and manage project expenses",
     "project-gantt": "Visual project timeline and scheduling",
     "project-grn": "Goods Receipt Note tracking",
     "project-inventory": "Project-level inventory tracking",
@@ -41,6 +49,9 @@ const MODULE_DESCRIPTIONS = {
     "project-stock-transfers": "Inter-project stock transfers",
     "project-tasks": "Manage daily tasks and assignments",
     "project-work-orders": "Project-level work orders",
+    "project-payables": "Manage project payables and payments",
+    "project-three-way-match": "PO, GRN & invoice matching",
+    "project-safety": "Safety inspections and compliance tracking",
 }
 
 const COL_WIDTH = 52
@@ -86,9 +97,8 @@ function ModuleRow({ moduleKey, grantedActions, actions }) {
         <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#09090b] hover:bg-[#fafafa] dark:hover:bg-[#0d0d0f] transition-colors min-w-max">
             <div className="flex items-center gap-3 flex-1 min-w-65 mr-3">
                 <div
-                    className={`w-2 h-2 rounded-full shrink-0 ${
-                        hasAny ? "bg-[#22c55e]" : "bg-gray-300 dark:bg-[#3f3f46]"
-                    }`}
+                    className={`w-2 h-2 rounded-full shrink-0 ${hasAny ? "bg-[#22c55e]" : "bg-gray-300 dark:bg-[#3f3f46]"
+                        }`}
                 />
                 <h4 className="text-[13px] xl:text-sm font-sfpro-bold text-gray-700 dark:text-[#f4f4f5] whitespace-nowrap shrink-0">
                     {label}
@@ -125,9 +135,8 @@ function MobilePermissionCard({ moduleKey, grantedActions, actions }) {
             <div className="flex items-start justify-between gap-3 p-3 border-b border-[#EAEAEA] dark:border-[#27272a] bg-[#fafafa] dark:bg-[#111113]">
                 <div className="flex items-start gap-2.5 min-w-0 flex-1">
                     <div
-                        className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
-                            hasAny ? "bg-[#22c55e]" : "bg-gray-300 dark:bg-[#3f3f46]"
-                        }`}
+                        className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${hasAny ? "bg-[#22c55e]" : "bg-gray-300 dark:bg-[#3f3f46]"
+                            }`}
                     />
                     <div className="min-w-0">
                         <h4 className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
@@ -154,17 +163,15 @@ function MobilePermissionCard({ moduleKey, grantedActions, actions }) {
                     return (
                         <div
                             key={action}
-                            className={`rounded-lg border px-2.5 py-1.5 flex items-center justify-between gap-2 transition-colors ${
-                                enabled
+                            className={`rounded-lg border px-2.5 py-1.5 flex items-center justify-between gap-2 transition-colors ${enabled
                                     ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/50"
                                     : "bg-[#fafafa] dark:bg-[#111113] border-[#EAEAEA] dark:border-[#27272a]"
-                            }`}
+                                }`}
                         >
-                            <span className={`text-[11px] font-sfpro-medium ${
-                                enabled
+                            <span className={`text-[11px] font-sfpro-medium ${enabled
                                     ? "text-green-700 dark:text-green-400"
                                     : "text-gray-500 dark:text-[#71717a]"
-                            }`}>
+                                }`}>
                                 {ACTION_LABELS[action] ?? action}
                             </span>
                             <ReadonlyCheck isChecked={enabled} size="sm" />
@@ -264,20 +271,18 @@ export default function PermissionsTab({ permissionsData, isLoading, error }) {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`relative flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-sfpro-medium whitespace-nowrap transition-all duration-200 ${
-                                            isSelected
+                                        className={`relative flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-sfpro-medium whitespace-nowrap transition-all duration-200 ${isSelected
                                                 ? "bg-[#18181b] text-white shadow-md dark:bg-white dark:text-black"
                                                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5"
-                                        }`}
+                                            }`}
                                     >
                                         <span>{tab.label}</span>
                                         {count > 0 && (
                                             <span
-                                                className={`flex items-center justify-center min-w-4 h-4 px-1 text-[9px] font-bold rounded-full ${
-                                                    isSelected
+                                                className={`flex items-center justify-center min-w-4 h-4 px-1 text-[9px] font-bold rounded-full ${isSelected
                                                         ? "bg-white/20 text-white dark:bg-black/10 dark:text-black"
                                                         : "bg-gray-200 text-gray-600 dark:bg-[#3f3f46] dark:text-gray-300"
-                                                }`}
+                                                    }`}
                                             >
                                                 {count}
                                             </span>

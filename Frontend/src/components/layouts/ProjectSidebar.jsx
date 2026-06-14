@@ -9,7 +9,7 @@ import {
     FolderOpen, ShieldCheck, Package, AlertTriangle,
     MessageSquare, X, Shuffle, BarChart3, Wrench,
     ClipboardList, ShoppingCart, ClipboardCheck, TrendingDown,
-    Wallet, HandCoins, FileCheck,
+    Wallet, HandCoins, FileCheck,ShieldAlert 
 } from "lucide-react"
 import axios from "axios"
 import { getBaseUrl, getAuthHeaders } from "@/lib/apiHelper.js"
@@ -31,11 +31,12 @@ const projectMenu = [
     { label: "Work Orders", icon: Wrench, href: "/work-order", moduleKey: "project-work-orders" },
     { label: "Expenses", icon: Wallet, href: "/expenses", moduleKey: "project-expense" },
     { label: "Payables", icon: HandCoins, href: "/payables", moduleKey: "project-payables" },
-    { label: "Three Way Match", icon: FileCheck, href: "/twm", moduleKey: "project-three-way-match"},
+    { label: "Three Way Match", icon: FileCheck, href: "/twm", moduleKey: "project-three-way-match" },
     { label: "Issues", icon: AlertTriangle, href: "/issues", moduleKey: "project-issues" },
     { label: "Documents", icon: FolderOpen, href: "/documents", moduleKey: "project-documents" },
     //   { label: "Roles", icon: ShieldCheck, href: "/roles", moduleKey: "project-roles" },
     { label: "Consumption", icon: TrendingDown, href: "/Consumption", moduleKey: "project-consumption" },
+    { label: "Safety", icon: ShieldAlert , href: "/safety", moduleKey: "project-safety" },
     { label: "Gantt", icon: BarChart3, href: "/gantt", moduleKey: "project-gantt" },
     { label: "Chat", icon: MessageSquare, href: "/chat", moduleKey: "project-chat" },
 ]
@@ -56,8 +57,11 @@ async function fetchRolePermissions(roleId, signal = null) {
         return null
     }
 }
+const SKELETON_WIDTHS = [72, 58, 64, 55, 76, 60, 68, 53, 70]
 
-function SkeletonItem({ isOpen }) {
+function SkeletonItem({ isOpen, index = 0 }) {
+    const width = SKELETON_WIDTHS[index % SKELETON_WIDTHS.length]
+
     return (
         <div
             className={`flex items-center py-2 rounded-lg animate-pulse ${isOpen ? "justify-start px-3 gap-3" : "justify-center"
@@ -70,18 +74,22 @@ function SkeletonItem({ isOpen }) {
             >
                 <div
                     className="h-3 rounded-md bg-gray-200 dark:bg-[#27272a]"
-                    style={{ width: `${Math.floor(Math.random() * 30) + 50}px` }}
+                    style={{ width: `${width}px` }}
                 />
             </div>
         </div>
     )
 }
+
 function ProjectSidebarSkeleton({ isOpen }) {
-    const itemCount = 9
     return (
         <div className="space-y-0.5">
-            {Array.from({ length: itemCount }).map((_, index) => (
-                <SkeletonItem key={index} isOpen={isOpen} />
+            {Array.from({ length: 9 }).map((_, index) => (
+                <SkeletonItem
+                    key={index}
+                    isOpen={isOpen}
+                    index={index}
+                />
             ))}
         </div>
     )
@@ -122,15 +130,19 @@ export default function ProjectSidebar() {
     const switcherTriggerRef = useRef(null)
     useEffect(() => {
         const controller = new AbortController()
+
         async function loadPermissions() {
             setIsLoadingPermissions(true)
             try {
                 const roleId = localStorage.getItem("roleId")
-                if (!roleId) {
+                const accessToken = localStorage.getItem("accessToken")
+
+                if (!roleId || !accessToken) {
                     setModuleStatus(null)
                     setIsLoadingPermissions(false)
                     return
                 }
+
                 const roleData = await fetchRolePermissions(roleId, controller.signal)
                 if (roleData?.moduleStatus) {
                     setModuleStatus(roleData.moduleStatus)
@@ -146,6 +158,7 @@ export default function ProjectSidebar() {
                 setIsLoadingPermissions(false)
             }
         }
+
         loadPermissions()
         return () => controller.abort()
     }, [])
