@@ -24,6 +24,8 @@ export const NOTIFICATION_TYPES = [
     "INVENTORY_ADDED",
     "MATERIAL_ADDED",
     "MANUAL",
+    "SAFETY_INSPECTION_CREATED",
+    "SAFETY_ENTRY_RESOLVED",
 ];
 
 export const NOTIFICATION_REF_MODELS = [
@@ -39,6 +41,7 @@ export const NOTIFICATION_REF_MODELS = [
     "Issue",
     "StockTransfer",
     "User",
+    "Safety",
 ];
 
 export const NOTIFICATION_CHANNELS = ["user", "system", "manual"];
