@@ -52,7 +52,8 @@ export const MODULES = [
     "project-consumption",
     "project-expense",
     "project-payables",
-    "project-three-way-match"
+    "project-three-way-match",
+    "project-safety"
 ];
 
 
