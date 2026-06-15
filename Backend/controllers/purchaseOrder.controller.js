@@ -19,6 +19,7 @@ import { createExpenseEntry, reverseExpenseEntry, recalcProjectHealth } from "..
 import { pushDprEvent } from "../helpers/dprHelper.js";
 import { enrichUser } from "../helpers/mrHelper.js";
 import NotificationService from "../services/notification.service.js";
+import { generatePOPdf } from "../helpers/poPdfGenerator.js";
 
 
 // This function creates a new purchase order (PO). takes x-company-id in headers, projectId in params and createdBy, mrId, vendorId, items, expectedDeliveryDate, deliveryAddress, paymentTerms, specialInstructions in body. validates MR and vendor, processes items, calculates total value and creates PO in Draft state with auto MR conversion if applicable. -------------------------- Ayan
@@ -891,18 +892,13 @@ export const exportPOAsPdf = async (req, res) => {
             projectId,
             companyId,
         });
-        // TODO: call PDF generator logic here
-        // await generatePOPdf(res, {
-        //     po: enrichedPO,
-        //     company,
-        //     vendor,
-        //     project,
-        //     createdByUser,
-        // });
-
-        return res.status(200).json(
-            new ApiResponse(200, { po: enrichedPO }, "PO Fetched", "PO details fetched successfully (PDF logic disabled)")
-        );
+        await generatePOPdf(res, {
+            po: enrichedPO,
+            company,
+            vendor,
+            project,
+            createdByUser,
+        });
     } catch (error) {
         if (!res.headersSent) {
             logger.error("exportPOAsPdf failed", { message: error.message, stack: error.stack });
