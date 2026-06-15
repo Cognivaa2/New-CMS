@@ -260,7 +260,7 @@ function drawRightRow(doc, leftField, rightField, x, y, width, height) {
 }
 
 const COLS = [
-    { k: "no", lbl: "#", fr: 0.04, a: "center" },
+    { k: "no", lbl: "Sl", fr: 0.04, a: "center" },
     { k: "name", lbl: "Material", fr: 0.28, a: "left" },
     { k: "unit", lbl: "Unit", fr: 0.08, a: "center" },
     { k: "qty", lbl: "Qty", fr: 0.08, a: "right" },
@@ -444,7 +444,7 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
         width: CW * 0.4, align: "right",
     });
 
-    y += 18;
+    y += 28;
 
     // Prepare Grid Contents
     const leftWidth = CW * 0.55;
@@ -525,7 +525,7 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
         try {
             doc.image(logoBuffer, MX + 6, curL_y + 6, { fit: [logoSize, logoSize] });
             logoDrawWidth = logoSize + 8;
-        } catch {}
+        } catch { }
     }
     drawBlock(doc, itemsL1, MX + 6 + logoDrawWidth, curL_y + 6, leftWidth - 12 - logoDrawWidth);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L1, C.border, 0.3);
