@@ -5,7 +5,7 @@ import {
   CheckCircle2, Clock, Send, XCircle, FileCheck,
   Truck, PackageCheck, Eye, Edit, Trash2,
   ThumbsUp, ThumbsDown, Ban, Loader2, IndianRupee,
-  Package, PackageOpen,
+  Package, PackageOpen,Download,
 } from "lucide-react"
 import ThreeDotMenu from "@/components/ui/ThreeDotMenu"
 import ViewPOModal from "./ViewPOModal"
@@ -239,6 +239,7 @@ export default function POTable({
   onApprove,
   onReject,
   onCancel,
+  onExportPdf,   
   actionLoading = {},
   projectId,
   total = 0,
@@ -276,50 +277,65 @@ export default function POTable({
 
   useEffect(() => () => { viewFetchRef.current?.abort() }, [])
 
-  const buildMenuItems = useCallback((row) => {
-    const loading = actionLoading[row.id]
-    const items = [
-      { label: "View Details", icon: <Eye className="w-4 h-4" />, onClick: () => handleView(row) },
-    ]
-    if (["Draft", "Rejected"].includes(row.status)) {
-      items.push({ label: "Edit PO", icon: <Edit className="w-4 h-4" />, onClick: () => onEdit?.(row) })
-      items.push({
-        label: loading === "submitting" ? "Submitting…" : "Submit for Approval",
-        icon: loading === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />,
-        onClick: () => !loading && onSubmit?.(row),
-        disabled: !!loading,
-      })
-    }
-    if (row.status === "Submitted") {
-      items.push({
-        label: loading === "approving" ? "Approving…" : "Approve",
-        icon: loading === "approving" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />,
-        onClick: () => !loading && onApprove?.(row),
-        disabled: !!loading,
-      })
-      items.push({
-        label: loading === "rejecting" ? "Rejecting…" : "Reject",
-        icon: loading === "rejecting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />,
-        onClick: () => !loading && onReject?.(row),
-        disabled: !!loading,
-        variant: "danger",
-      })
-    }
-    if (row.status === "Approved") {
-      items.push({
-        label: loading === "cancelling" ? "Cancelling…" : "Cancel PO",
-        icon: loading === "cancelling" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />,
-        onClick: () => !loading && onCancel?.(row),
-        disabled: !!loading,
-        variant: "danger",
-      })
-    }
-    if (["Draft", "Rejected"].includes(row.status)) {
-      items.push("divider")
-      items.push({ label: "Delete", icon: <Trash2 className="w-4 h-4" />, variant: "danger", onClick: () => onDelete?.(row) })
-    }
-    return items
-  }, [actionLoading, onApprove, onCancel, onDelete, onEdit, onReject, onSubmit, handleView])
+const buildMenuItems = useCallback((row) => {
+  const loading = actionLoading[row.id]
+  const items = [
+    { 
+      label: "View Details", 
+      icon: <Eye className="w-4 h-4" />, 
+      onClick: () => handleView(row) 
+    },
+    { 
+      label: "Export PDF",
+      icon: <Download className="w-4 h-4" />,   
+      onClick: () => onExportPdf?.(row),
+    },
+  ]
+
+  if (["Draft", "Rejected"].includes(row.status)) {
+    items.push({ label: "Edit PO", icon: <Edit className="w-4 h-4" />, onClick: () => onEdit?.(row) })
+    items.push({
+      label: loading === "submitting" ? "Submitting…" : "Submit for Approval",
+      icon: loading === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />,
+      onClick: () => !loading && onSubmit?.(row),
+      disabled: !!loading,
+    })
+  }
+  if (row.status === "Submitted") {
+    items.push({
+      label: loading === "approving" ? "Approving…" : "Approve",
+      icon: loading === "approving" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />,
+      onClick: () => !loading && onApprove?.(row),
+      disabled: !!loading,
+    })
+    items.push({
+      label: loading === "rejecting" ? "Rejecting…" : "Reject",
+      icon: loading === "rejecting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />,
+      onClick: () => !loading && onReject?.(row),
+      disabled: !!loading,
+      variant: "danger",
+    })
+  }
+  if (row.status === "Approved") {
+    items.push({
+      label: loading === "cancelling" ? "Cancelling…" : "Cancel PO",
+      icon: loading === "cancelling" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />,
+      onClick: () => !loading && onCancel?.(row),
+      disabled: !!loading,
+      variant: "danger",
+    })
+  }
+  if (["Draft", "Rejected"].includes(row.status)) {
+    items.push("divider")
+    items.push({ 
+      label: "Delete", 
+      icon: <Trash2 className="w-4 h-4" />, 
+      variant: "danger", 
+      onClick: () => onDelete?.(row) 
+    })
+  }
+  return items
+}, [actionLoading, onApprove, onCancel, onDelete, onEdit, onReject, onSubmit, onExportPdf, handleView])
 
   const POCard = ({ row }) => {
     const config = STATUS_CONFIG[row.status] || STATUS_CONFIG.Draft

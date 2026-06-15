@@ -17,6 +17,7 @@ import {
   buildPOPayload,
   computePOStats,
   formatPOError,
+  exportPOPdf, 
 } from "./api"
 
 import POHeader from "@/components/projects/(project)/purchase-order/POHeader"
@@ -117,6 +118,18 @@ export default function PurchaseOrderPage() {
       setIsRefreshing(false)
     }
   }, [projectId])
+
+  const handleExportPdf = async (po) => {
+  try {
+    toast.info("Generating PDF…", { description: "Please wait" })
+    await exportPOPdf(projectId, po.id)
+    toast.success("PDF Downloaded", {
+      description: `${po.poNumber} exported successfully`,
+    })
+  } catch (err) {
+    toast.error("Export Failed", { description: formatPOError(err) })
+  }
+}
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || !cursorRef.current) return
@@ -405,6 +418,7 @@ export default function PurchaseOrderPage() {
           onCancel={handleCancel}
           actionLoading={actionLoading}
           projectId={projectId}
+          onExportPdf={handleExportPdf} 
           total={total}
         />
       )}
