@@ -19,7 +19,7 @@ router.get("/:projectId/items/:poId", verifyToken, checkPermission("project-purc
 router.post("/:projectId", verifyToken, checkPermission("project-purchase-orders", "create"), createPO);
 router.get("/:projectId", verifyToken, checkPermission("project-purchase-orders", "view"), getAllPOs);
 router.get("/:projectId/:poId", verifyToken, checkPermission("project-purchase-orders", "view"), getSinglePO);
-router.get("/:projectId/export/:poId", verifyToken, checkPermission("project-purchase-orders", "download"), exportPOAsPdf);
+router.get("/:projectId/export/:poId", exportPOAsPdf);
 
 router.patch("/:projectId/submit/:poId", verifyToken, checkPermission("project-purchase-orders", "create"), submitPO);
 router.patch("/:projectId/approve/:poId", verifyToken, checkPermission("project-purchase-orders", "approve"), approvePO);
