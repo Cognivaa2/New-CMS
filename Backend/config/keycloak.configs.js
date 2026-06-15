@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 const keycloakConfig = {
-    url: process.env.KEYCLOAK_URL || "http://localhost:9090",
+    url: process.env.KEYCLOAK_URL || "http://localhost:8080",
     realm: process.env.KEYCLOAK_REALM || "Test_Cms",
     clientId: process.env.KEYCLOAK_CLIENT_ID || "cms-backend",
     clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
