@@ -119,24 +119,24 @@ export default function GanttPage() {
   if (!projectData) return null
 
   const { project } = projectData
-  return (
-    <div className="w-full mx-auto px-6 pt-6 flex flex-col gap-4 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg overflow-hidden h-screen">
-      <GanttHeader
-        project={project}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onRefresh={handleRefresh}
-        onExport={handleExport}
-        isExporting={isExporting}
-        totalItems={allRows.length}
-      />
-      <GanttChart
-        rows={visibleRows}
-        project={project}
-        viewMode={viewMode}
-        collapsedIds={collapsedIds}
-        onToggleCollapse={toggleCollapse}
-      />
-    </div>
-  )
+return (
+  <div className="w-full mx-auto px-6 pt-6 flex flex-col gap-4 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg overflow-hidden h-screen">
+    <GanttHeader
+      project={project}
+      viewMode={viewMode}
+      onViewModeChange={setViewMode}
+      onRefresh={handleRefresh}
+      onExport={handleExport}
+      isExporting={isExporting}
+      totalItems={allRows.length}
+    />
+    <GanttChart
+      rows={visibleRows}
+      project={project}
+      viewMode={viewMode}
+      collapsedIds={collapsedIds}
+      onToggleCollapse={toggleCollapse}
+    />
+  </div>
+)
 }

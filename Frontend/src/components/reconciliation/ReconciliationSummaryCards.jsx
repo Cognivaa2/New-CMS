@@ -28,7 +28,7 @@ const ICON_MAP = {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-3xl p-8 bg-[#f4f4f5] dark:bg-[#18181b] animate-pulse flex flex-col gap-4">
+    <div className="rounded-4xl p-8 bg-[#f4f4f5] dark:bg-[#18181b] animate-pulse flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <div className="h-10 w-24 bg-gray-200 dark:bg-[#27272a] rounded-lg" />
         <div className="h-6 w-6 bg-gray-200 dark:bg-[#27272a] rounded-full" />
@@ -59,7 +59,7 @@ export default function ReconciliationSummaryCards({ cards = [], isLoading = fal
         return (
           <div
             key={card.id}
-            className={`${card.colorClass} rounded-3xl p-8 flex flex-col relative overflow-hidden transition-colors duration-300`}
+            className={`${card.colorClass} rounded-2xl p-8 flex flex-col relative overflow-hidden transition-colors duration-300`}
           >
             <div className="flex items-center gap-3 mb-4">
               <span className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">

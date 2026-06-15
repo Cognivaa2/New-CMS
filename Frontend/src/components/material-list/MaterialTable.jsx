@@ -76,8 +76,8 @@ function StatusPill({ isActive }) {
   return (
     <span
       className={`inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-sfpro-medium uppercase tracking-wider transition-colors whitespace-nowrap ${isActive
-        ? "bg-[#f0faf0] dark:bg-[#1a2e1a] text-[#16a34a] dark:text-[#4ade80] border-[#16a34a]/30"
-        : "bg-[#fff1f1] dark:bg-[#2e1a1a] text-[#dc2626] dark:text-[#f87171] border-[#dc2626]/30"
+          ? "bg-[#f0faf0] dark:bg-[#1a2e1a] text-[#16a34a] dark:text-[#4ade80] border-[#16a34a]/30"
+          : "bg-[#fff1f1] dark:bg-[#2e1a1a] text-[#dc2626] dark:text-[#f87171] border-[#dc2626]/30"
         }`}
     >
       {isActive ? (

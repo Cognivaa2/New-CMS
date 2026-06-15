@@ -344,15 +344,15 @@ export default function DocumentsPage() {
   }
 
 
-  const handleRefresh = async () => {
-    try {
-      hasMoreRef.current = true
-      setFilters((prev) => ({ ...prev, page: 1 }))
-      await loadDocuments(false)
-    } catch (err) {
-      console.error("Refresh failed:", err)
-    }
+const handleRefresh = async () => {
+  try {
+    hasMoreRef.current = true
+    setFilters((prev) => ({ ...prev, page: 1 }))
+    await loadDocuments(false)
+  } catch (err) {
+    console.error("Refresh failed:", err)
   }
+}
 
 
   if (isInitialLoad) return <Loading />
@@ -427,7 +427,7 @@ export default function DocumentsPage() {
         projectId={projectId}
         documentId={linkTarget?.id}
         documentName={linkTarget?.title}
-        onSuccess={handleRefresh}
+      onSuccess={handleRefresh}
       />
 
       <UnlinkDocumentModal
@@ -436,7 +436,7 @@ export default function DocumentsPage() {
         projectId={projectId}
         documentId={unlinkTarget?.id}
         documentName={unlinkTarget?.title}
-        onSuccess={handleRefresh}
+      onSuccess={handleRefresh}
       />
 
     </div>

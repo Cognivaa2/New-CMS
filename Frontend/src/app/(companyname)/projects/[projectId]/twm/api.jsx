@@ -337,100 +337,100 @@ export function mapTWMDetail(raw) {
 }
 
 function abbreviateCount(num) {
-    if (num == null || isNaN(num)) return "0"
-    const abs = Math.abs(num)
-    const sign = num < 0 ? "-" : ""
-    if (abs >= 1_000_000_000) {
-        const v = abs / 1_000_000_000
-        return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "B"
-    }
-    if (abs >= 1_000_000) {
-        const v = abs / 1_000_000
-        return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "M"
-    }
-    if (abs >= 1_000) {
-        const v = abs / 1_000
-        return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "K"
-    }
-    return sign + String(abs)
+  if (num == null || isNaN(num)) return "0"
+  const abs = Math.abs(num)
+  const sign = num < 0 ? "-" : ""
+  if (abs >= 1_000_000_000) {
+    const v = abs / 1_000_000_000
+    return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "B"
+  }
+  if (abs >= 1_000_000) {
+    const v = abs / 1_000_000
+    return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "M"
+  }
+  if (abs >= 1_000) {
+    const v = abs / 1_000
+    return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "K"
+  }
+  return sign + String(abs)
 }
 
 function abbreviateIndianCurrency(num) {
-    if (num == null || isNaN(num)) return "₹0"
-    const abs = Math.abs(num)
-    const sign = num < 0 ? "-" : ""
-    if (abs >= 1_00_00_000) {
-        const v = abs / 1_00_00_000
-        const formatted = +v.toFixed(2) % 1 === 0 ? Math.round(v) : +v.toFixed(2)
-        return sign + "₹" + formatted + " Cr"
-    }
-    if (abs >= 1_00_000) {
-        const v = abs / 1_00_000
-        const formatted = +v.toFixed(2) % 1 === 0 ? Math.round(v) : +v.toFixed(2)
-        return sign + "₹" + formatted + " L"
-    }
-    if (abs >= 1_000) {
-        const v = abs / 1_000
-        const formatted = +v.toFixed(1) % 1 === 0 ? Math.round(v) : +v.toFixed(1)
-        return sign + "₹" + formatted + "K"
-    }
-    return sign + "₹" + abs.toLocaleString("en-IN")
+  if (num == null || isNaN(num)) return "₹0"
+  const abs = Math.abs(num)
+  const sign = num < 0 ? "-" : ""
+  if (abs >= 1_00_00_000) {
+    const v = abs / 1_00_00_000
+    const formatted = +v.toFixed(2) % 1 === 0 ? Math.round(v) : +v.toFixed(2)
+    return sign + "₹" + formatted + " Cr"
+  }
+  if (abs >= 1_00_000) {
+    const v = abs / 1_00_000
+    const formatted = +v.toFixed(2) % 1 === 0 ? Math.round(v) : +v.toFixed(2)
+    return sign + "₹" + formatted + " L"
+  }
+  if (abs >= 1_000) {
+    const v = abs / 1_000
+    const formatted = +v.toFixed(1) % 1 === 0 ? Math.round(v) : +v.toFixed(1)
+    return sign + "₹" + formatted + "K"
+  }
+  return sign + "₹" + abs.toLocaleString("en-IN")
 }
 
 
 export function computeTWMStats(records) {
-    const matched = records.filter((r) => r.matchStatus === "MATCHED").length
-    const unmatched = records.filter((r) => r.matchStatus === "UNMATCHED").length
-    const partial = records.filter((r) => r.matchStatus === "PARTIAL_MATCH").length
-    const pending = records.filter((r) =>
-        r.matchStatus === "PENDING_GRN" ||
-        r.matchStatus === "PENDING_INVOICE" ||
-        r.matchStatus === "NOT_STARTED"
-    ).length
-    const tolerated = records.filter((r) => r.matchStatus === "TOLERATED").length
+  const matched   = records.filter((r) => r.matchStatus === "MATCHED").length
+  const unmatched = records.filter((r) => r.matchStatus === "UNMATCHED").length
+  const partial   = records.filter((r) => r.matchStatus === "PARTIAL_MATCH").length
+  const pending   = records.filter((r) =>
+    r.matchStatus === "PENDING_GRN" ||
+    r.matchStatus === "PENDING_INVOICE" ||
+    r.matchStatus === "NOT_STARTED"
+  ).length
+  const tolerated = records.filter((r) => r.matchStatus === "TOLERATED").length
 
-    const totalOrderedValue = records.reduce((s, r) => s + (r.financials?.orderedValue || 0), 0)
-    const totalOutstanding = records.reduce((s, r) => s + (r.financials?.outstandingValue || 0), 0)
+  const totalOrderedValue = records.reduce((s, r) => s + (r.financials?.orderedValue    || 0), 0)
+  const totalOutstanding  = records.reduce((s, r) => s + (r.financials?.outstandingValue || 0), 0)
 
-    return {
-        cards: [
-            {
-                id: 1,
-                title: "Matched",
-                value: abbreviateCount(matched),
-                subtitle: "POs fully reconciled",
-                colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
-            },
-            {
-                id: 2,
-                title: "Unmatched",
-                value: abbreviateCount(unmatched),
-                subtitle: "POs with discrepancies",
-                colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
-            },
-            {
-                id: 3,
-                title: "Pending",
-                value: abbreviateCount(pending),
-                subtitle: "Awaiting GRN / Invoice",
-                colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
-            },
-            {
-                id: 4,
-                title: "Total Ordered",
-                value: abbreviateIndianCurrency(totalOrderedValue),
-                subtitle: `Outstanding: ${abbreviateIndianCurrency(totalOutstanding)}`,
-                colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
-            },
-            {
-                id: 5,
-                title: "Tolerated",
-                value: abbreviateCount(tolerated),
-                subtitle: "Within 2% variance",
-                colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
-            },
-        ],
-    }
+  return {
+    cards: [
+      {
+        id: 1,
+        title: "Matched",
+        value: abbreviateCount(matched),
+        subtitle: "POs fully reconciled",
+        colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
+      },
+      {
+        id: 2,
+        title: "Unmatched",
+        value: abbreviateCount(unmatched),
+        subtitle: "POs with discrepancies",
+        colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
+      },
+      {
+        id: 3,
+        title: "Pending",
+        value: abbreviateCount(pending),
+        subtitle: "Awaiting GRN / Invoice",
+        colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
+      },
+      {
+        id: 4,
+        title: "Total Ordered",
+        value: abbreviateIndianCurrency(totalOrderedValue),
+        subtitle: `Outstanding: ${abbreviateIndianCurrency(totalOutstanding)}`,
+        colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
+      },
+      {
+        id: 5,
+        title: "Tolerated",
+        value: abbreviateCount(tolerated),
+        subtitle: "Within 2% variance",
+        colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
+      },
+    ],
+  }
 }
 
 

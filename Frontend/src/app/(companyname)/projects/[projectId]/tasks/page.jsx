@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import {
     fetchAllTasksData,
-    fetchAllTasksByUser,
+    fetchAllTasksByUser,        
     fetchTaskById,
     fetchProjectUsers,
     editTask,
@@ -66,14 +66,14 @@ export default function AllTasksPage() {
     const editFetchRef = useRef(null)
     const usersFetchRef = useRef(null)
     const filtersRef = useRef(filters)
-    const selectedUserRef = useRef(null)
+    const selectedUserRef = useRef(null)         
     const isInitialLoadRef = useRef(true)
     const fetchLockRef = useRef(false)
     const sentinelRef = useRef(null)
     const hasMoreRef = useRef(true)
 
     filtersRef.current = filters
-    selectedUserRef.current = selectedUserKeycloakId
+    selectedUserRef.current = selectedUserKeycloakId  
 
     const debouncedSetSearch = useRef(
         debounce((query) => {
@@ -166,143 +166,143 @@ export default function AllTasksPage() {
         }
     }, [projectId])
     const loadTasks = useCallback(async () => {
-        if (!projectId || fetchLockRef.current) return
-        fetchLockRef.current = true
+    if (!projectId || fetchLockRef.current) return
+    fetchLockRef.current = true
 
-        if (controllerRef.current) controllerRef.current.abort()
-        const controller = new AbortController()
-        controllerRef.current = controller
+    if (controllerRef.current) controllerRef.current.abort()
+    const controller = new AbortController()
+    controllerRef.current = controller
 
-        const activeUser = selectedUserRef.current
-        const activeFilters = filtersRef.current
+    const activeUser = selectedUserRef.current
+    const activeFilters = filtersRef.current
 
-        try {
-            if (!isInitialLoadRef.current) setIsRefreshing(true)
-            let fetchedTasks = []
-            let fetchedPhases = phases
-            if (activeUser) {
-                const tasks = await fetchAllTasksByUser(
-                    projectId,
-                    activeUser,
-                    controller.signal
+    try {
+        if (!isInitialLoadRef.current) setIsRefreshing(true)
+        let fetchedTasks = []
+        let fetchedPhases = phases
+        if (activeUser) {
+            const tasks = await fetchAllTasksByUser(
+                projectId,
+                activeUser,
+                controller.signal
+            )
+
+            let mapped = tasks.map((t) => ({
+                ...t,
+                id: t._id || t.id,
+                title: t.taskName || t.title || "",
+                taskName: t.taskName || t.title || "",
+                progress: t.completionPercent || 0,
+                date: t.endDate || "",
+                phaseId: t.phaseId?._id || t.phaseId || "",
+                phaseName: t.phaseId?.phaseName || "",
+                workOrderId: t.workOrderId || null, 
+                members: (t.assignedTo || []).map((u) => ({
+                    id: u._id || u.id,
+                    keycloakId: u.keycloakId || "",
+                    name: u.name || "Unknown",
+                    email: u.email || "",
+                    avatar: u.avatar || null,
+                })),
+                assignedTo: (t.assignedTo || []).map((u) => ({
+                    id: u._id || u.id,
+                    keycloakId: u.keycloakId || "",
+                    name: u.name || "Unknown",
+                    email: u.email || "",
+                    avatar: u.avatar || null,
+                })),
+            }))
+            if (activeFilters.phaseFilter) {
+                mapped = mapped.filter(
+                    (t) => t.phaseId === activeFilters.phaseFilter
                 )
-
-                let mapped = tasks.map((t) => ({
-                    ...t,
-                    id: t._id || t.id,
-                    title: t.taskName || t.title || "",
-                    taskName: t.taskName || t.title || "",
-                    progress: t.completionPercent || 0,
-                    date: t.endDate || "",
-                    phaseId: t.phaseId?._id || t.phaseId || "",
-                    phaseName: t.phaseId?.phaseName || "",
-                    workOrderId: t.workOrderId || null,
-                    members: (t.assignedTo || []).map((u) => ({
-                        id: u._id || u.id,
-                        keycloakId: u.keycloakId || "",
-                        name: u.name || "Unknown",
-                        email: u.email || "",
-                        avatar: u.avatar || null,
-                    })),
-                    assignedTo: (t.assignedTo || []).map((u) => ({
-                        id: u._id || u.id,
-                        keycloakId: u.keycloakId || "",
-                        name: u.name || "Unknown",
-                        email: u.email || "",
-                        avatar: u.avatar || null,
-                    })),
-                }))
-                if (activeFilters.phaseFilter) {
-                    mapped = mapped.filter(
-                        (t) => t.phaseId === activeFilters.phaseFilter
-                    )
-                }
-                if (activeFilters.search?.trim()) {
-                    const q = activeFilters.search.trim().toLowerCase()
-                    mapped = mapped.filter(
-                        (t) =>
-                            t.taskName?.toLowerCase().includes(q) ||
-                            t.description?.toLowerCase().includes(q)
-                    )
-                }
-                if (activeFilters.status) {
-                    mapped = mapped.filter((t) => t.status === activeFilters.status)
-                }
-                if (activeFilters.priority) {
-                    mapped = mapped.filter((t) => t.priority === activeFilters.priority)
-                }
-                const priorityOrder = { Critical: 4, High: 3, Medium: 2, Low: 1 }
-                mapped.sort((a, b) => {
-                    let aVal, bVal
-                    switch (activeFilters.sortBy) {
-                        case "taskName":
-                        case "title":
-                            aVal = a.taskName?.toLowerCase() || ""
-                            bVal = b.taskName?.toLowerCase() || ""
-                            break
-                        case "completionPercent":
-                        case "progress":
-                            aVal = a.progress || 0
-                            bVal = b.progress || 0
-                            break
-                        case "endDate":
-                        case "date":
-                            aVal = new Date(a.date || 0).getTime()
-                            bVal = new Date(b.date || 0).getTime()
-                            break
-                        case "priority":
-                            aVal = priorityOrder[a.priority] || 0
-                            bVal = priorityOrder[b.priority] || 0
-                            break
-                        case "status":
-                            aVal = a.status || ""
-                            bVal = b.status || ""
-                            break
-                        default:
-                            aVal = new Date(a.createdAt || 0).getTime()
-                            bVal = new Date(b.createdAt || 0).getTime()
-                    }
-                    return activeFilters.order === "asc"
-                        ? aVal > bVal ? 1 : -1
-                        : aVal < bVal ? 1 : -1
-                })
-
-                fetchedTasks = mapped
-
-            } else {
-                const res = await fetchAllTasksData({
-                    projectId,
-                    ...activeFilters,
-                    signal: controller.signal,
-                })
-                fetchedTasks = res.tasks
-                fetchedPhases = res.phases
-                setPhases(fetchedPhases)
             }
-            if (controller.signal.aborted) return
-            setAllTasks(fetchedTasks)
-            setDisplayCount(ITEMS_PER_PAGE)
-            setPagination({
-                total: fetchedTasks.length,
-                displayed: Math.min(ITEMS_PER_PAGE, fetchedTasks.length),
-                hasMore: fetchedTasks.length > ITEMS_PER_PAGE,
+            if (activeFilters.search?.trim()) {
+                const q = activeFilters.search.trim().toLowerCase()
+                mapped = mapped.filter(
+                    (t) =>
+                        t.taskName?.toLowerCase().includes(q) ||
+                        t.description?.toLowerCase().includes(q)
+                )
+            }
+            if (activeFilters.status) {
+                mapped = mapped.filter((t) => t.status === activeFilters.status)
+            }
+            if (activeFilters.priority) {
+                mapped = mapped.filter((t) => t.priority === activeFilters.priority)
+            }
+            const priorityOrder = { Critical: 4, High: 3, Medium: 2, Low: 1 }
+            mapped.sort((a, b) => {
+                let aVal, bVal
+                switch (activeFilters.sortBy) {
+                    case "taskName":
+                    case "title":
+                        aVal = a.taskName?.toLowerCase() || ""
+                        bVal = b.taskName?.toLowerCase() || ""
+                        break
+                    case "completionPercent":
+                    case "progress":
+                        aVal = a.progress || 0
+                        bVal = b.progress || 0
+                        break
+                    case "endDate":
+                    case "date":
+                        aVal = new Date(a.date || 0).getTime()
+                        bVal = new Date(b.date || 0).getTime()
+                        break
+                    case "priority":
+                        aVal = priorityOrder[a.priority] || 0
+                        bVal = priorityOrder[b.priority] || 0
+                        break
+                    case "status":
+                        aVal = a.status || ""
+                        bVal = b.status || ""
+                        break
+                    default:
+                        aVal = new Date(a.createdAt || 0).getTime()
+                        bVal = new Date(b.createdAt || 0).getTime()
+                }
+                return activeFilters.order === "asc"
+                    ? aVal > bVal ? 1 : -1
+                    : aVal < bVal ? 1 : -1
             })
-            hasMoreRef.current = fetchedTasks.length > ITEMS_PER_PAGE
-        } catch (err) {
-            if (err.name !== "CanceledError") {
-                toast.error("Failed to load tasks", { description: formatToastError(err) })
-                setAllTasks([])
-                setDisplayCount(0)
-                setPagination({ total: 0, displayed: 0, hasMore: false })
-            }
-        } finally {
-            isInitialLoadRef.current = false
-            setIsInitialLoad(false)
-            setIsRefreshing(false)
-            fetchLockRef.current = false
-            controllerRef.current = null
+
+            fetchedTasks = mapped
+
+        } else {
+            const res = await fetchAllTasksData({
+                projectId,
+                ...activeFilters,
+                signal: controller.signal,
+            })
+            fetchedTasks = res.tasks
+            fetchedPhases = res.phases
+            setPhases(fetchedPhases)
         }
-    }, [projectId])
+        if (controller.signal.aborted) return
+        setAllTasks(fetchedTasks)
+        setDisplayCount(ITEMS_PER_PAGE)
+        setPagination({
+            total: fetchedTasks.length,
+            displayed: Math.min(ITEMS_PER_PAGE, fetchedTasks.length),
+            hasMore: fetchedTasks.length > ITEMS_PER_PAGE,
+        })
+        hasMoreRef.current = fetchedTasks.length > ITEMS_PER_PAGE
+    } catch (err) {
+        if (err.name !== "CanceledError") {
+            toast.error("Failed to load tasks", { description: formatToastError(err) })
+            setAllTasks([])
+            setDisplayCount(0)
+            setPagination({ total: 0, displayed: 0, hasMore: false })
+        }
+    } finally {
+        isInitialLoadRef.current = false
+        setIsInitialLoad(false)
+        setIsRefreshing(false)
+        fetchLockRef.current = false
+        controllerRef.current = null
+    }
+}, [projectId])
 
     const loadMoreTasks = useCallback(() => {
         if (isLoadingMore || !hasMoreRef.current || fetchLockRef.current) return
@@ -349,19 +349,19 @@ export default function AllTasksPage() {
         return () => usersFetchRef.current?.abort()
     }, [loadProjectUsers])
     useEffect(() => {
-        hasMoreRef.current = true
-        setDisplayCount(ITEMS_PER_PAGE)
-        loadTasks()
-        return () => controllerRef.current?.abort()
-    }, [
-        filters.search,
-        filters.status,
-        filters.priority,
-        filters.sortBy,
-        filters.order,
-        filters.phaseFilter,
-        loadTasks,
-    ])
+    hasMoreRef.current = true
+    setDisplayCount(ITEMS_PER_PAGE)
+    loadTasks()
+    return () => controllerRef.current?.abort()
+}, [
+    filters.search,
+    filters.status,
+    filters.priority,
+    filters.sortBy,
+    filters.order,
+    filters.phaseFilter,
+    loadTasks,
+])
     useEffect(() => {
         hasMoreRef.current = true
         setDisplayCount(ITEMS_PER_PAGE)
@@ -571,8 +571,8 @@ export default function AllTasksPage() {
     }
 
     const handleMembersChanged = useCallback(() => {
-        loadTasks()
-    }, [loadTasks])
+  loadTasks()
+}, [loadTasks])
 
     if (isInitialLoad) return <TaskPageSkeleton />
 

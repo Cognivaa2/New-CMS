@@ -43,6 +43,8 @@ import vendorAdvanceRoutes from "./routes/vendorAdvance.routes.js";
 import financeRoutes from "./routes/finance.routes.js";
 import adjustmentRoutes from "./routes/stockAdjustment.routes.js";
 import reconciliationRoutes from "./routes/reconciliation.routes.js";
+import safetyRoutes from "./routes/safety.routes.js";
+
 
 const app = express();
 const httpServer = createServer(app);
@@ -88,6 +90,7 @@ app.use("/api/v1/vendors/advance", vendorAdvanceRoutes);
 app.use("/api/v1/finance", financeRoutes);
 app.use("/api/v1/adjustments", adjustmentRoutes);
 app.use("/api/v1/reconciliation", reconciliationRoutes);
+app.use("/api/v1/safety", safetyRoutes);
 
 
 app.get("/api/health", (req, res) => {

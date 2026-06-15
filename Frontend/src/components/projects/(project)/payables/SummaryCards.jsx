@@ -32,7 +32,7 @@ function PayableCard({ item }) {
 
   return (
     <div
-      className={`p-4 sm:p-5 lg:p-6 rounded-3xl sm:rounded-4xl transition-all duration-300 font-sfpro flex flex-col justify-center min-h-32 sm:min-h-36 lg:min-h-40 ${item.colorClass}`}
+      className={`p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-2xl transition-all duration-300 font-sfpro flex flex-col justify-center min-h-32 sm:min-h-36 lg:min-h-40 ${item.colorClass}`}
     >
       <h2
         className="text-[26px] sm:text-[30px] lg:text-[34px] font-sfpro-bold leading-none mb-1.5 sm:mb-2 text-gray-800 dark:text-gray-100 truncate"

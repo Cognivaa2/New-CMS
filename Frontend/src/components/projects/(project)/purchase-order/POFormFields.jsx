@@ -635,8 +635,8 @@ export function POFormContent({ form, setForm, disabled = false, projectId, isEd
                       unit: i.unit || "Units",
                       orderedQuantity: i.requiredQuantity ?? 1,
                       unitPrice: 0,
-                      discountPercent: 0,
-                      gstPercent: 0,
+                      discountPercent: 0,   
+                      gstPercent: 0,   
                     })),
               }))
             }

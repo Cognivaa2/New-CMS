@@ -12,7 +12,7 @@ import {
   computePayableSummaryCards,
   formatPayableError,
   PAYABLE_TABS,
-  exportPayablePdf,
+  exportPayablePdf,   
   TAB_TO_STATUS,
   fetchSinglePayable,
   TAB_TO_SOURCE_TYPE,
@@ -224,62 +224,62 @@ export default function PayablesPage() {
 
 
   const handleAction = useCallback(async (action, payable) => {
-    switch (action) {
+  switch (action) {
 
-      case "view":
-        setViewPayable(payable)
-        setIsViewOpen(true)
-        break
+    case "view":
+      setViewPayable(payable)
+      setIsViewOpen(true)
+      break
 
-      case "history":
-        setIsHistoryOpen(true)
-        setIsHistoryLoading(true)
-        try {
-          const detailedPayable = await fetchSinglePayable(projectId, payable.id)
-          setHistoryPayable(detailedPayable)
-        } catch (err) {
-          toast.error("Failed to load transaction history", {
-            description: formatPayableError(err),
-          })
-          setIsHistoryOpen(false)
-        } finally {
-          setIsHistoryLoading(false)
-        }
-        break
-
-      case "pay":
-        setPaymentModalPayable(payable)
-        break
-
-      case "void":
-        toast.warning(`Void ${payable.payableNumber}?`, {
-          description: "This action cannot be undone.",
+    case "history":
+      setIsHistoryOpen(true)
+      setIsHistoryLoading(true)
+      try {
+        const detailedPayable = await fetchSinglePayable(projectId, payable.id)
+        setHistoryPayable(detailedPayable)
+      } catch (err) {
+        toast.error("Failed to load transaction history", {
+          description: formatPayableError(err),
         })
-        break
-
-      case "exportPdf": {
-        const toastId = toast.loading("Generating PDF…", {
-          description: `Preparing ${payable.payableNumber}`,
-        })
-        try {
-          await exportPayablePdf(projectId, payable.id, payable.payableNumber)
-          toast.success("PDF Downloaded", {
-            id: toastId,
-            description: `${payable.payableNumber} saved to downloads`,
-          })
-        } catch (err) {
-          toast.error("Export Failed", {
-            id: toastId,
-            description: formatPayableError(err),
-          })
-        }
-        break
+        setIsHistoryOpen(false)
+      } finally {
+        setIsHistoryLoading(false)
       }
+      break
 
-      default:
-        break
+    case "pay":
+      setPaymentModalPayable(payable)
+      break
+
+    case "void":
+      toast.warning(`Void ${payable.payableNumber}?`, {
+        description: "This action cannot be undone.",
+      })
+      break
+
+    case "exportPdf": {                                        
+      const toastId = toast.loading("Generating PDF…", {
+        description: `Preparing ${payable.payableNumber}`,
+      })
+      try {
+        await exportPayablePdf(projectId, payable.id, payable.payableNumber)
+        toast.success("PDF Downloaded", {
+          id: toastId,
+          description: `${payable.payableNumber} saved to downloads`,
+        })
+      } catch (err) {
+        toast.error("Export Failed", {
+          id: toastId,
+          description: formatPayableError(err),
+        })
+      }
+      break
     }
-  }, [projectId])
+
+    default:
+      break
+  }
+}, [projectId])
 
 
   const handleRecordPayment = async (form) => {
@@ -334,7 +334,7 @@ export default function PayablesPage() {
         <SummaryCards cards={summaryCards} isLoading={isSummaryLoading} />
 
 
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] w-fit">
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] lg:w-fit">
           {PAYABLE_TABS.map((tab) => {
             const count = tabCounts[tab] ?? 0
             return (

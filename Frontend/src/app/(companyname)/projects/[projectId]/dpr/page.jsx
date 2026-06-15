@@ -202,8 +202,8 @@ export default function DprPage() {
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`relative h-10 px-4 sm:px-5 rounded-xl text-sm font-sfpro-medium transition-all whitespace-nowrap border ${activeTab === tab
-                  ? "bg-[#212121] text-white border-[#212121] shadow-sm dark:bg-white dark:text-black dark:border-white"
-                  : "bg-white text-[#3f3f46] border-transparent hover:bg-[#fafafa] hover:border-[#e5e7eb] dark:bg-[#1f1f1f] dark:text-[#d4d4d8] dark:hover:bg-[#262626] dark:hover:border-[#3f3f46]"
+                    ? "bg-[#212121] text-white border-[#212121] shadow-sm dark:bg-white dark:text-black dark:border-white"
+                    : "bg-white text-[#3f3f46] border-transparent hover:bg-[#fafafa] hover:border-[#e5e7eb] dark:bg-[#1f1f1f] dark:text-[#d4d4d8] dark:hover:bg-[#262626] dark:hover:border-[#3f3f46]"
                   }`}
               >
                 <span className="flex items-center gap-1.5">
@@ -211,8 +211,8 @@ export default function DprPage() {
                   {mod && mod.count > 0 && (
                     <span
                       className={`text-[10px] leading-none font-bold px-1.5 py-0.5 rounded-full ${activeTab === tab
-                        ? "bg-white/15 text-white dark:bg-black/10 dark:text-black"
-                        : "bg-gray-100 text-gray-500 dark:bg-[#2f2f2f] dark:text-[#a1a1aa]"
+                          ? "bg-white/15 text-white dark:bg-black/10 dark:text-black"
+                          : "bg-gray-100 text-gray-500 dark:bg-[#2f2f2f] dark:text-[#a1a1aa]"
                         }`}
                     >
                       {mod.count}

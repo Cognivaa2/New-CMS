@@ -187,7 +187,7 @@ export default function UserProfileRight({ userId, roleId, activities }) {
                 </div>
 
                 {activeTab === "projects" && (
-                    <div className="relative flex items-center w-full sm:w-[320px] lg:w-[260px] xl:w-[320px] shrink-0">
+                    <div className="relative flex items-center w-full sm:w-[320px] lg:w-65 xl:w-[320px] shrink-0">
                         <Search className="w-4.5 h-4.5 text-gray-400 absolute left-3" />
                         <input
                             type="text"

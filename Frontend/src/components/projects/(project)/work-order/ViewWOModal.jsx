@@ -175,7 +175,7 @@ function ItemsTable({ items }) {
                                 </td>
                                 <td className="px-3 py-3">
                                     <p className="font-sfpro-medium text-gray-800 dark:text-[#f4f4f5] truncate max-w-40">
-                                        {item.description || "—"}
+                                        {item.description || "Not provided"}
                                     </p>
                                     {item.remarks && (
                                         <p className="text-[10px] text-gray-400 dark:text-[#52525b] mt-0.5 truncate max-w-40">
@@ -184,7 +184,7 @@ function ItemsTable({ items }) {
                                     )}
                                 </td>
                                 <td className="px-3 py-3 text-gray-500 dark:text-[#71717a]">
-                                    {item.unit || "—"}
+                                    {item.unit || "Not provided"}
                                 </td>
                                 <td className="px-3 py-3 text-right font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                                     {item.quantity ?? 0}
@@ -206,6 +206,114 @@ function ItemsTable({ items }) {
                             <td className="px-3 py-3 text-right text-[14px] font-sfpro-bold text-gray-900 dark:text-white">
                                 ₹{grandTotal.toLocaleString("en-IN")}
                             </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    )
+}
+
+// Add to STATUS_CONFIG at top
+const MILESTONE_STATUS_CONFIG = {
+    Pending: { label: "Pending", className: "text-gray-600 bg-gray-100 border-gray-200 dark:bg-[#27272a] dark:text-[#a1a1aa] dark:border-[#3f3f46]" },
+    Triggered: { label: "Triggered", className: "text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" },
+    Paid: { label: "Paid", className: "text-green-600 bg-green-50 border-green-200 dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/20" },
+}
+
+function MilestoneStatusPill({ status }) {
+    const config = MILESTONE_STATUS_CONFIG[status] || MILESTONE_STATUS_CONFIG.Pending
+    return (
+        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-sfpro-bold uppercase tracking-wide border ${config.className}`}>
+            {config.label}
+        </span>
+    )
+}
+
+function MilestonesTable({ milestones, totalContractValue }) {
+    if (!milestones?.length) return null
+
+    const totalPaymentPercent = milestones.reduce((sum, m) => sum + (m.paymentPercent || 0), 0)
+    const totalAmount = milestones.reduce((sum, m) => sum + (m.amount || 0), 0)
+
+    return (
+        <div className="rounded-xl border border-gray-100 dark:border-[#27272a] overflow-hidden">
+            <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
+                <table className="w-full min-w-135 border-collapse text-[12px]">
+                    <thead>
+                        <tr className="bg-gray-50 dark:bg-[#18181b] border-b border-gray-100 dark:border-[#27272a]">
+                            {["#", "Title", "Trigger %", "Payment %", "Amount", "Status", "Triggered At"].map((h, i) => (
+                                <th
+                                    key={i}
+                                    className={`px-3 py-2.5 text-[10px] font-sfpro-bold text-gray-400 dark:text-[#52525b] uppercase tracking-wide whitespace-nowrap ${
+                                        i === 0 ? "text-center w-8" : i >= 2 && i <= 4 ? "text-right" : "text-left"
+                                    }`}
+                                >
+                                    {h}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-[#0d0d0d]">
+                        {milestones.map((ms, idx) => (
+                            <tr
+                                key={ms.id || idx}
+                                className={`${idx < milestones.length - 1 ? "border-b border-gray-50 dark:border-[#1a1a1a]" : ""} hover:bg-gray-50/50 dark:hover:bg-[#111] transition-colors`}
+                            >
+                                <td className="px-3 py-3 text-center">
+                                    <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-[#27272a] text-[10px] font-sfpro-bold text-gray-500 dark:text-[#71717a] flex items-center justify-center mx-auto">
+                                        {idx + 1}
+                                    </span>
+                                </td>
+                                <td className="px-3 py-3">
+                                    <p className="font-sfpro-medium text-gray-800 dark:text-[#f4f4f5] truncate max-w-36">
+                                        {ms.title || "Not provided"}
+                                    </p>
+                                    {ms.description && (
+                                        <p className="text-[10px] text-gray-400 dark:text-[#52525b] mt-0.5 truncate max-w-36">
+                                            {ms.description}
+                                        </p>
+                                    )}
+                                </td>
+                                <td className="px-3 py-3 text-right font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
+                                    {ms.triggerPercent ?? 0}%
+                                </td>
+                                <td className="px-3 py-3 text-right font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
+                                    {ms.paymentPercent ?? 0}%
+                                </td>
+                                <td className="px-3 py-3 text-right font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
+                                    ₹{(ms.amount ?? 0).toLocaleString("en-IN")}
+                                </td>
+                                
+                                <td className="px-3 py-3">
+                                    <MilestoneStatusPill status={ms.status} />
+                                </td>
+                                <td className="px-3 py-3 text-gray-500 dark:text-[#71717a] whitespace-nowrap text-[11px]">
+                                    {ms.triggeredAt ? formatDate(ms.triggeredAt) : "Not provided"}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                    <tfoot>
+                        <tr className="border-t-2 border-gray-100 dark:border-[#27272a] bg-gray-50 dark:bg-[#18181b]">
+                            <td colSpan={3} className="px-3 py-3 text-right text-[10px] font-sfpro-bold text-gray-500 dark:text-[#71717a] uppercase tracking-wide">
+                                Total Payment %
+                            </td>
+                            <td className="px-3 py-3 text-right">
+                                <span className={`text-[12px] font-sfpro-bold ${
+                                    totalPaymentPercent === 100
+                                        ? "text-green-600 dark:text-green-400"
+                                        : totalPaymentPercent > 100
+                                            ? "text-red-500 dark:text-red-400"
+                                            : "text-amber-600 dark:text-amber-400"
+                                }`}>
+                                    {totalPaymentPercent}%
+                                </span>
+                            </td>
+                            <td className="px-3 py-3 text-right text-[14px] font-sfpro-bold text-gray-900 dark:text-white">
+                                ₹{totalAmount.toLocaleString("en-IN")}
+                            </td>
+                            <td colSpan={3} />
                         </tr>
                     </tfoot>
                 </table>
@@ -401,6 +509,28 @@ export default function ViewWOModal({ open, onClose, wo, isLoading = false }) {
                                         <SectionHeader title={`Work Items (${wo.workItems?.length ?? 0})`} />
                                         <ItemsTable items={wo.workItems} />
                                     </div>
+
+                                    {wo.hasMilestones && wo.milestones?.length > 0 && (
+    <>
+        <div className="h-px bg-gray-100 dark:bg-[#252525]" />
+        <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+                <SectionHeader title={`Payment Milestones (${wo.milestones.length})`} />
+                <span className={`text-[11px] px-2 py-0.5 rounded-full font-sfpro-bold shrink-0 mb-3 ${
+                    wo.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0) === 100
+                        ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+                        : "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
+                }`}>
+                    {wo.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0)}% allocated
+                </span>
+            </div>
+            <MilestonesTable
+                milestones={wo.milestones}
+                totalContractValue={wo.totalContractValue}
+            />
+        </div>
+    </>
+)}
 
                                     <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                     <div className="flex flex-col gap-4">

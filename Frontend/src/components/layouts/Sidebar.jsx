@@ -271,66 +271,71 @@ export default function Sidebar() {
     setExpandedItems((prev) => ({ ...prev, [label]: !prev[label] }))
   }
 
-  useEffect(() => {
-    const controller = new AbortController()
+useEffect(() => {
+  const controller = new AbortController()
 
-    async function loadPermissions() {
-      setIsLoadingPermissions(true)
-      try {
-        const roleId = localStorage.getItem("roleId")
-        if (!roleId) {
-          setModuleStatus(null)
-          setIsLoadingPermissions(false)
-          return
-        }
-        const roleData = await fetchRolePermissions(roleId, controller.signal)
-        if (roleData?.moduleStatus) {
-          setModuleStatus(roleData.moduleStatus)
-        } else {
-          setModuleStatus(null)
-        }
-      } catch (error) {
-        if (error.name !== "CanceledError") {
-          console.error("Error loading permissions:", error)
-          setModuleStatus(null)
-        }
-      } finally {
+  async function loadPermissions() {
+    setIsLoadingPermissions(true)
+    try {
+      const roleId = localStorage.getItem("roleId")
+      const accessToken = localStorage.getItem("accessToken") 
+
+      if (!roleId || !accessToken) {
+        setModuleStatus(null)
         setIsLoadingPermissions(false)
+        return
       }
+
+      const roleData = await fetchRolePermissions(roleId, controller.signal)
+      if (roleData?.moduleStatus) {
+        setModuleStatus(roleData.moduleStatus)
+      } else {
+        setModuleStatus(null)
+      }
+    } catch (error) {
+      if (error.name !== "CanceledError") {
+        console.error("Error loading permissions:", error)
+        setModuleStatus(null)
+      }
+    } finally {
+      setIsLoadingPermissions(false)
     }
+  }
 
-    loadPermissions()
-    return () => controller.abort()
-  }, [])
+  loadPermissions()
+  return () => controller.abort()
+}, [])
 
-  useEffect(() => {
-    const controller = new AbortController()
+useEffect(() => {
+  const controller = new AbortController()
 
-    async function loadCompany() {
-      setIsLoadingCompany(true)
-      try {
-        const companyId = localStorage.getItem("companyId")
-        if (!companyId) {
-          setCompany(null)
-          setIsLoadingCompany(false)
-          return
-        }
-        const companyData = await fetchCompanyDetails(companyId, controller.signal)
-        setCompany(companyData ?? null)
-      } catch (error) {
-        if (error.name !== "CanceledError") {
-          console.error("Error loading company:", error)
-          setCompany(null)
-        }
-      } finally {
+  async function loadCompany() {
+    setIsLoadingCompany(true)
+    try {
+      const companyId = localStorage.getItem("companyId")
+      const accessToken = localStorage.getItem("accessToken") 
+
+      if (!companyId || !accessToken) {
+        setCompany(null)
         setIsLoadingCompany(false)
+        return
       }
+
+      const companyData = await fetchCompanyDetails(companyId, controller.signal)
+      setCompany(companyData ?? null)
+    } catch (error) {
+      if (error.name !== "CanceledError") {
+        console.error("Error loading company:", error)
+        setCompany(null)
+      }
+    } finally {
+      setIsLoadingCompany(false)
     }
+  }
 
-    loadCompany()
-    return () => controller.abort()
-  }, [])
-
+  loadCompany()
+  return () => controller.abort()
+}, [])
   const filteredMenu = menu.map(section => {
     const filteredItems = section.items.filter(item => {
       if (item.moduleKey === null) return true

@@ -48,10 +48,10 @@ export async function updateCompany(companyId, formState) {
     let headers;
     if (hasLogo) {
         payload = buildFormData(formState);
-        headers = getAuthHeaders(true);
+        headers = getAuthHeaders(true); 
     } else {
         payload = buildJsonPayload(formState);
-        headers = getAuthHeaders(false);
+        headers = getAuthHeaders(false); 
     }
     try {
         const { data } = await axios.put(
@@ -167,10 +167,10 @@ export function toInfoData(company) {
         addressParts.push(cityLine.join("  •  "));
     }
     return {
-        email: company.email,
-        phone: company.phone,
-        address: addressParts.join("\n"),
-        website: company.website,
+        email: company.email ,
+        phone: company.phone ,
+        address: addressParts.join("\n") ,
+        website: company.website ,
     };
 }
 export function toStatsAndLegalData(company) {
@@ -192,28 +192,28 @@ export function toStatsAndLegalData(company) {
     return { stats, legal };
 }
 export function toEditFormState(company) {
-    return {
-        companyName: company.companyName || "",
-        companyType: company.companyType || "",
-        phone: company.phone || "",
-        description: company.description || "",
-        email: company.email || "",
-        website: company.website || "",
-        gstin: company.gstin || "",
-        pan: company.pan || "",
-        cin: company.cin || "",
-        laborLicenseNo: company.laborLicenseNo || "",
-        address: {
-            street: company.address?.street || "",
-            city: company.address?.city || "",
-            state: company.address?.state || "",
-            country: company.address?.country || "",
-            pincode: company.address?.pincode || "",
-        },
-        tags: Array.isArray(company.tags) ? company.tags : [],
-        logo: company.logo || "",
-        logoPreview: company.logo || "",
-    };
+  return {
+    companyName: company.companyName || "",
+    companyType: company.companyType || "",
+    phone: company.phone || "",
+    description: company.description || "", 
+    email: company.email || "",
+    website: company.website || "",
+    gstin: company.gstin || "",
+    pan: company.pan || "",
+    cin: company.cin || "",
+    laborLicenseNo: company.laborLicenseNo || "",
+    address: {
+      street: company.address?.street || "",
+      city: company.address?.city || "",
+      state: company.address?.state || "",
+      country: company.address?.country || "",
+      pincode: company.address?.pincode || "",
+    },
+    tags: Array.isArray(company.tags) ? company.tags : [],
+    logo: company.logo || "",
+    logoPreview: company.logo || "",
+  };
 }
 export function getFallbackCompany() {
     return {

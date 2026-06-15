@@ -1,6 +1,6 @@
 import express from "express";
 import {
-    createPO, getAllPOs, getSinglePO, editPO, submitPO, approvePO, rejectPO, cancelPO, deletePO, getMRsPendingForPO, getPOsByMR, getPOItems, getPOLookup, getGlobalPOSummary, getAllPOsGlobal, exportPOAsPdf, getGlobalPOLookup
+    createPO, getAllPOs, getSinglePO, editPO, submitPO, approvePO, rejectPO, cancelPO, deletePO, getMRsPendingForPO, getPOsByMR, getPOItems, getPOLookup, getGlobalPOSummary, getAllPOsGlobal, getGlobalPOLookup
 } from "../controllers/purchaseOrder.controller.js";
 import { verifyToken } from "../middlewares/verifyToken.middlewares.js";
 import { checkPermission } from "../middlewares/checkPermission.middlewares.js";
@@ -19,7 +19,6 @@ router.get("/:projectId/items/:poId", verifyToken, checkPermission("project-purc
 router.post("/:projectId", verifyToken, checkPermission("project-purchase-orders", "create"), createPO);
 router.get("/:projectId", verifyToken, checkPermission("project-purchase-orders", "view"), getAllPOs);
 router.get("/:projectId/:poId", verifyToken, checkPermission("project-purchase-orders", "view"), getSinglePO);
-router.get("/:projectId/export/:poId", verifyToken, checkPermission("project-purchase-orders", "download"), exportPOAsPdf);
 
 router.patch("/:projectId/submit/:poId", verifyToken, checkPermission("project-purchase-orders", "create"), submitPO);
 router.patch("/:projectId/approve/:poId", verifyToken, checkPermission("project-purchase-orders", "approve"), approvePO);

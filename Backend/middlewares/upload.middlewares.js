@@ -79,3 +79,8 @@ export const uploadDocument = {
     array: (field, max) => wrap(documentMulter.array(field, max)),
     fields: (fields) => wrap(documentMulter.fields(fields)),
 };
+
+
+export const uploadSafetyFields = wrap(
+    documentMulter.any()
+);

@@ -86,8 +86,9 @@ function VendorSearchDropdown({ value, onChange, disabled, options, isLoading })
               className="flex-1 bg-transparent text-[13.5px] font-sfpro text-black dark:text-white placeholder-gray-400 outline-none min-w-0"
             />
             <ChevronDown
-              className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${open ? "rotate-180" : ""
-                }`}
+              className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${
+                open ? "rotate-180" : ""
+              }`}
             />
           </div>
 
@@ -327,19 +328,21 @@ export default function AddMaterialModal({ open, onClose, onSuccess }) {
       <div
         onClick={() => !submitting && onClose()}
         style={{ transitionDuration: "400ms" }}
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity ease-in-out ${visible ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity ease-in-out ${
+          visible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
       />
       <div
         style={{
           transitionDuration: "400ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         }}
-        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform ${visible ? "translate-y-0" : "translate-y-full"
-          }`}
+        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform ${
+          visible ? "translate-y-0" : "translate-y-full"
+        }`}
       >
         <div className="w-full bg-white dark:bg-[#09090b] border-t-2 border-gray-200 dark:border-[#27272a] rounded-t-2xl max-h-[88dvh] lg:max-h-[70dvh] flex flex-col">
-
+          
           <div className="flex justify-center pt-3 shrink-0">
             <div className="w-9 lg:w-12 h-1 rounded-full bg-gray-300 dark:bg-[#3f3f46]" />
           </div>
@@ -357,7 +360,7 @@ export default function AddMaterialModal({ open, onClose, onSuccess }) {
 
           <div
             className="flex-1 overflow-y-auto px-6 sm:px-12 lg:px-24 xl:px-40 pt-4 pb-28 space-y-5"
-            style={{
+            style={{ 
               scrollbarWidth: "thin",
               scrollbarColor: "#cbd5e0 transparent"
             }}
@@ -398,8 +401,9 @@ export default function AddMaterialModal({ open, onClose, onSuccess }) {
                     </button>
                   )}
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${showMaterialDropdown ? "rotate-180" : ""
-                      }`}
+                    className={`w-4 h-4 text-gray-400 shrink-0 transition-transform ${
+                      showMaterialDropdown ? "rotate-180" : ""
+                    }`}
                   />
                 </div>
 
