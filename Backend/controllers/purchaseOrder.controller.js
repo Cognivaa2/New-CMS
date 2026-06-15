@@ -19,7 +19,7 @@ import { createExpenseEntry, reverseExpenseEntry, recalcProjectHealth } from "..
 import { pushDprEvent } from "../helpers/dprHelper.js";
 import { enrichUser } from "../helpers/mrHelper.js";
 import NotificationService from "../services/notification.service.js";
-import { generatePOPdf } from "../helpers/poPdfGenerator.js";
+import {generatePOPdf} from "../helpers/poPdfGenerator.js"
 
 
 // This function creates a new purchase order (PO). takes x-company-id in headers, projectId in params and createdBy, mrId, vendorId, items, expectedDeliveryDate, deliveryAddress, paymentTerms, specialInstructions in body. validates MR and vendor, processes items, calculates total value and creates PO in Draft state with auto MR conversion if applicable. -------------------------- Ayan
@@ -821,6 +821,7 @@ export const rejectPO = async (req, res) => {
     }
 };
 
+
 // This function exports a PO as a PDF document. takes x-company-id in headers, projectId and poId in params. fetches PO, project, vendor and user details and generates a formatted PDF for download. -------------------------- Ayan
 export const exportPOAsPdf = async (req, res) => {
     try {
@@ -910,7 +911,7 @@ export const exportPOAsPdf = async (req, res) => {
             message: error.message,
         });
     }
-};
+}
 
 
 // This function cancels a PO. takes x-company-id in headers, projectId and poId in params and actionBy with cancellationRemarks in body. allows cancellation only in Approved state and updates status to Cancelled. -------------------------- Ayan

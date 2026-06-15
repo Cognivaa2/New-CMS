@@ -279,7 +279,7 @@ export function EntriesList({ entries = [], onChange, disabled = false }) {
                 type="button"
                 onClick={handleAdd}
                 disabled={disabled}
-                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black text-[12px] font-sfpro-medium hover:bg-[#111] dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black text-[12px] font-sfpro-medium hover:bg-[#111] dark:hover:bg-gray-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <Plus className="w-3.5 h-3.5" />
                 Add Entry

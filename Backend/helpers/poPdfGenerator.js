@@ -318,7 +318,7 @@ function tableTotals(doc, y, items, totalValue) {
     });
     absText(
         doc,
-        `Total Order Value : ₹ ${fmtN(totalValue || totalP, 2)}`,
+        `Total Order Value : Rs. ${fmtN(totalValue || totalP, 2)}`,
         MX + CW - 180,
         y + RH + 8,
         {
