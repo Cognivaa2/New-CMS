@@ -63,7 +63,7 @@ function AttachmentButton({ attachmentFile, attachment, onFileChange, onClear, d
             {displayName && (
                 <div className="flex items-center gap-1 px-2 h-7 rounded-md bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#252525]">
                     <FileText className="w-3 h-3 text-gray-400 shrink-0" />
-                    <span className="text-[10.5px] font-sfpro text-gray-600 dark:text-[#a1a1aa] truncate max-w-[80px]">
+                    <span className="text-[10.5px] font-sfpro text-gray-600 dark:text-[#a1a1aa] truncate max-w-20">
                         {displayName}
                     </span>
                     <button
@@ -279,7 +279,7 @@ export function EntriesList({ entries = [], onChange, disabled = false }) {
                 type="button"
                 onClick={handleAdd}
                 disabled={disabled}
-                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 dark:border-[#333] text-[12px] font-sfpro-medium text-gray-400 dark:text-[#52525b] hover:border-gray-400 dark:hover:border-[#555] hover:text-gray-600 dark:hover:text-[#71717a] transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black text-[12px] font-sfpro-medium hover:bg-[#111] dark:hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
                 <Plus className="w-3.5 h-3.5" />
                 Add Entry
