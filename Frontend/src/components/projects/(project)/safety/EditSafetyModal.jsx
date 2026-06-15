@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { SafetyFormContent } from "./SafetyFormFields"
 
@@ -8,11 +8,35 @@ function Backdrop({ visible, onClose }) {
     return (
         <div
             onClick={onClose}
-            style={{ transitionDuration: "400ms" }}
-            className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity ease-in-out ${visible ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
+            className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+                visible ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
         />
     )
+}
+
+function mapInspectionToForm(inspection) {
+    if (!inspection) return null
+    const keycloakId =
+        typeof window !== "undefined" ? localStorage.getItem("keycloakId") || "" : ""
+
+    return {
+        entries: (inspection.entries || []).map((entry) => ({
+            id: entry.id || "",
+            _id: entry.id || "",
+            title: entry.title || "",
+            category: entry.category || "Safety",
+            status: entry.status || "Observation",
+            severity: entry.severity || "Low",
+            inspectionDate: entry.inspectionDate ? new Date(entry.inspectionDate) : null,
+            location: entry.location || "",
+            description: entry.description || "",
+            remarks: entry.remarks || "",
+            inspectedBy: entry.inspectedBy?.keycloakId || entry.inspectedByRaw || keycloakId,
+            attachment: entry.attachment || null,
+            attachmentFile: null,
+        })),
+    }
 }
 
 export default function EditSafetyModal({
@@ -39,46 +63,14 @@ export default function EditSafetyModal({
             const t = setTimeout(() => {
                 setMounted(false)
                 setForm(null)
-            }, 420)
+            }, 350)
             return () => clearTimeout(t)
         }
     }, [open])
 
     useEffect(() => {
-        if (!inspection) return
-
-        const keycloakId = typeof window !== "undefined"
-            ? localStorage.getItem("keycloakId") || ""
-            : ""
-
-        setForm({
-            entries: (inspection.entries || []).map((entry) => ({
-                id: entry.id || "",
-                _id: entry.id || "",
-                title: entry.title || "",
-                category: entry.category || "Safety",
-                status: entry.status || "Observation",
-                severity: entry.severity || "Low",
-                inspectionDate: entry.inspectionDate
-                    ? new Date(entry.inspectionDate)
-                    : null,
-                location: entry.location || "",
-                description: entry.description || "",
-                remarks: entry.remarks || "",
-                inspectionDate: entry.inspectionDate
-                    ? new Date(entry.inspectionDate)
-                    : null,
-                inspectedBy:
-                    entry.inspectedBy?.keycloakId ||
-                    entry.inspectedByRaw ||
-                    keycloakId,
-                attachment: entry.attachment || null,
-                attachmentFile: null,
-            })),
-        })
+        if (inspection) setForm(mapInspectionToForm(inspection))
     }, [inspection])
-
-
 
     useEffect(() => {
         const fn = (e) => {
@@ -88,32 +80,32 @@ export default function EditSafetyModal({
         return () => window.removeEventListener("keydown", fn)
     }, [open, submitting, onClose])
 
-    const handleSubmit = async () => {
-        if (!form) return
-
-        if (!form.entries?.length) {
+    const validate = useCallback(() => {
+        if (!form?.entries?.length) {
             toast.error("Add at least one entry")
-            return
+            return false
         }
-
-        const hasEmptyTitle = form.entries.some((e) => !e.title?.trim())
-        if (hasEmptyTitle) {
-            toast.error("All entries must have a title")
-            return
+        for (let i = 0; i < form.entries.length; i++) {
+            const e = form.entries[i]
+            const tag = form.entries.length > 1 ? ` in Entry #${i + 1}` : ""
+            if (!e.title?.trim()) {
+                toast.error(`Title is required${tag}`)
+                return false
+            }
+            if (!e.inspectionDate) {
+                toast.error(`Date is required${tag}`)
+                return false
+            }
+            if (!e.inspectedBy?.trim()) {
+                toast.error("Inspector is required — please refresh")
+                return false
+            }
         }
+        return true
+    }, [form])
 
-        const hasEmptyInspector = form.entries.some((e) => !e.inspectedBy?.trim())
-        if (hasEmptyInspector) {
-            toast.error("All entries must have an inspector")
-            return
-        }
-
-        const hasEmptyDate = form.entries.some((e) => !e.inspectionDate)
-        if (hasEmptyDate) {
-            toast.error("All entries must have an inspection date")
-            return
-        }
-
+    const handleSubmit = async () => {
+        if (!validate()) return
         setSubmitting(true)
         try {
             await onSave(form)
@@ -124,61 +116,54 @@ export default function EditSafetyModal({
     }
 
     if (!mounted) return null
+    const loading = isEditLoading || !form
 
     return (
         <>
             <Backdrop visible={visible} onClose={() => !submitting && onClose()} />
-
             <div
-                style={{
-                    transitionDuration: "1000ms",
-                    transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-                }}
-                className={`fixed bottom-0 left-0 right-0 z-50 transition-transform ${visible ? "translate-y-0" : "translate-y-full"
-                    }`}
+                className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    visible ? "translate-y-0" : "translate-y-full"
+                }`}
             >
-                <div className="w-full bg-white dark:bg-[#09090b] border-t-2 border-gray-200 dark:border-[#27272a] rounded-t-2xl max-h-[92dvh] lg:max-h-[70dvh] flex flex-col">
+                <div className="w-full bg-white dark:bg-[#09090b] border-t-2 border-gray-200 dark:border-[#27272a] rounded-t-2xl max-h-[90dvh] lg:max-h-[75dvh] flex flex-col">
                     <div className="flex justify-center pt-3 shrink-0">
-                        <div className="w-9 lg:w-12 h-0.75 rounded-full bg-gray-300 dark:bg-[#3f3f46]" />
-                    </div>
-                    <div className="flex flex-col items-center px-8 pt-5 pb-4 shrink-0">
-                        <h2 className="text-lg lg:text-xl xl:text-2xl font-sfpro-bold text-[#212121] dark:text-[#f4f4f5] leading-tight">
-                            Edit Safety Inspection
-                        </h2>
-                        <p className="text-sm font-sfpro-medium text-gray-500 dark:text-[#71717a] mt-1">
-                            {inspection?.inspectionNumber || "Update inspection details"}
-                        </p>
+                        <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-[#3f3f46]" />
                     </div>
 
-                    {isEditLoading || !form ? (
-                        <div className="flex-1 px-8 lg:px-20 xl:px-36 pt-7 pb-10 space-y-4">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="h-10 rounded-lg bg-gray-100 dark:bg-[#1c1c1c] animate-pulse"
-                                />
+                    <div className="px-6 pt-4 pb-3 shrink-0 text-center">
+                        <h2 className="text-lg font-sfpro-bold text-[#212121] dark:text-[#f4f4f5]">
+                            Edit Inspection
+                        </h2>
+                        {inspection?.inspectionNumber && (
+                            <p className="text-[13px] font-sfpro text-gray-400 dark:text-[#71717a] mt-0.5">
+                                {inspection.inspectionNumber}
+                            </p>
+                        )}
+                    </div>
+
+                    {loading ? (
+                        <div className="flex-1 px-6 lg:px-12 xl:px-20 py-6 space-y-3">
+                            {[1, 2, 3].map((i) => (
+                                <div key={i} className="h-20 rounded-xl bg-gray-100 dark:bg-[#1c1c1c] animate-pulse" />
                             ))}
                         </div>
                     ) : (
-                        <SafetyFormContent
-                            form={form}
-                            setForm={setForm}
-                            disabled={submitting}
-                        />
+                        <SafetyFormContent form={form} setForm={setForm} disabled={submitting} />
                     )}
 
-                    <div className="shrink-0 flex items-center justify-end gap-2 px-8 py-4 border-t border-gray-100 dark:border-[#27272a]">
+                    <div className="shrink-0 flex items-center justify-end gap-2 px-6 py-3.5 border-t border-gray-100 dark:border-[#27272a]">
                         <button
                             onClick={() => !submitting && onClose()}
                             disabled={submitting || isEditLoading}
-                            className="h-9 px-4 rounded-lg text-[13.5px] font-sfpro-medium border border-gray-200 dark:border-[#27272a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-100 dark:hover:bg-[#27272a] disabled:opacity-50 transition-all duration-150"
+                            className="h-9 px-5 rounded-lg text-[13px] font-sfpro-medium border border-gray-200 dark:border-[#27272a] text-gray-600 dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-[#27272a] disabled:opacity-50 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSubmit}
-                            disabled={submitting || isEditLoading || !form}
-                            className="h-9 px-4 rounded-lg text-[13.5px] font-sfpro-medium bg-[#2a2a2a] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-200 disabled:opacity-50 transition-all duration-150"
+                            disabled={submitting || loading}
+                            className="h-9 px-5 rounded-lg text-[13px] font-sfpro-medium bg-[#2a2a2a] dark:bg-white text-white dark:text-black hover:bg-black dark:hover:bg-gray-200 disabled:opacity-50 transition-colors"
                         >
                             {submitting ? "Saving…" : "Save Changes"}
                         </button>

@@ -99,16 +99,13 @@ function absText(doc, text, x, y, opts = {}) {
         align: opts.align || "left",
         lineBreak: opts.lineBreak !== false,
     });
-    if (isNA) {
-        doc.fillOpacity(1);
-    }
     doc.restore();
 }
 
 function drawFooter(doc, ctx) {
     const fy = PH - MB + 4;
     hLine(doc, MX, MX + CW, fy - 2, C.border, 0.3);
-    absText(doc, `${ctx.companyName}  ·  GRN ${ctx.grnNumber}`, MX, fy + 4, {
+    absText(doc, `${ctx.companyName}  ·  PO ${ctx.poNumber}`, MX, fy + 4, {
         size: 7, color: C.muted, width: CW * 0.55,
     });
     absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.55, fy + 4, {
@@ -263,14 +260,15 @@ function drawRightRow(doc, leftField, rightField, x, y, width, height) {
 }
 
 const COLS = [
-    { k: "no", lbl: "#", fr: 0.04, a: "center" },
-    { k: "name", lbl: "Material", fr: 0.27, a: "left" },
-    { k: "unit", lbl: "Unit", fr: 0.07, a: "center" },
-    { k: "ord", lbl: "Ordered", fr: 0.12, a: "right" },
-    { k: "prev", lbl: "Prev. Rcvd", fr: 0.12, a: "right" },
-    { k: "this", lbl: "This GRN", fr: 0.12, a: "right" },
-    { k: "bal", lbl: "Balance", fr: 0.12, a: "right" },
-    { k: "rmk", lbl: "Remarks", fr: 0.14, a: "left" },
+    { k: "no", lbl: "Sl", fr: 0.04, a: "center" },
+    { k: "name", lbl: "Material", fr: 0.28, a: "left" },
+    { k: "unit", lbl: "Unit", fr: 0.08, a: "center" },
+    { k: "qty", lbl: "Qty", fr: 0.08, a: "right" },
+    { k: "price", lbl: "Price", fr: 0.12, a: "right" },
+    { k: "gst", lbl: "GST %", fr: 0.08, a: "right" },
+    { k: "disc", lbl: "Disc %", fr: 0.08, a: "right" },
+    { k: "total", lbl: "Total", fr: 0.12, a: "right" },
+    { k: "rmk", lbl: "Remarks", fr: 0.12, a: "left" },
 ];
 COLS.forEach((c) => { c.w = Math.round(c.fr * CW * 10) / 10; });
 const drift = CW - COLS.reduce((s, c) => s + c.w, 0);
@@ -282,15 +280,15 @@ const TPY = 5;
 const TFS = 8;
 
 function rowHeight(doc, item, i) {
-    const bal = (item.orderedQuantity || 0) - (item.previouslyReceivedQuantity || 0) - (item.receivedQuantity || 0);
     const vals = [
         String(i + 1),
         String(item.materialName || ""),
         String(item.unit || ""),
         fmtN(item.orderedQuantity),
-        fmtN(item.previouslyReceivedQuantity),
-        fmtN(item.receivedQuantity),
-        fmtN(bal),
+        fmtN(item.unitPrice),
+        fmtN(item.gstPercent),
+        fmtN(item.discountPercent),
+        fmtN(item.totalPrice),
         String(item.remarks || ""),
     ];
     let maxH = 0;
@@ -323,23 +321,22 @@ function tableHeader(doc, y) {
 
 function tableRow(doc, y, item, i) {
     const rh = rowHeight(doc, item, i);
-    const bal = (item.orderedQuantity || 0) - (item.previouslyReceivedQuantity || 0) - (item.receivedQuantity || 0);
     const vals = [
         String(i + 1),
         String(item.materialName || ""),
         String(item.unit || ""),
         fmtN(item.orderedQuantity),
-        fmtN(item.previouslyReceivedQuantity),
-        fmtN(item.receivedQuantity),
-        fmtN(bal),
+        fmtN(item.unitPrice),
+        fmtN(item.gstPercent),
+        fmtN(item.discountPercent),
+        fmtN(item.totalPrice),
         String(item.remarks || ""),
     ];
 
     let cx = MX;
     COLS.forEach((col, ci) => {
-        const color = (col.k === "bal" && bal < 0) ? C.negative : C.black;
         absText(doc, vals[ci], cx + TPX, y + TPY, {
-            size: TFS, color,
+            size: TFS, color: C.black,
             width: col.w - TPX * 2, align: col.a, lineBreak: true,
         });
         cx += col.w;
@@ -356,22 +353,21 @@ function tableRow(doc, y, item, i) {
     return y + rh;
 }
 
-function tableTotals(doc, y, items, totalAmount) {
+function tableTotals(doc, y, items, totalValue) {
     const tot = (f) => items.reduce((s, it) => s + (it[f] || 0), 0);
-    const ord = tot("orderedQuantity");
-    const prev = tot("previouslyReceivedQuantity");
-    const rcv = tot("receivedQuantity");
-    const bal = ord - prev - rcv;
+    const qty = tot("orderedQuantity");
+    const totalP = tot("totalPrice");
     const RH = 19;
     strokeRect(doc, MX, y, CW, RH, C.border, 0.3);
     const vals = [
         "",
         `Total (${items.length} item${items.length !== 1 ? "s" : ""})`,
         "",
-        fmtN(ord),
-        fmtN(prev),
-        fmtN(rcv),
-        fmtN(bal),
+        fmtN(qty),
+        "",
+        "",
+        "",
+        fmtN(totalP),
         "",
     ];
 
@@ -396,7 +392,7 @@ function tableTotals(doc, y, items, totalAmount) {
     });
     absText(
         doc,
-        `GRN Amount : Rs. ${fmtN(totalAmount || 0, 2)}`,
+        `Total Order Value : Rs. ${fmtN(totalValue || totalP, 2)}`,
         MX + CW - 180,
         y + RH + 8,
         {
@@ -411,11 +407,11 @@ function tableTotals(doc, y, items, totalAmount) {
     return y + RH + 22;
 }
 
-export async function generateGRNPdf(res, { grn, company, vendor, project, createdByUser }) {
+export async function generatePOPdf(res, { po, company, vendor, project, createdByUser }) {
     const logoBuffer = await fetchImageBuffer(company?.logo);
     const ctx = {
         page: 1,
-        grnNumber: grn.grnNumber,
+        poNumber: po.poNumber,
         companyName: company?.companyName || "",
     };
 
@@ -423,24 +419,24 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
         size: "A4",
         margins: { top: MT, bottom: 4, left: MX, right: MX },
         info: {
-            Title: `GRN ${grn.grnNumber}`,
+            Title: `PO ${po.poNumber}`,
             Author: company?.companyName || "System",
-            Subject: "Goods Receipt Note",
+            Subject: "Purchase Order",
             Creator: "Procurement Management System",
         },
         compress: true,
         autoFirstPage: false,
     });
 
-    const safeName = grn.grnNumber.replace(/[^a-zA-Z0-9\-_]/g, "_");
+    const safeName = po.poNumber.replace(/[^a-zA-Z0-9\-_]/g, "_");
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="GRN_${safeName}.pdf"`);
+    res.setHeader("Content-Disposition", `attachment; filename="PO_${safeName}.pdf"`);
     doc.pipe(res);
     doc.addPage();
     let y = MT;
 
     // Title Section
-    absText(doc, "Goods Receipt Note", MX, y, {
+    absText(doc, "Purchase Order", MX, y, {
         font: F.bold, size: 12, color: C.black, width: CW * 0.6,
     });
     absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
@@ -481,11 +477,11 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
     ];
 
     const rightRows = [
-        { left: { lbl: "GRN Number", val: grn.grnNumber }, right: { lbl: "Dated", val: fmt(grn.createdAt) } },
-        { left: { lbl: "Delivery Date", val: fmt(grn.deliveryDate) }, right: { lbl: "PO Reference", val: grn.poNumber } },
-        { left: { lbl: "Challan Number", val: grn.deliveryChallanNumber }, right: { lbl: "Challan Date", val: fmt(grn.deliveryChallanDate) } },
-        { left: { lbl: "Vehicle Number", val: grn.vehicleNumber } },
-        { left: { lbl: "Created by", val: createdByUser?.name }, right: { lbl: "Status", val: "RECEIVED" } },
+        { left: { lbl: "PO Number", val: po.poNumber }, right: { lbl: "Dated", val: fmt(po.createdAt) } },
+        { left: { lbl: "Expected Delivery", val: fmt(po.expectedDeliveryDate) }, right: { lbl: "Status", val: po.status } },
+        { left: { lbl: "Payment terms", val: po.paymentTerms } },
+        { left: { lbl: "Special instructions", val: po.specialInstructions } },
+        { left: { lbl: "Delivery address", val: po.deliveryAddress } },
     ];
 
     // Responsive Spacing calculations
@@ -558,7 +554,7 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
     y = label(doc, y, "Order items");
     y = tableHeader(doc, y);
 
-    grn.items.forEach((item, i) => {
+    po.items.forEach((item, i) => {
         const rh = rowHeight(doc, item, i);
         if (y + rh > PH - MB - FZONE) {
             drawFooter(doc, ctx);
@@ -571,23 +567,8 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
     });
 
     y = space(doc, y, 19, ctx);
-    y = tableTotals(doc, y, grn.items, grn.totalAmount);
+    y = tableTotals(doc, y, po.items, po.totalOrderValue);
     y += 14;
-
-    // Remarks
-    if (grn.remarks?.trim()) {
-        const rmkW = CW - 12;
-        const rmkH = textH(doc, grn.remarks, rmkW, F.regular, 8) + 12;
-
-        y = space(doc, y, rmkH + 20, ctx);
-        y = label(doc, y, "Remarks & Notes");
-
-        strokeRect(doc, MX, y, CW, rmkH, C.border, 0.3);
-        absText(doc, grn.remarks, MX + 6, y + 6, {
-            size: 8, color: C.black, width: rmkW,
-        });
-        y += rmkH + 12;
-    }
 
     // Signatures / Authorisation Box
     const SIG_H = 68;

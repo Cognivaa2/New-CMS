@@ -19,6 +19,7 @@ import { createExpenseEntry, reverseExpenseEntry, recalcProjectHealth } from "..
 import { pushDprEvent } from "../helpers/dprHelper.js";
 import { enrichUser } from "../helpers/mrHelper.js";
 import NotificationService from "../services/notification.service.js";
+import {generatePOPdf} from "../helpers/poPdfGenerator.js"
 
 
 // This function creates a new purchase order (PO). takes x-company-id in headers, projectId in params and createdBy, mrId, vendorId, items, expectedDeliveryDate, deliveryAddress, paymentTerms, specialInstructions in body. validates MR and vendor, processes items, calculates total value and creates PO in Draft state with auto MR conversion if applicable. -------------------------- Ayan
@@ -915,6 +916,98 @@ export const exportPOAsPdf = async (req, res) => {
         });
     }
 };
+
+// This function exports a PO as a PDF document. takes x-company-id in headers, projectId and poId in params. fetches PO, project, vendor and user details and generates a formatted PDF for download. -------------------------- Ayan
+export const exportPOAsPdf = async (req, res) => {
+    try {
+        const companyUUID = req.headers["x-company-id"];
+        if (!companyUUID?.trim()) {
+            return res.status(400).json(
+                new ApiErrors(400, "Missing Header", "x-company-id header is required")
+            );
+        }
+        const company = await resolveCompany(companyUUID);
+        if (!company) {
+            return res.status(404).json(
+                new ApiErrors(404, "Company Not Found", "No active company found")
+            );
+        }
+        const companyId = company._id;
+        const { projectId, poId } = req.params;
+        if (!projectId || !isValidObjectId(projectId)) {
+            return res.status(400).json(
+                new ApiErrors(400, "Invalid Project ID", "Valid projectId is required in params")
+            );
+        }
+        if (!poId || !isValidObjectId(poId)) {
+            return res.status(400).json(
+                new ApiErrors(400, "Invalid PO ID", "Valid poId is required in params")
+            );
+        }
+        const po = await PurchaseOrder.findOne({
+            _id: poId,
+            projectId,
+            companyId,
+            isDeleted: false,
+        })
+            .select("-__v -isDeleted -deletedAt")
+            .lean();
+        if (!po) {
+            return res.status(404).json(
+                new ApiErrors(404, "PO Not Found", "No PO found with the given ID")
+            );
+        }
+        const [project, vendor, enrichedPO] = await Promise.all([
+            Project.findOne({
+                _id: projectId,
+                companyId,
+                isDeleted: false,
+            })
+                .select("projectName projectCode location clientName status startDate endDate")
+                .lean(),
+
+            Vendor.findOne({
+                _id: po.vendorId,
+                companyId,
+                isDeleted: false,
+            })
+                .select("name vendorType contactPerson phone email address legalDetails")
+                .lean(),
+
+            enrichPOUsers(po),
+        ]);
+        if (!project) {
+            return res.status(404).json(
+                new ApiErrors(404, "Project Not Found", "Project linked to this PO no longer exists")
+            );
+        }
+        const createdByUser = enrichedPO.createdBy;
+        logger.info("PO PDF export initiated", {
+            poId,
+            poNumber: po.poNumber,
+            projectId,
+            companyId,
+        });
+        await generatePOPdf(res, {
+            po: enrichedPO,
+            company,
+            vendor,
+            project,
+            createdByUser,
+        });
+    } catch (error) {
+        if (!res.headersSent) {
+            logger.error("exportPOAsPdf failed", { message: error.message, stack: error.stack });
+            return res.status(500).json(
+                new ApiErrors(500, "Server Error", "Failed to generate PO PDF", [error.message])
+            );
+        }
+        logger.error("exportPOAsPdf stream error (headers already sent)", {
+            message: error.message,
+        });
+    }
+}
+
 
 // This function cancels a PO. takes x-company-id in headers, projectId and poId in params and actionBy with cancellationRemarks in body. allows cancellation only in Approved state and updates status to Cancelled. -------------------------- Ayan
 export const cancelPO = async (req, res) => {

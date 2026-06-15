@@ -440,3 +440,24 @@ export async function fetchVendorsLookup(search = "", signal = null) {
     return []
   }
 }
+
+export async function exportPOPdf(projectId, poId) {
+  if (!projectId || !poId) throw new Error("projectId and poId are required")
+
+  try {
+    const { data } = await axios.get(
+      `${API_BASE_URL}/po/${projectId}/export/${poId}`,
+      { headers: getPOHeaders(), responseType: "blob" }
+    )
+    const url = window.URL.createObjectURL(new Blob([data]))
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", `PO_${poId}.pdf`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (error) {
+    throw new Error(formatPOError(error))
+  }
+}
