@@ -153,7 +153,7 @@ function ResolveButton({ entry, inspectionId, onResolve }) {
                     e.stopPropagation()
                     setShowInput(true)
                 }}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-sfpro-medium border border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-sfpro-medium border cursor-pointer border-green-200 dark:border-green-500/30 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 transition-colors"
             >
                 <CheckCircle2 className="w-3 h-3" />
                 Resolve
@@ -373,7 +373,7 @@ function DetailContent({
 
                                     <div className="flex items-center gap-2 shrink-0">
                                         {entry.isResolved && (
-                                            <span className="flex items-center gap-1 px-2 py-0.5 cursor-pointer rounded-full text-[10px] font-sfpro-bold bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
+                                            <span className="flex items-center gap-1 px-2 py-0.5  rounded-full text-[10px] font-sfpro-bold bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
                                                 <CheckCircle2 className="w-3 h-3" />
                                                 Resolved
                                             </span>
