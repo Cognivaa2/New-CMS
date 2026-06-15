@@ -373,7 +373,7 @@ function DetailContent({
 
                                     <div className="flex items-center gap-2 shrink-0">
                                         {entry.isResolved && (
-                                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-sfpro-bold bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
+                                            <span className="flex items-center gap-1 px-2 py-0.5 cursor-pointer rounded-full text-[10px] font-sfpro-bold bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400">
                                                 <CheckCircle2 className="w-3 h-3" />
                                                 Resolved
                                             </span>
@@ -381,7 +381,7 @@ function DetailContent({
                                         {entry.attachment && (
                                             <button
                                                 onClick={() => onViewAttachment(entry.attachment)}
-                                                className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-sfpro-medium border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                                                className="flex items-center gap-1 px-2 py-0.5 cursor-pointer rounded-lg text-[10px] font-sfpro-medium border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
                                             >
                                                 <ImageIcon className="w-3 h-3" />
                                                 View
