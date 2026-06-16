@@ -54,10 +54,10 @@ export default function ExecutionTab({ data, isLoading = false }) {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {isLoading
                     ? Array.from({ length: 10 }).map((_, i) => (
-                        <div key={i} className="bg-white dark:bg-neutral-900 p-6 rounded-[1.8rem] border border-gray-100 dark:border-neutral-800 h-28 animate-pulse" />
+                        <div key={i} className="bg-white dark:bg-neutral-900 p-6 rounded-xl border border-gray-100 dark:border-neutral-800 h-28 animate-pulse" />
                     ))
                     : stats.map((card, i) => (
-                        <div key={i} className="bg-white dark:bg-neutral-900 p-6 rounded-[1.8rem] border border-gray-100 dark:border-neutral-800 shadow-sm transition-colors">
+                        <div key={i} className="bg-white dark:bg-neutral-900 p-6 rounded-xl border border-gray-100 dark:border-neutral-800 shadow-sm transition-colors">
                             <div className="text-3xl font-sfpro-bold mb-1 text-black dark:text-white">{card.v}</div>
                             <div className="text-sm font-sfpro-medium text-gray-800 dark:text-gray-300">{card.l}</div>
                             <div className="text-[11px] text-gray-400 font-sfpro">{card.s}</div>
