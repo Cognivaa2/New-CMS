@@ -22,7 +22,6 @@ function EmptyState() {
     </div>
   )
 }
-
 function DraggablePhaseCard({ phase, index, onEdit, onDelete, onViewDocuments }) {
   return (
     <Draggable draggableId={phase.id} index={index}>
@@ -99,7 +98,7 @@ export default function PhasesGrid({
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-y-16 transition-all duration-200 rounded-2xl ${
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 lg:gap-y-8 transition-all duration-200 rounded-2xl ${
                 snapshot.isDraggingOver
                   ? "bg-[#fafafa] dark:bg-[#0a0a0a] p-4 -m-4"
                   : ""

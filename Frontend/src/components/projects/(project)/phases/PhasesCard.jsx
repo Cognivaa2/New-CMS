@@ -62,12 +62,12 @@ export default function PhaseCard({
   return (
     <article
       onClick={handleCardClick}
-      className={`group/card flex flex-col transition-all duration-300 ${
+      className={`group/card flex flex-col h-full transition-all duration-300 ${
         isDragging ? "cursor-grabbing" : "cursor-pointer"
       }`}
     >
       <div
-        className={`relative rounded-2xl p-4 flex flex-col gap-2 bg-[#f4f4f5] dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] transition-all duration-300 ${
+        className={`relative rounded-2xl p-4 flex flex-col flex-1 gap-2 bg-[#f4f4f5] dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] transition-all duration-300 ${
           isDragging
             ? "bg-white dark:bg-[#1f1f1f] shadow-2xl shadow-black/10 dark:shadow-black/30 scale-[1.02]"
             : "hover:bg-[#e4e4e7] dark:hover:bg-[#222222]"
@@ -112,7 +112,7 @@ export default function PhaseCard({
           </div>
         </div>
 
-        <div className="flex items-end justify-between gap-3">
+        <div className="flex items-end justify-between gap-3 mt-auto">
           <p className="text-xs font-sfpro text-[#71717a] dark:text-[#a1a1aa] transition-colors duration-300 max-w-[65%] line-clamp-2">
             {phase.description || "No description"}
           </p>
