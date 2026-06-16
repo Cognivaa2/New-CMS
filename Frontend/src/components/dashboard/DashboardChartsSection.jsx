@@ -18,7 +18,7 @@ export default function DashboardChartsSection({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm transition-all hover:shadow-md">
           {projectChartLoading ? (
             <ChartSkeleton variant="bar" />
           ) : (
@@ -30,7 +30,7 @@ export default function DashboardChartsSection({
           )}
         </div>
 
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm transition-all hover:shadow-md">
           {inventoryChartLoading ? (
             <ChartSkeleton variant="donut" />
           ) : (
@@ -42,7 +42,7 @@ export default function DashboardChartsSection({
           )}
         </div>
 
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm transition-all hover:shadow-md">
           {expenseChartLoading ? (
             <ChartSkeleton variant="horizontal" />
           ) : (
@@ -56,7 +56,7 @@ export default function DashboardChartsSection({
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm transition-all hover:shadow-md">
           {tasksFlowLoading ? (
             <ChartSkeleton variant="bar" />
           ) : (
