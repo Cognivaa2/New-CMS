@@ -30,6 +30,12 @@ const HEADERS = [
     "Value", "Status", "Progress", "Delivery", "Requested By", "",
 ]
 
+const EMPTY = <span className="text-[13px] text-gray-400 dark:text-[#52525b] italic">Not provided</span>
+
+function isEmpty(val) {
+    return val === null || val === undefined || val === "" || val === 0 || val === "—"
+}
+
 function StatusPill({ status }) {
     const config = STATUS_CONFIG[status] || STATUS_CONFIG.Draft
     const Icon = config.icon
@@ -83,12 +89,14 @@ function UserAvatar({ user, size = 32 }) {
 }
 
 function UserCell({ user }) {
-    if (!user) return <span className="text-[13px] text-gray-400 dark:text-[#52525b]">—</span>
+    if (!user) return EMPTY
     return (
         <div className="flex items-center gap-2.5 min-w-0">
             <UserAvatar user={user} size={30} />
             <div className="flex flex-col min-w-0">
-                <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5] truncate">{user.name}</span>
+                <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5] truncate">
+                    {user.name || "Not provided"}
+                </span>
                 {user.role && (
                     <span className="text-[11px] text-gray-400 dark:text-[#52525b] truncate leading-tight">{user.role}</span>
                 )}
@@ -116,7 +124,7 @@ function DetailRow({ label, children }) {
         <div className="flex flex-col gap-0.5">
             <span className="text-[10px] text-[#a1a1aa] dark:text-[#71717a] uppercase font-sfpro-bold tracking-wide">{label}</span>
             <div className="text-[13px] text-[#3f3f46] dark:text-[#d4d4d8] font-sfpro-medium wrap-break-word">
-                {children || "—"}
+                {children ?? EMPTY}
             </div>
         </div>
     )
@@ -193,8 +201,12 @@ function WOCard({ row, menuItems }) {
         <div className="rounded-2xl border-2 border-[#EAEAEA] dark:border-[#252525] bg-transparent hover:bg-[#f9f9f9] dark:hover:bg-[#09090b] transition-all duration-300 p-4 flex flex-col gap-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <p className="text-sm font-sfpro-bold text-[#212121] dark:text-[#f4f4f5] truncate">{row.woId}</p>
-                    <p className="text-xs font-sfpro text-[#a1a1aa] dark:text-[#71717a] truncate">{row.title}</p>
+                    <p className="text-sm font-sfpro-bold text-[#212121] dark:text-[#f4f4f5] truncate">
+                        {row.woId || "Not provided"}
+                    </p>
+                    <p className="text-xs font-sfpro text-[#a1a1aa] dark:text-[#71717a] truncate">
+                        {row.title || "Not provided"}
+                    </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                     <StatusPill status={row.status} />
@@ -207,28 +219,46 @@ function WOCard({ row, menuItems }) {
                 </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-                <DetailRow label="Vendor"><span className="truncate font-sfpro">{row.vendorName || "—"}</span></DetailRow>
-                <DetailRow label="Total Value">
-                    <span className="font-sfpro-bold text-[#212121] dark:text-white">
-                        ₹{(row.totalContractValue || 0).toLocaleString("en-IN")}
+                <DetailRow label="Vendor">
+                    <span className="truncate font-sfpro">
+                        {isEmpty(row.vendorName) ? EMPTY : row.vendorName}
                     </span>
                 </DetailRow>
-                <DetailRow label="Work Items">
-                    <span className="line-clamp-2 leading-snug font-sfpro text-[12px]">{row.workSummary || "—"}</span>
+                <DetailRow label="Total Value">
+                    {isEmpty(row.totalContractValue)
+                        ? EMPTY
+                        : <span className="font-sfpro-bold text-[#212121] dark:text-white">
+                            ₹{(row.totalContractValue).toLocaleString("en-IN")}
+                        </span>
+                    }
                 </DetailRow>
-                <DetailRow label="Progress"><ProgressBar percent={row.completionPercent || 0} /></DetailRow>
+                <DetailRow label="Work Items">
+                    <span className="line-clamp-2 leading-snug font-sfpro text-[12px]">
+                        {isEmpty(row.workSummary) ? EMPTY : row.workSummary}
+                    </span>
+                </DetailRow>
+                <DetailRow label="Progress">
+                    <ProgressBar percent={row.completionPercent || 0} />
+                </DetailRow>
             </div>
             <div className="grid grid-cols-3 gap-x-4 gap-y-2.5 pt-3 border-t border-[#f0f0f0] dark:border-[#252525]">
-                <DetailRow label="Delivery">{row.expectedEndFormatted}</DetailRow>
-                <DetailRow label="Created At">{row.createdAt}</DetailRow>
+                <DetailRow label="Delivery">
+                    {isEmpty(row.expectedEndFormatted) ? EMPTY : row.expectedEndFormatted}
+                </DetailRow>
+                <DetailRow label="Created At">
+                    {isEmpty(row.createdAt) ? EMPTY : row.createdAt}
+                </DetailRow>
                 <div className="flex flex-col gap-0.5">
                     <span className="text-[10px] text-[#a1a1aa] dark:text-[#71717a] uppercase font-sfpro-bold tracking-wide">Created By</span>
-                    <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
-                        <UserAvatar user={row.createdBy} size={22} />
-                        <span className="text-[12px] font-sfpro-medium text-[#3f3f46] dark:text-[#d4d4d8] truncate">
-                            {row.createdBy?.name || "—"}
-                        </span>
-                    </div>
+                    {row.createdBy
+                        ? <div className="flex items-center gap-1.5 min-w-0 mt-0.5">
+                            <UserAvatar user={row.createdBy} size={22} />
+                            <span className="text-[12px] font-sfpro-medium text-[#3f3f46] dark:text-[#d4d4d8] truncate">
+                                {row.createdBy?.name || "Not provided"}
+                            </span>
+                        </div>
+                        : <div className="mt-0.5">{EMPTY}</div>
+                    }
                 </div>
             </div>
         </div>
@@ -240,28 +270,47 @@ function WORow({ row, menuItems, isLast }) {
     return (
         <tr className={`group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""}`}>
             <td className="px-5 py-4 whitespace-nowrap">
-                <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">{row.woId}</span>
-            </td>
-            <td className="px-5 py-4">
-                <p className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8] truncate max-w-45">{row.title}</p>
-            </td>
-            <td className="px-5 py-4 whitespace-nowrap">
-                <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.vendorName}</span>
-            </td>
-            <td className="px-5 py-4">
-                <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-40">{row.workSummary}</p>
-            </td>
-            <td className="px-5 py-4 whitespace-nowrap">
-                <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
-                    ₹{(row.totalContractValue || 0).toLocaleString("en-IN")}
+                <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">
+                    {isEmpty(row.woId) ? EMPTY : row.woId}
                 </span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap"><StatusPill status={row.status} /></td>
-            <td className="px-5 py-4"><ProgressBar percent={row.completionPercent || 0} /></td>
-            <td className="px-5 py-4 whitespace-nowrap">
-                <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.expectedEndFormatted}</span>
+            <td className="px-5 py-4">
+                <p className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8] truncate max-w-45">
+                    {isEmpty(row.title) ? EMPTY : row.title}
+                </p>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap"><UserCell user={row.createdBy} /></td>
+            <td className="px-5 py-4 whitespace-nowrap">
+                <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
+                    {isEmpty(row.vendorName) ? EMPTY : row.vendorName}
+                </span>
+            </td>
+            <td className="px-5 py-4">
+                <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-40">
+                    {isEmpty(row.workSummary) ? EMPTY : row.workSummary}
+                </p>
+            </td>
+            <td className="px-5 py-4 whitespace-nowrap">
+                {isEmpty(row.totalContractValue)
+                    ? EMPTY
+                    : <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
+                        ₹{(row.totalContractValue).toLocaleString("en-IN")}
+                    </span>
+                }
+            </td>
+            <td className="px-5 py-4 whitespace-nowrap">
+                <StatusPill status={row.status} />
+            </td>
+            <td className="px-5 py-4">
+                <ProgressBar percent={row.completionPercent || 0} />
+            </td>
+            <td className="px-5 py-4 whitespace-nowrap">
+                <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
+                    {isEmpty(row.expectedEndFormatted) ? EMPTY : row.expectedEndFormatted}
+                </span>
+            </td>
+            <td className="px-5 py-4 whitespace-nowrap">
+                <UserCell user={row.createdBy} />
+            </td>
             <td className="px-4 py-4 whitespace-nowrap">
                 <div onClick={e => e.stopPropagation()} className="flex justify-center">
                     <ThreeDotMenu
