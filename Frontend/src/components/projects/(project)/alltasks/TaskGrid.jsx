@@ -1,4 +1,4 @@
-import TaskCard from "./TaskCard"
+import TaskCard from "../tasks/TaskCard"
 import { ClipboardList } from "lucide-react"
 
 function EmptyState() {
@@ -30,7 +30,7 @@ export default function TaskGrid({
   onMembersChanged,
 }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2">
       {tasks.length === 0 ? (
         <EmptyState />
       ) : (
