@@ -178,22 +178,9 @@ export default function TaskCard({
 
     return (
         <>
-            <div
-                onClick={handleCardClick}
-                className="
-                    group relative cursor-pointer h-full
-                    p-4 flex flex-col justify-between gap-4 xl:gap-5
-                    bg-white dark:bg-[#18181b]
-                    border border-gray-200/80 dark:border-black/60
-                    rounded-2xl
-                    shadow-[0px_4px_12px_rgba(0,0,0,0.06)]
-                    dark:shadow-[0px_4px_16px_rgba(0,0,0,0.35)]
-                    transition-all duration-300
-                    hover:-translate-y-1
-                "
-            >
+            <div onClick={handleCardClick} className="group relative cursor-pointer h-full p-4 flex flex-col justify-between gap-4 bg-white dark:bg-[#18181b] border border-[#e9e9e9] dark:border-black/60 rounded-2xl transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-start justify-between text-xs text-[#71717a] dark:text-[#a1a1aa]">
-                    <div className="flex items-center flex-wrap gap-3 mt-1">
+                    <div className="flex flex-col items-start flex-wrap gap-1 mt-1">
                         <span className="flex items-center gap-1 font-sfpro-medium">
                             <SquareSlash size={16} /> {phaseName}
                         </span>
@@ -208,10 +195,7 @@ export default function TaskCard({
                             </span>
                         )}
                     </div>
-                    <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="shrink-0 relative z-10 -mt-1 -mr-1"
-                    >
+                    <div onClick={(e) => e.stopPropagation()} className="shrink-0 relative z-10 -mt-1 -mr-1">
                         <ThreeDotMenu
                             items={menuItems}
                             size="sm"
@@ -229,7 +213,7 @@ export default function TaskCard({
                     </div>
                 </div>
 
-                <p className="text-[15px] font-sfpro font-bold text-[#18181b] dark:text-[#f4f4f5] line-clamp-3 leading-snug">
+                <p className="text-sm font-sfpro-medium text-[#121212] dark:text-[#f4f4f5] line-clamp-3 leading-snug">
                     {task.taskName}
                 </p>
 
