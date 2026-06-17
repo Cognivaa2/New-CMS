@@ -239,7 +239,7 @@ export default function RolesPermissionsPage() {
   if (isInitialLoad) return <RolesLoading />
 
   return (
-    <div className="w-full mx-auto p-4 md:p-8 min-h-screen transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
       <PageHeader
         title="Roles & Permissions"
         description="Configure access levels and module permissions for your organization roles."
@@ -275,7 +275,7 @@ export default function RolesPermissionsPage() {
 
       {roles.length > 0 && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {roles.map((role) => (
               <RoleCard
                 key={role.id}

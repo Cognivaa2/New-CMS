@@ -196,7 +196,7 @@ export default function UserPage() {
   }
 
   return (
-    <div className="w-full rounded-md mx-auto py-8 px-4 flex flex-col gap-6 bg-white dark:bg-[#121212] min-h-screen transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
 
       {/* <div className="flex flex-wrap gap-6 mb-16">
         {categories.map((cat) => (

@@ -27,7 +27,7 @@ export default function RoleCard({ role, isActive, onClick, onToggleStatus, onEd
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col text-left border rounded-[20px] p-6 w-full transition-all duration-300 font-sfpro group
+            className={`flex flex-col text-left border rounded-2xl p-4 w-full transition-all duration-300 font-sfpro group
         ${
             isActive
                 ? "border-gray-400 dark:border-[#52525b] bg-gray-50 dark:bg-[#27272a] shadow-sm"
