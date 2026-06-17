@@ -52,7 +52,7 @@ function PayableCard({ item }) {
 
 function SkeletonCard() {
   return (
-    <div className="h-32 sm:h-36 lg:h-40 rounded-3xl sm:rounded-4xl bg-gray-100 dark:bg-[#1e1e1e] animate-pulse" />
+    <div className="h-30 sm:h-34 lg:h-36 rounded-3xl sm:rounded-4xl bg-gray-100 dark:bg-[#1e1e1e] animate-pulse" />
   );
 }
 
@@ -68,7 +68,7 @@ export default function SummaryCards({ cards = [], isLoading = false }) {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
       {cards.map((card) => (
         <PayableCard key={card.id} item={card} />
       ))}
