@@ -17,7 +17,7 @@ function LayoutInner({ children }) {
       <div className="flex-1 flex h-full min-w-0">
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-white dark:bg-[#09090b] transition-colors duration-300">
           <Navbar />
-          <main className="p-2 lg:p-4 flex-1">{children}</main>
+          <main className="p-1 lg:p-2 flex-1">{children}</main>
         </div>
         <NotificationsPanel />
       </div>
