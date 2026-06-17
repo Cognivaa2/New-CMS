@@ -26,7 +26,6 @@ export default function OrganizationPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  /* ---------------- All hooks at the top ---------------- */
   const editFormData = useMemo(
     () => (company ? toEditFormState(company) : null),
     [company]
@@ -92,8 +91,6 @@ export default function OrganizationPage() {
       setSaving(false);
     }
   };
-
-  /* ---------------- Early returns AFTER hooks ---------------- */
   if (loading) {
     return <OrganizationLoading />;
   }
@@ -113,16 +110,14 @@ export default function OrganizationPage() {
       </div>
     );
   }
-
-  /* ---------------- Derived data (plain — not hooks) ---------------- */
   const profileData = toProfileData(company);
   const infoData = toInfoData(company);
   const { stats, legal } = toStatsAndLegalData(company);
 
   return (
-    <div className="w-full rounded-md mx-auto py-8 px-4 flex flex-col gap-6 bg-white dark:bg-[#121212] min-h-screen transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4">
       <div className="flex justify-between items-center w-full mb-4">
-        <h1 className="text-[24px] font-sfpro-medium text-gray-900 dark:text-[#f4f4f5] transition-colors">
+        <h1 className="text-[40px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none font-sfpro">
           Organization
         </h1>
         <Tooltip content="Edit Your Company Profile" side="left">
@@ -138,7 +133,7 @@ export default function OrganizationPage() {
 
       <ProfileHeader data={profileData} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 mt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-12 ">
         <InformationCard data={infoData} />
         <StatsAndLegal stats={stats} legal={legal} />
       </div>
