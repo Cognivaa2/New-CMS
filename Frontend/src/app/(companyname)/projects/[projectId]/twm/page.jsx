@@ -128,7 +128,7 @@ export default function ThreeWayMatchPage() {
     if (isInitialLoad) return <Loading />
 
     return (
-        <div className="w-full mx-auto py-8 px-4 sm:px-8 flex flex-col gap-6 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen font-sfpro">
+        <div className="w-full mx-auto p-4  flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen font-sfpro">
             <TWMHeader
                 title="Three Way Match"
                 description={
@@ -162,7 +162,7 @@ export default function ThreeWayMatchPage() {
                 <TWMTable
                     data={records}
                     isLoading={isRefreshing}
-                    projectId={projectId}   // ← passed down so TWMTable can call fetchTWMDetail
+                    projectId={projectId}   
                 />
             )}
         </div>
