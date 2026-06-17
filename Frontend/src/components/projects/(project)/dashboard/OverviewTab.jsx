@@ -8,7 +8,7 @@ import EditProjectDrawer from "./EditProjectDrawer"
 
 function SummaryCard({ item }) {
     return (
-        <div className={`p-6 rounded-[2.5rem] transition-all duration-300 font-sfpro flex flex-col justify-center min-h-40 border border-transparent dark:border-white/5 shadow-sm ${item.colorClass}`}>
+        <div className={`p-6 rounded-2xl transition-all duration-300 font-sfpro flex flex-col justify-center min-h-40 border border-transparent dark:border-white/5 shadow-sm ${item.colorClass}`}>
             <h2 className="text-[34px] font-sfpro-bold leading-none mb-2 text-gray-800 dark:text-gray-100">
                 {item.value}
             </h2>
@@ -88,7 +88,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                     </div>
                 </div>
 
-                <div className="lg:col-span-5 bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50 relative">
+                <div className="lg:col-span-5 bg-white dark:bg-[#0d0d0d] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50 relative">
                     <div className="flex justify-between items-start mb-6">
                         <h3 className="text-xl font-sfpro-bold text-[#1e1e1e] dark:text-white">Project Details</h3>
                         <Edit
@@ -141,7 +141,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                     </div>
                 </div>
 
-                <div className="lg:col-span-4 bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
+                <div className="lg:col-span-4 bg-white dark:bg-[#0d0d0d] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
                     <div className="flex justify-between items-start mb-6">
                         <h3 className="text-xl font-sfpro-bold text-[#1e1e1e] dark:text-white">Assigned Members</h3>
                         <Edit
@@ -201,7 +201,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
             )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
-                <div className="lg:col-span-2 bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
+                <div className="lg:col-span-2 bg-white dark:bg-[#0d0d0d] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
                     {phasesLoading ? (
                         <div className="h-72 bg-gray-100 dark:bg-[#1a1a1a] rounded-2xl animate-pulse" />
                     ) : (
@@ -214,7 +214,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                     )}
                 </div>
 
-                <div className="bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
+                <div className="bg-white dark:bg-[#0d0d0d] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
                     <h3 className="text-xl font-sfpro-bold text-[#1e1e1e] dark:text-white">Alerts</h3>
                     <p className="text-xs text-gray-400 mt-1 mb-6">
                         {data.alertSummary?.total > 0

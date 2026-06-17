@@ -242,7 +242,7 @@ export default function ManageMembersModal({ isOpen, onClose, project, onMembers
 
                     <div className="px-6 pb-5 mt-2">
                         <h2 className="text-[18px] font-sfpro-bold text-gray-900 dark:text-white tracking-tight">Manage Members</h2>
-                        <p className="text-sm text-gray-500 dark:text-[#888] mt-1 font-sfpro">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim</p>
+                        <p className="text-sm text-gray-500 dark:text-[#888] mt-1 font-sfpro">Manage who has access to this project. Assign new members or unassign existing ones anytime.</p>
                     </div>
 
                     <div className="h-0.5 bg-gray-100 dark:bg-[#272727] w-full" />

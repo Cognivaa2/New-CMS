@@ -8,7 +8,6 @@ import ThreeDotMenu from "@/components/ui/ThreeDotMenu"
 import TaskManageMembersModal from "./TaskManageMembersModal"
 import TaskDocumentsModal from "@/components/projects/(project)/tasks/TaskDocumentsModal"
 import LinkTaskToWOModal from "@/components/projects/(project)/tasks/LinkTaskToWOModal"
-import { SmoothCorners } from "react-smooth-corners"
 import { toast } from "sonner"
 import { unlinkTaskFromWO } from "@/app/(companyname)/projects/[projectId]/phases/[phaseId]/api"
 
@@ -25,13 +24,15 @@ function formatDate(dateStr) {
 
 function getInitials(name) {
   if (!name || typeof name !== "string") return "?"
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "?"
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "?"
+  )
 }
 
 function UserAvatar({ user, size = 28 }) {
@@ -144,7 +145,10 @@ export default function TaskCard({
     {
       label: "View details",
       icon: <Eye className="w-4 h-4" />,
-      onClick: () => router.push(`/projects/${params?.projectId}/phases/${phaseId}/${task.id}`),
+      onClick: () =>
+        router.push(
+          `/projects/${params?.projectId}/phases/${phaseId}/${task.id}`
+        ),
     },
     {
       label: "Edit task",
@@ -163,21 +167,21 @@ export default function TaskCard({
     },
     ...(task.workOrderId
       ? [
-          {
-            label: isUnlinking ? "Unlinking…" : "Unlink Work Order",
-            icon: <Unlink className="w-4 h-4" />,
-            onClick: handleUnlink,
-            disabled: isUnlinking,
-            variant: "danger",
-          },
-        ]
+        {
+          label: isUnlinking ? "Unlinking…" : "Unlink Work Order",
+          icon: <Unlink className="w-4 h-4" />,
+          onClick: handleUnlink,
+          disabled: isUnlinking,
+          variant: "danger",
+        },
+      ]
       : [
-          {
-            label: "Link to Work Order",
-            icon: <Link2 className="w-4 h-4" />,
-            onClick: () => setLinkWOOpen(true),
-          },
-        ]),
+        {
+          label: "Link to Work Order",
+          icon: <Link2 className="w-4 h-4" />,
+          onClick: () => setLinkWOOpen(true),
+        },
+      ]),
     "divider",
     {
       label: "Delete task",
@@ -188,7 +192,9 @@ export default function TaskCard({
   ]
 
   const handleCardClick = () => {
-    router.push(`/projects/${params?.projectId}/phases/${phaseId}/${task.id}`)
+    router.push(
+      `/projects/${params?.projectId}/phases/${phaseId}/${task.id}`
+    )
   }
 
   const handleAssign = async (user) => {
@@ -203,95 +209,102 @@ export default function TaskCard({
     <>
       <div
         onClick={handleCardClick}
-        className="group relative cursor-pointer h-full transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01]"
+        className="
+          group relative cursor-pointer h-full
+          p-4 flex flex-col justify-between gap-4 xl:gap-5
+          bg-[#fcfcfd] dark:bg-[#18181b]
+          border border-[#d4d4d8] dark:border-black/60
+          rounded-2xl
+          shadow-[0_6px_18px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.04)]
+          hover:shadow-[0_12px_28px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.05)]
+          transition-all duration-300
+          hover:-translate-y-1 hover:scale-[1.01]
+        "
       >
-        <SmoothCorners
-          corners="8"
-          borderRadius="42"
-          className="
-            h-full p-4 flex flex-col justify-between gap-4 xl:gap-5
-            bg-[#fcfcfd] dark:bg-[#18181b]
-            border border-[#d4d4d8] dark:border-black/60
-            shadow-[0_6px_18px_rgba(0,0,0,0.06),0_2px_6px_rgba(0,0,0,0.04)]
-            group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.10),0_4px_10px_rgba(0,0,0,0.05)]
-            transition-all duration-300
-          "
-        >
-          <div className="flex items-start justify-between text-xs text-[#71717a] dark:text-[#a1a1aa]">
-            <div className="flex items-center flex-wrap gap-3 mt-1">
-              <span className="flex items-center gap-1 font-sfpro-medium">
-                <SquareSlash size={16} /> {displayPhaseName}
+        <div className="flex items-start justify-between text-xs text-[#71717a] dark:text-[#a1a1aa]">
+          <div className="flex items-center flex-wrap gap-3 mt-1">
+            <span className="flex items-center gap-1 font-sfpro-medium">
+              <SquareSlash size={16} /> {displayPhaseName}
+            </span>
+            <span className="flex items-center gap-1 font-sfpro-medium">
+              <Calendar size={16} />
+              {formatDate(task.endDate || task.date)}
+            </span>
+            {task.workOrderId && (
+              <span className="flex items-center gap-1 font-sfpro-medium text-violet-500 dark:text-violet-400">
+                <Link2 size={13} />
+                WO Linked
               </span>
-              <span className="flex items-center gap-1 font-sfpro-medium">
-                <Calendar size={16} />
-                {formatDate(task.endDate || task.date)}
-              </span>
-              {task.workOrderId && (
-                <span className="flex items-center gap-1 font-sfpro-medium text-violet-500 dark:text-violet-400">
-                  <Link2 size={13} />
-                  WO Linked
-                </span>
-              )}
-            </div>
-
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="shrink-0 relative z-10 -mt-1 -mr-1"
-            >
-              <ThreeDotMenu
-                items={menuItems}
-                size="sm"
-                header={{
-                  title: taskTitle,
-                  subtitle: `Phase: ${displayPhaseName}`,
-                  statusColor:
-                    progress === 100 ? "#22c55e" : progress > 0 ? "#f59e0b" : "#a1a1aa",
-                }}
-              />
-            </div>
+            )}
           </div>
 
-          <p className="text-sm font-sfpro font-bold text-[#18181b] dark:text-[#f4f4f5] line-clamp-3">
-            {taskTitle}
-          </p>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="shrink-0 relative z-10 -mt-1 -mr-1"
+          >
+            <ThreeDotMenu
+              items={menuItems}
+              size="sm"
+              header={{
+                title: taskTitle,
+                subtitle: `Phase: ${displayPhaseName}`,
+                statusColor:
+                  progress === 100
+                    ? "#22c55e"
+                    : progress > 0
+                      ? "#f59e0b"
+                      : "#a1a1aa",
+              }}
+            />
+          </div>
+        </div>
 
-          <div className="flex items-end flex-wrap justify-between">
-            <div className={`text-2xl lg:text-3xl font-sfpro-bold tracking-tighter ${progressColor}`}>
-              {progress}%
-            </div>
+        <p className="text-sm font-sfpro font-bold text-[#18181b] dark:text-[#f4f4f5] line-clamp-3">
+          {taskTitle}
+        </p>
 
-            <div className="flex -space-x-2">
-              {userList.length > 0 ? (
-                <>
-                  {userList.slice(0, 4).map((user, i) => {
-                    const key = user?.id || user?.keycloakId || user?._id || `user-${i}`
-                    const userName = user?.name || user?.email || "Unknown"
+        <div className="flex items-end flex-wrap justify-between">
+          <div
+            className={`text-2xl lg:text-3xl font-sfpro-bold tracking-tighter ${progressColor}`}
+          >
+            {progress}%
+          </div>
 
-                    return (
-                      <Tooltip content={userName} side="bottom" key={key}>
-                        <div>
-                          <UserAvatar user={user} size={28} />
-                        </div>
-                      </Tooltip>
-                    )
-                  })}
+          <div className="flex -space-x-2">
+            {userList.length > 0 ? (
+              <>
+                {userList.slice(0, 4).map((user, i) => {
+                  const key =
+                    user?.id || user?.keycloakId || user?._id || `user-${i}`
+                  const userName = user?.name || user?.email || "Unknown"
 
-                  {userList.length > 4 && (
-                    <Tooltip content={`+${userList.length - 4} more`} side="bottom">
-                      <div className="w-7 h-7 rounded-full border-2 border-[#f4f4f5] dark:border-[#18181b] bg-[#e4e4e7] dark:bg-[#3f3f46] flex items-center justify-center text-xs font-sfpro-medium text-[#71717a]">
-                        +{userList.length - 4}
+                  return (
+                    <Tooltip content={userName} side="bottom" key={key}>
+                      <div>
+                        <UserAvatar user={user} size={28} />
                       </div>
                     </Tooltip>
-                  )}
-                </>
-              ) : (
-                <div className="text-xs text-gray-400 dark:text-[#52525b] font-sfpro">
-                  No assignees
-                </div>
-              )}
-            </div>
+                  )
+                })}
+
+                {userList.length > 4 && (
+                  <Tooltip
+                    content={`+${userList.length - 4} more`}
+                    side="bottom"
+                  >
+                    <div className="w-7 h-7 rounded-full border-2 border-[#f4f4f5] dark:border-[#18181b] bg-[#e4e4e7] dark:bg-[#3f3f46] flex items-center justify-center text-xs font-sfpro-medium text-[#71717a]">
+                      +{userList.length - 4}
+                    </div>
+                  </Tooltip>
+                )}
+              </>
+            ) : (
+              <div className="text-xs text-gray-400 dark:text-[#52525b] font-sfpro">
+                No assignees
+              </div>
+            )}
           </div>
-        </SmoothCorners>
+        </div>
       </div>
 
       <TaskManageMembersModal
