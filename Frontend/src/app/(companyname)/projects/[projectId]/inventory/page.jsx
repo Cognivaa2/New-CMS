@@ -453,7 +453,7 @@ export default function InventoryPage() {
   if (isInitialLoad) return <InventoryLoading />
 
   return (
-    <div className="w-full  mx-auto py-8 px-4 flex flex-col gap-6 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
+    <div className="w-full  mx-auto p-4 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
       <InventoryPageHeader
         total={pagination.total}
         count={allItems.length}
@@ -484,12 +484,12 @@ export default function InventoryPage() {
 
       {activeTab === "Inventory" && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 ">
             {summaryCards.map((card) => (
               <SummaryCard key={card.id} item={card} />
             ))}
           </div>
-          <div className="space-y-3">
+          <div className="space-y-1">
             {allItems.length === 0 && !isRefreshing ? (
               <div className="py-20 text-center">
                 <p className="text-[15px] text-gray-400 dark:text-[#71717a] font-sfpro">
