@@ -16,8 +16,8 @@ export default function DashboardChartsSection({
   onTasksDaysChange,
 }) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         <div className="bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm transition-all hover:shadow-md">
           {projectChartLoading ? (
             <ChartSkeleton variant="bar" />
