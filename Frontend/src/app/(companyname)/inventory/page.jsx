@@ -250,7 +250,7 @@ export default function InventoryPage() {
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
-      <div className="max-w-400 mx-auto space-y-2">
+      <div className="max-w-screen mx-auto space-y-2">
 
         <PageHeader
           title={PAGE_META.title}
