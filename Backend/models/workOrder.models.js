@@ -134,6 +134,33 @@ const workOrderSchema = new Schema(
             default: 0,
             min: 0,
         },
+        gst: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 100,
+        },
+        discount: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 100,
+        },
+        gstAmount: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        discountAmount: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        finalAmount: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
         hasMilestones: {
             type: Boolean,
             default: false,

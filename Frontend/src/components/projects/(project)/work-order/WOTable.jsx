@@ -27,7 +27,7 @@ const PDF_EXPORT_STATUSES = ["Approved", "InProgress", "Completed"]
 
 const HEADERS = [
     "WO ID", "Title", "Vendor", "Work Items",
-    "Value", "Status", "Progress", "Delivery", "Requested By", "",
+    "Final Value", "Status", "Progress", "Delivery", "Requested By", "",
 ]
 
 const EMPTY = <span className="text-[13px] text-gray-400 dark:text-[#52525b] italic">Not provided</span>
@@ -224,12 +224,21 @@ function WOCard({ row, menuItems }) {
                         {isEmpty(row.vendorName) ? EMPTY : row.vendorName}
                     </span>
                 </DetailRow>
-                <DetailRow label="Total Value">
-                    {isEmpty(row.totalContractValue)
+                <DetailRow label="Final Value">
+                    {isEmpty(row.finalAmount ?? row.totalContractValue)
                         ? EMPTY
-                        : <span className="font-sfpro-bold text-[#212121] dark:text-white">
-                            ₹{(row.totalContractValue).toLocaleString("en-IN")}
-                        </span>
+                        : <div className="flex flex-col">
+                            <span className="font-sfpro-bold text-[#212121] dark:text-white">
+                                ₹{(row.finalAmount || row.totalContractValue).toLocaleString("en-IN")}
+                            </span>
+                            {(row.gst > 0 || row.discount > 0) && (
+                                <span className="text-[10px] text-gray-400 dark:text-[#52525b]">
+                                    {row.discount > 0 ? `-${row.discount}%` : ""}
+                                    {row.discount > 0 && row.gst > 0 ? " · " : ""}
+                                    {row.gst > 0 ? `+${row.gst}% GST` : ""}
+                                </span>
+                            )}
+                        </div>
                     }
                 </DetailRow>
                 <DetailRow label="Work Items">
@@ -290,11 +299,20 @@ function WORow({ row, menuItems, isLast }) {
                 </p>
             </td>
             <td className="px-5 py-4 whitespace-nowrap">
-                {isEmpty(row.totalContractValue)
+                {isEmpty(row.finalAmount ?? row.totalContractValue)
                     ? EMPTY
-                    : <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
-                        ₹{(row.totalContractValue).toLocaleString("en-IN")}
-                    </span>
+                    : <div className="flex flex-col">
+                        <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
+                            ₹{(row.finalAmount || row.totalContractValue).toLocaleString("en-IN")}
+                        </span>
+                        {row.gst > 0 || row.discount > 0 ? (
+                            <span className="text-[10px] text-gray-400 dark:text-[#52525b]">
+                                {row.discount > 0 ? `-${row.discount}% disc` : ""}
+                                {row.discount > 0 && row.gst > 0 ? " · " : ""}
+                                {row.gst > 0 ? `+${row.gst}% GST` : ""}
+                            </span>
+                        ) : null}
+                    </div>
                 }
             </td>
             <td className="px-5 py-4 whitespace-nowrap">
