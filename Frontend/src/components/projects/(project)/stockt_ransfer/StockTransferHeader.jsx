@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Search, ArrowLeftRight, Loader2, X } from "lucide-react"
 import FilterOptions from "@/components/ui/FilterOptions"
+import Tooltip from "@/components/ui/Tooltip"
 
 const STOCK_TRANSFER_FILTERS = [
   {
@@ -142,6 +143,7 @@ export default function StockTransferHeader({
           </div>
 
           <div className="flex-1 sm:flex-initial">
+          <Tooltip content="Create Stock Transfer" side="left">
             <button
               onClick={onAction}
               className="cursor-pointer w-full flex items-center justify-center gap-2 bg-[#222222] dark:bg-white hover:bg-black dark:hover:bg-gray-200 text-white dark:text-black px-4 py-2.5 rounded-xl text-sm font-sfpro-bold transition-colors duration-300"
@@ -149,6 +151,7 @@ export default function StockTransferHeader({
               <ArrowLeftRight className="w-4 h-4" strokeWidth={2.5} />
               <span className="truncate">New Transfer</span>
             </button>
+            </Tooltip>
           </div>
         </div>
       </div>
