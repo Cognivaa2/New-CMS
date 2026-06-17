@@ -117,7 +117,7 @@ export default function OrganizationPage() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4">
       <div className="flex justify-between items-center w-full mb-4">
-        <h1 className="text-[40px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none font-sfpro">
+        <h1 className="text-[30px] sm:text-[36px] lg:text-[42px] font-sfpro-bold text-[#a3a3a3] dark:text-[#a1a1aa] leading-none tracking-tight transition-colors wrap-break-word">
           Organization
         </h1>
         <Tooltip content="Edit Your Company Profile" side="left">
