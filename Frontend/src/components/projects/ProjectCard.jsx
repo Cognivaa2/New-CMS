@@ -26,7 +26,7 @@ function AvatarStack({ users = [] }) {
     const visible = safeUsers.slice(0, 3)
     const extra = safeUsers.length - 3
     return (
-        <div className="flex items-center">
+        <div className="flex items-center -space-x-1">
             {visible.map((u, i) => (
                 <Tooltip content={u.name || u.email || "User"} side="bottom" key={i}>
                     <div
@@ -111,12 +111,12 @@ export default function ProjectCard({ project, index = 0, onClick, onEdit, onDel
                     </div>
                 </div>
 
-                <div className="p-3 sm:p-4 flex flex-col flex-1 gap-2">
+                <div className="p-1 sm:p-3 flex flex-col flex-1">
                     <div>
                         <h3 className="text-[15px] sm:text-base lg:text-lg font-sfpro-medium text-gray-900 dark:text-[#f4f4f5] truncate mb-0.5 transition-colors duration-300">
                             {project.projectName}
                         </h3>
-                        <p className="text-xs sm:text-[13px] font-sfpro text-gray-500 dark:text-[#71717a] leading-[1.45] line-clamp-2 transition-colors duration-300">
+                        <p className="text-xs sm:text-[13px] font-sfpro text-gray-500 dark:text-[#71717a] line-clamp-2 transition-colors duration-300">
                             {project.description}
                         </p>
                         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 mt-1.5">
@@ -134,8 +134,8 @@ export default function ProjectCard({ project, index = 0, onClick, onEdit, onDel
                         </div>
                     </div>
 
-                    <div className="mt-auto pt-3">
-                        <div className="flex items-center gap-2 mb-3">
+                    <div className="mt-auto">
+                        <div className="flex items-center gap-2 mb-2">
                             <div className="flex-1 h-1 bg-gray-100 dark:bg-[#27272a] rounded-full overflow-hidden">
                                 <div className="h-full rounded-full transition-all duration-500 bg-[#212121] dark:bg-white" style={{ width: `${pct}%` }} />
                             </div>
@@ -147,7 +147,7 @@ export default function ProjectCard({ project, index = 0, onClick, onEdit, onDel
                             <div className="shrink-0">
                                 <AvatarStack users={project.assignedUsers ?? []} />
                             </div>
-                            <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+                            <div className="flex flex-wrap items-center justify-end gap-0.5">
                                 <span className="text-[10px] sm:text-[11px] lg:text-xs font-sfpro-medium px-2.5 py-1 rounded-full shrink-0 transition-colors duration-300 text-white bg-black dark:bg-white dark:text-[#212121]">
                                     {status.label}
                                 </span>
