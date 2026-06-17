@@ -129,7 +129,7 @@ export default function PageHeader({
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
         {/* Search */}
         <div className="relative flex items-center w-full sm:w-[320px] lg:w-65 shrink-0">
           <Search
