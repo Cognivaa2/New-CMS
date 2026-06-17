@@ -65,8 +65,8 @@ export default function EditWOModal({
             milestones: (wo.milestones || []).map((ms) => ({
                 title: ms.title || "",
                 description: ms.description || "",
-                triggerPercent: ms.triggerPercent ?? 0,  
-                paymentPercent: ms.paymentPercent ?? 0,  
+                triggerPercent: ms.triggerPercent ?? 0,
+                paymentPercent: ms.paymentPercent ?? 0,
                 dueDate: ms.dueDate || null,
             })),
             startDate: wo.startDate ? new Date(wo.startDate) : null,
@@ -76,6 +76,8 @@ export default function EditWOModal({
             specialInstructions: wo.specialInstructions || "",
             phaseId: wo.phaseId || null,
             status: wo.status || "Draft",
+            gst: wo.gst ?? 0,
+            discount: wo.discount ?? 0,
         })
     }, [wo])
 

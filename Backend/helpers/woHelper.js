@@ -284,8 +284,8 @@ const C = {
     mid: "#000000",
     muted: "#444444",
     light: "#000000",
-    border: "#efefef",
-    borderFaint: "#efefef",
+    border: "#000000",
+    borderFaint: "#000000",
     rowAlt: "#FFFFFF",
     headerBg: "#FFFFFF",
     accent: "#000000",
@@ -404,8 +404,8 @@ function space(doc, y, needed, ctx) {
 function drawFooter(doc, ctx) {
     const fy = PH - MB + 4;
     hLine(doc, MX, MX + CW, fy - 2, C.border, 0.3);
-    absText(doc, `${ctx.companyName}  ·  ${ctx.docLabel}`, MX, fy + 4, { size: 7, color: C.muted, width: CW * 0.55 });
-    absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.55, fy + 4, { size: 7, color: C.muted, width: CW * 0.27, align: "center" });
+    absText(doc, `${ctx.companyName}  ·  ${ctx.docLabel}  ·  Subject to Kolkata jurisdiction`, MX, fy + 4, { size: 7, color: C.muted, width: CW * 0.65 });
+    absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.65, fy + 4, { size: 7, color: C.muted, width: CW * 0.17, align: "center" });
     absText(doc, `Page ${ctx.page}`, MX + CW * 0.82, fy + 4, { size: 7, color: C.muted, width: CW * 0.18, align: "right" });
 }
 
@@ -642,6 +642,90 @@ function wiTableTotals(doc, y, items, totalContractValue) {
     return y + RH;
 }
 
+function wiTableAmountBreakdown(doc, y, {
+    totalContractValue,
+    gst,
+    discount,
+    gstAmount,
+    discountAmount,
+    finalAmount,
+}) {
+    const RH = 22;
+    const summaryWidth = 260;
+    const summaryX = MX + CW - summaryWidth;
+    const labelWidth = 160;
+    const valueWidth = 90;
+    const rows = [
+        {
+            label: "Sub Total (Contract Value)",
+            value: fmtCurrency(totalContractValue),
+            bold: false,
+        },
+        discount > 0
+            ? {
+                label: `Discount (${discount}%)`,
+                value: `- ${fmtCurrency(discountAmount)}`,
+                bold: false,
+            }
+            : null,
+        gst > 0
+            ? {
+                label: `GST (${gst}%)`,
+                value: `+ ${fmtCurrency(gstAmount)}`,
+                bold: false,
+            }
+            : null,
+        {
+            label: "Final Payable Amount",
+            value: fmtCurrency(finalAmount),
+            bold: true,
+        },
+    ].filter(Boolean);
+    rows.forEach((row, i) => {
+        const isLast = i === rows.length - 1;
+        if (isLast) {
+            fillRect(doc, summaryX, y, summaryWidth, RH, "#f9f9f9");
+        }
+        strokeRect(
+            doc,
+            summaryX,
+            y,
+            summaryWidth,
+            RH,
+            C.border,
+            isLast ? 0.6 : 0.3
+        );
+        absText(
+            doc,
+            row.label,
+            summaryX + 8,
+            y + 6,
+            {
+                font: row.bold ? F.bold : F.regular,
+                size: row.bold ? 10 : 8,
+                width: labelWidth,
+                align: "left",
+                lineBreak: false,
+            }
+        );
+        absText(
+            doc,
+            row.value,
+            summaryX + summaryWidth - valueWidth - 8,
+            y + 6,
+            {
+                font: row.bold ? F.bold : F.regular,
+                size: row.bold ? 10 : 8,
+                width: valueWidth,
+                align: "right",
+                lineBreak: false,
+            }
+        );
+        y += RH;
+    });
+    return y;
+}
+
 
 function drawMilestonesTable(doc, y, milestones, ctx) {
     if (!milestones || milestones.length === 0) return y;
@@ -675,6 +759,8 @@ function drawMilestonesTable(doc, y, milestones, ctx) {
             absText(doc, vals[ci], cx + TPX, y + (rh - TFS) / 2, { size: TFS, color: C.dark, width: col.w - TPX * 2, align: col.a, lineBreak: false });
             cx += col.w;
         });
+        cx = MX;
+        MS_COLS.slice(0, -1).forEach((col) => { cx += col.w; vLine(doc, cx, y, y + rh, C.borderFaint, 0.3); });
         vLine(doc, MX, y, y + rh, C.border, 0.4);
         vLine(doc, MX + CW, y, y + rh, C.border, 0.4);
         y += rh;
@@ -751,18 +837,26 @@ export async function generateWOPdf(res, { wo, company, vendor, project, created
     doc.addPage();
     let y = MT;
 
-    // Title Section
     absText(doc, "Work Order", MX, y, {
         font: F.bold, size: 12, color: C.black, width: CW * 0.6,
     });
-    absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
-        font: F.regular, size: 8, color: C.muted,
-        width: CW * 0.4, align: "right",
-    });
 
-    y += 28;
+    const logoSize = 34;
+    if (logoBuffer) {
+        try {
+            doc.image(logoBuffer, MX + CW - logoSize, y, { fit: [logoSize, logoSize] });
+        } catch { drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize); }
+    } else {
+        drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize);
+    }
 
-    // Prepare Grid Contents
+    // absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
+    //     font: F.regular, size: 8, color: C.muted,
+    //     width: CW * 0.4 - logoSize - 6, align: "right",
+    // });
+
+    y += logoSize + 14;
+
     const leftWidth = CW * 0.55;
     const rightWidth = CW - leftWidth;
 
@@ -788,23 +882,24 @@ export async function generateWOPdf(res, { wo, company, vendor, project, created
         { type: "header", text: vendor?.name || "Contractor Name" },
         { type: "text", text: vendor?.address },
         { type: "pair", label: "Type", value: vendor?.vendorType },
-        { type: "pair", label: "Contact", value: vendor?.contactPerson },
+        { type: "pair", label: "Contact Person", value: vendor?.contactPerson },
         { type: "pair", label: "Phone", value: vendor?.phone },
         { type: "pair", label: "Email", value: vendor?.email },
         { type: "pair", label: "GSTIN", value: vendor?.legalDetails?.gstin },
+        { type: "pair", label: "PAN", value: vendor?.legalDetails?.panNumber },
+        { type: "pair", label: "Reg. No.", value: vendor?.legalDetails?.registrationNumber },
     ];
 
     const rightRows = [
         { left: { lbl: "WO Number", val: wo.woNumber }, right: { lbl: "Dated", val: fmt(wo.createdAt) } },
-        { left: { lbl: "Title", val: wo.title }, right: { lbl: "Status", val: wo.status } },
+        { left: { lbl: "Title", val: wo.title }, right: { lbl: "Status", val: "Approved" } },
         { left: { lbl: "Start Date", val: fmt(wo.startDate) }, right: { lbl: "End Date", val: fmt(wo.expectedEndDate) } },
-        { left: { lbl: "Payment terms", val: wo.paymentTerms } },
-        { left: { lbl: "Contract value", val: fmtCurrency(wo.totalContractValue) } },
+        { left: { lbl: "Payment Terms", val: wo.paymentTerms } },
+        { left: { lbl: "Contract Value", val: fmtCurrency(wo.totalContractValue) } },
         { left: { lbl: "Work Location", val: wo.workLocation } },
         { left: { lbl: "Created by", val: createdByUser?.name }, right: { lbl: "Milestones", val: wo.hasMilestones ? "Yes" : "No" } },
     ];
 
-    // Responsive Spacing calculations
     const paddingOffset = 12;
     const H_L1 = measureBlockHeight(doc, itemsL1, leftWidth - paddingOffset) + 12;
     const H_L2 = measureBlockHeight(doc, itemsL2, leftWidth - paddingOffset) + 12;
@@ -826,40 +921,26 @@ export async function generateWOPdf(res, { wo, company, vendor, project, created
     const H_RIGHT = rowHeights.reduce((sum, h) => sum + h, 0);
     const H_MAX = Math.max(H_LEFT, H_RIGHT);
 
-    // Dynamic grid extension for Right Column to stretch to bottom boundary
     if (H_MAX > H_RIGHT) {
         rowHeights[rowHeights.length - 1] += (H_MAX - H_RIGHT);
     }
 
-    // Draw Grid borders
     strokeRect(doc, MX, y, CW, H_MAX, C.border, 0.3);
     vLine(doc, MX + leftWidth, y, y + H_MAX, C.border, 0.3);
 
-    // Draw Left Column Blocks
     let curL_y = y;
 
-    // Draw L1
-    let logoSize = 34;
     let logoDrawWidth = 0;
-    if (logoBuffer) {
-        try {
-            doc.image(logoBuffer, MX + 6, curL_y + 6, { fit: [logoSize, logoSize] });
-            logoDrawWidth = logoSize + 8;
-        } catch { }
-    }
     drawBlock(doc, itemsL1, MX + 6 + logoDrawWidth, curL_y + 6, leftWidth - 12 - logoDrawWidth);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L1, C.border, 0.3);
     curL_y += H_L1;
 
-    // Draw L2
     drawBlock(doc, itemsL2, MX + 6, curL_y + 6, leftWidth - 12);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L2, C.border, 0.3);
     curL_y += H_L2;
 
-    // Draw L3
     drawBlock(doc, itemsL3, MX + 6, curL_y + 6, leftWidth - 12);
 
-    // Draw Right Column Rows
     let curR_y = y;
     rightRows.forEach((row, idx) => {
         const h = rowHeights[idx];
@@ -874,13 +955,13 @@ export async function generateWOPdf(res, { wo, company, vendor, project, created
         const descH = textH(doc, wo.description, descW, F.regular, 8) + 12;
         y = space(doc, y, descH + 20, ctx);
         y = sectionLabel(doc, y, "Scope of Work");
-        strokeRect(doc, MX, y, CW, descH, C.border, 0.3);
-        absText(doc, wo.description, MX + 6, y + 6, { size: 8, color: C.black, width: descW });
+        // strokeRect(doc, MX, y, CW, descH, C.border, 0.3);
+        absText(doc, wo.description, MX, y + 6, { size: 8, color: C.black, width: descW });
         y += descH + 12;
     }
 
     y = space(doc, y, TH + 30, ctx);
-    y = sectionLabel(doc, y, "Work items");
+    y = sectionLabel(doc, y, "Work Items");
     y = wiTableHeader(doc, y);
     wo.workItems.forEach((item, i) => {
         const rh = wiRowHeight(doc, item, i);
@@ -895,6 +976,14 @@ export async function generateWOPdf(res, { wo, company, vendor, project, created
     });
     y = space(doc, y, 20, ctx);
     y = wiTableTotals(doc, y, wo.workItems, wo.totalContractValue);
+    y = wiTableAmountBreakdown(doc, y, {
+        totalContractValue: wo.totalContractValue,
+        gst: wo.gst || 0,
+        discount: wo.discount || 0,
+        gstAmount: wo.gstAmount || 0,
+        discountAmount: wo.discountAmount || 0,
+        finalAmount: wo.finalAmount || wo.totalContractValue,
+    });
     y += 14;
 
     if (wo.hasMilestones && wo.milestones?.length > 0) {
@@ -905,26 +994,22 @@ export async function generateWOPdf(res, { wo, company, vendor, project, created
         const siW = CW - 12;
         const siH = textH(doc, wo.specialInstructions, siW, F.regular, 8) + 12;
         y = space(doc, y, siH + 20, ctx);
-        y = sectionLabel(doc, y, "Special instructions");
-        strokeRect(doc, MX, y, CW, siH, C.border, 0.3);
+        y = sectionLabel(doc, y, "Special Instructions");
         absText(doc, wo.specialInstructions, MX + 6, y + 6, { size: 8, color: C.black, width: siW });
         y += siH + 12;
     }
 
-    // Signatures / Authorisation Box
     const SIG_H = 68;
     const sigColW = CW / 3;
 
     y = space(doc, y, SIG_H + 25, ctx);
-    y = sectionLabel(doc, y, "Authorisation & signatures");
+    y = sectionLabel(doc, y, "Authorisation & Signatures");
 
     strokeRect(doc, MX, y, CW, SIG_H, C.border, 0.3);
 
-    ["Prepared by", "Contractor acknowledgement", "Authorised by"].forEach((lbl, s) => {
+    ["Prepared by", "Contractor Acceptance", "Authorized Signatory"].forEach((lbl, s) => {
         const sx = MX + s * sigColW;
-        if (s > 0) {
-            vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
-        }
+        if (s > 0) vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
         hLine(doc, sx, sx + sigColW, y + SIG_H - 18, C.border, 0.3);
         absText(doc, lbl, sx, y + SIG_H - 12, {
             font: F.bold, size: 8, color: C.black,
@@ -957,28 +1042,34 @@ export async function generateWCCPdf(res, { wo, company, vendor, project, comple
     doc.addPage();
     let y = MT;
 
-    // Title Section
     absText(doc, "Work Completion Certificate", MX, y, {
         font: F.bold, size: 12, color: C.black, width: CW * 0.6,
     });
-    absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
-        font: F.regular, size: 8, color: C.muted,
-        width: CW * 0.4, align: "right",
-    });
 
-    y += 28;
+    const logoSize = 34;
+    const headerBottomGap = 12;
+    if (logoBuffer) {
+        try {
+            doc.image(logoBuffer, MX + CW - logoSize, y, { fit: [logoSize, logoSize] });
+            y += logoSize + headerBottomGap;
+        } catch { drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize); }
+    } else {
+        drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize);
+    }
 
-    // Prepare Grid Contents
+    // absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
+    //     font: F.regular, size: 8, color: C.muted,
+    //     width: CW * 0.4 - logoSize - 6, align: "right",
+    // });
+    y += logoSize + 14;
     const leftWidth = CW * 0.55;
     const rightWidth = CW - leftWidth;
-
     const itemsL1 = [
         { type: "header", text: company?.companyName || "Company Name" },
         { type: "text", text: [company?.address?.city, company?.address?.state, company?.address?.country].filter(Boolean).join(", ") },
         { type: "pair", label: "Contact", value: (company?.phone || company?.email) ? `${company.phone || ""} ${company.email || ""}`.trim() : null },
         { type: "pair", label: "GSTIN/UIN", value: company?.gstin },
     ];
-
     const itemsL2 = [
         { type: "title", text: "Consignee (Ship to) / Project details" },
         { type: "header", text: project?.projectName || "Project Name" },
@@ -986,35 +1077,32 @@ export async function generateWCCPdf(res, { wo, company, vendor, project, comple
         { type: "pair", label: "Client Name", value: project?.clientName },
         { type: "pair", label: "Project Code", value: project?.projectCode },
     ];
-
     const itemsL3 = [
         { type: "title", text: "Contractor Details" },
         { type: "header", text: vendor?.name || "Contractor Name" },
         { type: "text", text: vendor?.address },
         { type: "pair", label: "Type", value: vendor?.vendorType },
-        { type: "pair", label: "Contact", value: vendor?.contactPerson },
+        { type: "pair", label: "Contact Person", value: vendor?.contactPerson },
         { type: "pair", label: "Phone", value: vendor?.phone },
         { type: "pair", label: "Email", value: vendor?.email },
         { type: "pair", label: "GSTIN", value: vendor?.legalDetails?.gstin },
+        { type: "pair", label: "PAN", value: vendor?.legalDetails?.panNumber },
+        { type: "pair", label: "Reg. No.", value: vendor?.legalDetails?.registrationNumber },
     ];
-
     const rightRows = [
         { left: { lbl: "WO Number", val: wo.woNumber }, right: { lbl: "Dated", val: fmt(wo.createdAt) } },
         { left: { lbl: "Title", val: wo.title }, right: { lbl: "WCC Ref", val: `WCC / ${wo.woNumber}` } },
-        { left: { lbl: "Contract value", val: fmtCurrency(wo.totalContractValue) }, right: { lbl: "Completed On", val: fmt(wo.completedAt) } },
+        { left: { lbl: "Contract Value", val: fmtCurrency(wo.totalContractValue) }, right: { lbl: "Completed On", val: fmt(wo.completedAt) } },
         { left: { lbl: "Start Date", val: fmt(wo.startDate) }, right: { lbl: "Expected End", val: fmt(wo.expectedEndDate) } },
         { left: { lbl: "Actual End Date", val: fmt(wo.actualEndDate || wo.completedAt) } },
         { left: { lbl: "Completed by", val: completedByUser?.name }, right: { lbl: "Email", val: completedByUser?.email } },
         { left: { lbl: "Location", val: project?.location } },
     ];
-
-    // Responsive Spacing calculations
     const paddingOffset = 12;
     const H_L1 = measureBlockHeight(doc, itemsL1, leftWidth - paddingOffset) + 12;
     const H_L2 = measureBlockHeight(doc, itemsL2, leftWidth - paddingOffset) + 12;
     const H_L3 = measureBlockHeight(doc, itemsL3, leftWidth - paddingOffset) + 12;
     const H_LEFT = H_L1 + H_L2 + H_L3;
-
     const rowHeights = rightRows.map(row => {
         if (row.right) {
             const hw = rightWidth / 2;
@@ -1030,47 +1118,25 @@ export async function generateWCCPdf(res, { wo, company, vendor, project, comple
     const H_RIGHT = rowHeights.reduce((sum, h) => sum + h, 0);
     const H_MAX = Math.max(H_LEFT, H_RIGHT);
 
-    // Dynamic grid extension for Right Column to stretch to bottom boundary
     if (H_MAX > H_RIGHT) {
         rowHeights[rowHeights.length - 1] += (H_MAX - H_RIGHT);
     }
-
-    // Draw Grid borders
     strokeRect(doc, MX, y, CW, H_MAX, C.border, 0.3);
     vLine(doc, MX + leftWidth, y, y + H_MAX, C.border, 0.3);
-
-    // Draw Left Column Blocks
     let curL_y = y;
-
-    // Draw L1
-    let logoSize = 34;
-    let logoDrawWidth = 0;
-    if (logoBuffer) {
-        try {
-            doc.image(logoBuffer, MX + 6, curL_y + 6, { fit: [logoSize, logoSize] });
-            logoDrawWidth = logoSize + 8;
-        } catch { }
-    }
-    drawBlock(doc, itemsL1, MX + 6 + logoDrawWidth, curL_y + 6, leftWidth - 12 - logoDrawWidth);
+    drawBlock(doc, itemsL1, MX + 6, curL_y + 6, leftWidth - 12);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L1, C.border, 0.3);
     curL_y += H_L1;
-
-    // Draw L2
     drawBlock(doc, itemsL2, MX + 6, curL_y + 6, leftWidth - 12);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L2, C.border, 0.3);
     curL_y += H_L2;
-
-    // Draw L3
     drawBlock(doc, itemsL3, MX + 6, curL_y + 6, leftWidth - 12);
-
-    // Draw Right Column Rows
     let curR_y = y;
     rightRows.forEach((row, idx) => {
         const h = rowHeights[idx];
         drawRightRow(doc, row.left, row.right, MX + leftWidth, curR_y, rightWidth, h);
         curR_y += h;
     });
-
     y += H_MAX + 16;
 
     if (wo.completionRemarks?.trim()) {
@@ -1098,6 +1164,14 @@ export async function generateWCCPdf(res, { wo, company, vendor, project, comple
         y = wiTableRow(doc, y, item, i);
     });
     y = wiTableTotals(doc, y, wo.workItems, wo.totalContractValue);
+    y = wiTableAmountBreakdown(doc, y, {
+        totalContractValue: wo.totalContractValue,
+        gst: wo.gst || 0,
+        discount: wo.discount || 0,
+        gstAmount: wo.gstAmount || 0,
+        discountAmount: wo.discountAmount || 0,
+        finalAmount: wo.finalAmount || wo.totalContractValue,
+    });
     y += 14;
 
     if (wo.hasMilestones && wo.milestones?.length > 0) {
@@ -1138,10 +1212,7 @@ export async function generateWCCPdf(res, { wo, company, vendor, project, comple
             MS_COLS2.forEach((col, ci) => {
                 const color = ci === 5 ? statusColor : C.black;
                 absText(doc, vals2[ci], cx + TPX, y + (rh - TFS) / 2, {
-                    size: TFS,
-                    color,
-                    width: col.w - TPX * 2,
-                    align: col.a,
+                    size: TFS, color, width: col.w - TPX * 2, align: col.a,
                 });
                 cx += col.w;
             });
@@ -1162,21 +1233,14 @@ export async function generateWCCPdf(res, { wo, company, vendor, project, comple
     strokeRect(doc, MX, y, CW, declH, C.border, 0.3);
     absText(doc, declaration, MX + 6, y + 6, { size: 8, color: C.black, width: declW });
     y += declH + 16;
-
-    // Signatures / Acceptance Box
     const SIG_H = 68;
     const sigColW = CW / 3;
-
     y = space(doc, y, SIG_H + 25, ctx);
-    y = sectionLabel(doc, y, "Acceptance signatures");
-
+    y = sectionLabel(doc, y, "Acceptance Signatures");
     strokeRect(doc, MX, y, CW, SIG_H, C.border, 0.3);
-
-    ["Site Engineer", "Contractor Representative", "Project Manager"].forEach((lbl, s) => {
+    ["Site Engineer", "Contractor Acceptance", "Authorized Signatory"].forEach((lbl, s) => {
         const sx = MX + s * sigColW;
-        if (s > 0) {
-            vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
-        }
+        if (s > 0) vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
         hLine(doc, sx, sx + sigColW, y + SIG_H - 18, C.border, 0.3);
         absText(doc, lbl, sx, y + SIG_H - 12, {
             font: F.bold, size: 8, color: C.black,

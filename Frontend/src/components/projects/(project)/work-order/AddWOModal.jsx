@@ -18,6 +18,8 @@ const INITIAL_FORM = {
     paymentTerms: "",
     specialInstructions: "",
     phaseId: null,
+    gst: 0,
+    discount: 0,
 }
 
 function Backdrop({ visible, onClose }) {
@@ -92,7 +94,7 @@ export default function AddWOModal({ open, onClose, onSave, projectId }) {
                 toast.error("Add at least one milestone")
                 return
             }
-            const totalPercent = form.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0) 
+            const totalPercent = form.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0)
             if (totalPercent !== 100) {
                 toast.error(`Payment percentages must total 100% (currently ${totalPercent}%)`)
                 return

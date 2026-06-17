@@ -110,6 +110,11 @@ export function mapWO(raw) {
         paymentTerms: raw.paymentTerms || "",
         specialInstructions: raw.specialInstructions || "",
         completionPercent: raw.completionPercent ?? 0,
+        gst: raw.gst ?? 0,
+        discount: raw.discount ?? 0,
+        gstAmount: raw.gstAmount ?? 0,
+        discountAmount: raw.discountAmount ?? 0,
+        finalAmount: raw.finalAmount ?? 0,
         completionRemarks: raw.completionRemarks || "",
         rejectionRemarks: raw.rejectionRemarks || "",
         cancellationRemarks: raw.cancellationRemarks || "",
@@ -172,6 +177,8 @@ export function buildWOPayload(form, createdBy = null, updatedBy = null) {
             : null,
         workLocation: form.workLocation || null,
         paymentTerms: form.paymentTerms || null,
+        gst: Number(form.gst) || 0,
+        discount: Number(form.discount) || 0,
         specialInstructions: form.specialInstructions || null,
         phaseId: form.phaseId || null,
     }
@@ -188,14 +195,14 @@ export function computeWOStats(wos) {
     const approved = wos.filter((w) => w.status === "Approved").length
     const inProgress = wos.filter((w) => w.status === "InProgress").length
     const completed = wos.filter((w) => w.status === "Completed").length
-    const totalValue = wos.reduce((sum, w) => sum + (w.totalContractValue || 0), 0)
+    const totalValue = wos.reduce((sum, w) => sum + (w.finalAmount || w.totalContractValue || 0), 0)
 
     return [
         { id: 1, title: "Draft WOs", value: draft, subtitle: "Pending submission", colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
         { id: 2, title: "Submitted WOs", value: submitted, subtitle: "Awaiting approval", colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]" },
         { id: 3, title: "In Progress", value: inProgress, subtitle: "Active work orders", colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
         { id: 4, title: "Completed WOs", value: completed, subtitle: "Finished work orders", colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]" },
-        { id: 5, title: "Total Value", value: `₹${totalValue.toLocaleString("en-IN")}`, subtitle: "Across all WOs", colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
+        { id: 5, title: "Final Value", value: `₹${totalValue.toLocaleString("en-IN")}`, subtitle: "Across all WOs (incl. GST)", colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
     ]
 }
 
