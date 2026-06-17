@@ -389,11 +389,11 @@ export default function MaterialMasterPage() {
   if (isInitialLoad) return <Loading />
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg py-12 px-6 lg:px-12 transition-colors duration-300">
+    <div  className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
       <MaterialHeader
         title="Material Master List"
         badgeCount={pagination.total}
-        description="Manage your company's material catalogue — add, edit, or deactivate materials."
+        description="Manage your company's material catalogue  add, edit, or deactivate materials."
         actionText="Add Material"
         ActionIcon={PlusSquare}
         filters={MATERIAL_FILTERS}
@@ -403,7 +403,7 @@ export default function MaterialMasterPage() {
         isRefreshing={isRefreshing}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2">
         {stats.map((stat, index) => (
           <SummaryCard key={stat.id} item={stat} index={index} />
         ))}

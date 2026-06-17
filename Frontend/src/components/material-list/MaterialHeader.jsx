@@ -66,7 +66,7 @@ export default function MaterialHeader({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0 mt-1 lg:mt-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto shrink-0 mt-1 lg:mt-0">
 
           <div className="relative flex items-center w-full sm:w-64 md:w-75 lg:w-72 xl:w-[320px]">
             <Search className="w-4 h-4 text-gray-400 absolute left-4 shrink-0 pointer-events-none" />

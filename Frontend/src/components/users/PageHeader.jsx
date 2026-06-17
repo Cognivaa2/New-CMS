@@ -130,7 +130,6 @@ export default function PageHeader({
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
-        {/* Search */}
         <div className="relative flex items-center w-full sm:w-[320px] lg:w-65 shrink-0">
           <Search
             className={`w-4 h-4 absolute left-3 transition-colors duration-200 ${isFocused ? "text-gray-700 dark:text-[#f4f4f5]" : "text-gray-400"
