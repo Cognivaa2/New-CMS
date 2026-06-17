@@ -239,7 +239,7 @@ export default function ContraEntriesPage() {
     if (isInitialLoad) return <Loading />
 
     return (
-        <div className="w-full mx-auto py-8 px-4 sm:px-8 flex flex-col gap-6 bg-white dark:bg-[#121212] min-h-screen transition-colors duration-300 font-sfpro">
+        <div className="w-full mx-auto py-4 px-4 sm:px-8 flex flex-col gap-2 bg-white dark:bg-[#121212] min-h-screen transition-colors duration-300 font-sfpro">
 
             <CEHeader
                 title="Contra Entries"
@@ -281,7 +281,7 @@ export default function ContraEntriesPage() {
             </div>
 
             {activeTab === "All Entries" && stats.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
                     {stats.map((stat, index) => (
                         <SummaryCard key={stat.id} item={stat} index={index} />
                     ))}
