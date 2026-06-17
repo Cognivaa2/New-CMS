@@ -461,7 +461,7 @@ export default function IssuesPage() {
   if (isInitialLoad) return <Loading />
 
   return (
-    <div className="w-full mx-auto py-8 px-4 sm:px-6 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
+    <div className="w-full mx-auto p-4 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
       <IssueHeader
         title="Issues"
         badgeCount={pagination.total}
@@ -473,7 +473,7 @@ export default function IssuesPage() {
         isRefreshing={isRefreshing}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         {stats.map((stat) => (
           <SummaryCard key={stat.id} item={stat} />
         ))}
