@@ -2,7 +2,7 @@ export default function ProfileHeader({ data }) {
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full pb-8 font-sfpro">
       <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="w-35 h-35 rounded-full overflow-hidden shrink-0 border border-transparent dark:border-[#27272a] flex items-center justify-center">
+        <div className="w-65 h-65 rounded-full overflow-hidden shrink-0 border border-transparent dark:border-[#27272a] flex items-center justify-center">
           {data.avatarUrl ? (
             <img 
               src={data.avatarUrl} 
@@ -18,7 +18,7 @@ export default function ProfileHeader({ data }) {
             {data.name?.charAt(0)?.toUpperCase()}
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <h1 className="text-[46px] font-sfpro-bold text-gray-900 dark:text-[#f4f4f5] transition-colors">
             {data.name || <NotProvided />}
           </h1>

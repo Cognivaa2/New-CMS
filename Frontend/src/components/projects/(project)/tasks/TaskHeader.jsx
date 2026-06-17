@@ -78,7 +78,7 @@ function Avatar({ user, size = "md", className = "", isSelected = false, onClick
                     "rounded-full ring-2 overflow-hidden shrink-0 transition-all duration-200 cursor-pointer",
                     isSelected
                         ? "ring-[#212121] dark:ring-white scale-110"
-                        : "ring-white dark:ring-[#09090b] hover:scale-105 hover:ring-[#a1a1aa] dark:hover:ring-[#52525b]",
+                        : "ring-white dark:ring-[#09090b] hover:scale-110",
                     className,
                 ].join(" ")}
             >
@@ -165,7 +165,7 @@ function MembersModal({ users, isOpen, onClose, triggerRef }) {
                     users.map((user) => (
                         <div
                             key={user.keycloakId}
-                            className="flex items-center gap-2.5 mb-1 px-2 py-1.5 rounded-lg hover:bg-[#f4f4f5] dark:hover:bg-[#27272a] transition-colors duration-150"
+                            className="flex items-center gap-1 mb-1 px-2 py-1.5 rounded-lg hover:bg-[#f4f4f5] dark:hover:bg-[#27272a] transition-colors duration-150"
                         >
                             <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
                                 {user.avatar ? (
@@ -181,7 +181,7 @@ function MembersModal({ users, isOpen, onClose, triggerRef }) {
                                     {user.name}
                                 </p>
                                 {user.email && (
-                                    <p className="text-xs font-sfpro text-[#a1a1aa] dark:text-[#71717a] truncate mt-0.5">
+                                    <p className="text-xs font-sfpro text-[#a1a1aa] dark:text-[#71717a] truncate">
                                         {user.email}
                                     </p>
                                 )}
@@ -206,14 +206,13 @@ function AvatarStack({ users, isLoading, selectedUserKeycloakId, onUserAvatarCli
         return (
             <div className="flex items-center -space-x-2">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full ring-2 ring-white dark:ring-[#09090b] bg-[#f4f4f5] dark:bg-[#27272a] animate-pulse" />
+                    <div key={i} className="w-8 h-8 rounded-full dark:ring-[#09090b] bg-[#f4f4f5] dark:bg-[#27272a] animate-pulse" />
                 ))}
             </div>
         )
     }
 
     if (!users || users.length === 0) return null
-
     const visible = users.slice(0, MAX_VISIBLE)
     const overflow = users.length - MAX_VISIBLE
 
@@ -234,7 +233,7 @@ function AvatarStack({ users, isLoading, selectedUserKeycloakId, onUserAvatarCli
                             <button
                                 type="button"
                                 onClick={() => setIsOpen((v) => !v)}
-                                className="w-8 h-8 rounded-full ring-2 ring-white dark:ring-[#09090b] bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7] dark:border-[#3f3f46] flex items-center justify-center text-[11px] font-sfpro-bold text-[#71717a] dark:text-[#a1a1aa] hover:bg-[#e4e4e7] dark:hover:bg-[#3f3f46] transition-colors duration-150 cursor-pointer"
+                                className="w-8 h-8 rounded-full ring-2 ring-white dark:ring-[#09090b] bg-[#f4f4f5] dark:bg-[#27272a] border border-[#e4e4e7] dark:border-[#3f3f46] flex items-center justify-center text-[11px] font-sfpro-bold text-[#71717a] dark:text-[#a1a1aa] dark:hover:bg-[#3f3f46] transition-colors duration-150 cursor-pointer"
                             >
                                 +{overflow}
                             </button>
@@ -323,9 +322,9 @@ export default function TaskHeader({
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-8 transition-colors duration-300 font-sfpro">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-6 transition-colors duration-300 font-sfpro">
                 <div className="min-w-0">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <h1 className="text-[30px] sm:text-[36px] lg:text-[42px] font-sfpro-bold leading-none tracking-tight transition-colors break-word">
                             <span className="text-[#a3a3a3] dark:text-[#858585]">{phaseName} / </span>
                             <span className="text-[#09090b] dark:text-[#f4f4f5]">Tasks</span>
@@ -337,12 +336,12 @@ export default function TaskHeader({
                         )}
                         {isRefreshing && <Loader2 className="w-4 h-4 text-[#71717a] animate-spin mt-1" />}
                     </div>
-                    <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-3 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
+                    <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-1 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
                         Manage tasks and track progress for this phase
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 w-full lg:w-auto">
                     <AvatarStack
                         users={assignedUsers}
                         isLoading={false}
@@ -376,7 +375,7 @@ export default function TaskHeader({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex items-center gap-1 w-full sm:w-auto">
                         <div className="shrink-0">
                             <FilterOptions
                                 filters={TASK_FILTERS}

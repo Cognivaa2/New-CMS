@@ -50,7 +50,7 @@ export default function DashboardStatsSection({ stats = [], isLoading = false })
   }
 
   return (
-    <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="mb-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
       {stats.map((stat) => {
         const Icon = stat.icon || FileText
         return (

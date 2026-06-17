@@ -8,7 +8,6 @@ import ThreeDotMenu from "@/components/ui/ThreeDotMenu"
 import TaskManageMembersModal from "./TaskManageMembersModal"
 import TaskDocumentsModal from "./TaskDocumentsModal"
 import LinkTaskToWOModal from "./LinkTaskToWOModal"
-import { SmoothCorners } from "react-smooth-corners"
 import { toast } from "sonner"
 import { unlinkTaskFromWO } from "@/app/(companyname)/projects/[projectId]/phases/[phaseId]/api"
 
@@ -179,92 +178,73 @@ export default function TaskCard({
 
     return (
         <>
-            <div
-                onClick={handleCardClick}
-                className="group relative cursor-pointer h-full transition-all duration-300 hover:-translate-y-1"
-            >
-                <SmoothCorners
-                    corners="8"
-                    borderRadius="42"
-                    className="
-                        h-full p-4 flex flex-col justify-between gap-4 xl:gap-5
-                        bg-white dark:bg-[#18181b]
-                        border border-gray-200/80 dark:border-black/60
-                        shadow-[0px_4px_12px_rgba(0,0,0,0.06)]
-                        dark:shadow-[0px_4px_16px_rgba(0,0,0,0.35)]
-                        transition-colors duration-300
-                    "
-                >
-                    <div className="flex items-start justify-between text-xs text-[#71717a] dark:text-[#a1a1aa]">
-                        <div className="flex items-center flex-wrap gap-3 mt-1">
-                            <span className="flex items-center gap-1 font-sfpro-medium">
-                                <SquareSlash size={16} /> {phaseName}
+            <div onClick={handleCardClick} className="group relative cursor-pointer h-full p-4 flex flex-col justify-between gap-4 bg-white dark:bg-[#18181b] border border-[#e9e9e9] dark:border-black/60 rounded-2xl transition-all duration-300 hover:-translate-y-1">
+                <div className="flex items-start justify-between text-xs text-[#71717a] dark:text-[#a1a1aa]">
+                    <div className="flex flex-col items-start flex-wrap gap-1 mt-1">
+                        <span className="flex items-center gap-1 font-sfpro-medium">
+                            <SquareSlash size={16} /> {phaseName}
+                        </span>
+                        <span className="flex items-center gap-1 font-sfpro-medium">
+                            <Calendar size={16} />
+                            {formatDate(task.endDate)}
+                        </span>
+                        {task.workOrderId && (
+                            <span className="flex items-center gap-1 font-sfpro-medium text-violet-500 dark:text-violet-400">
+                                <Link2 size={13} />
+                                WO Linked
                             </span>
-                            <span className="flex items-center gap-1 font-sfpro-medium">
-                                <Calendar size={16} />
-                                {formatDate(task.endDate)}
-                            </span>
-                            {task.workOrderId && (
-                                <span className="flex items-center gap-1 font-sfpro-medium text-violet-500 dark:text-violet-400">
-                                    <Link2 size={13} />
-                                    WO Linked
-                                </span>
-                            )}
-                        </div>
-                        <div
-                            onClick={(e) => e.stopPropagation()}
-                            className="shrink-0 relative z-10 -mt-1 -mr-1"
-                        >
-                            <ThreeDotMenu
-                                items={menuItems}
-                                size="sm"
-                                header={{
-                                    title: task.taskName,
-                                    subtitle: `Phase: ${phaseName}`,
-                                    statusColor:
-                                        progress === 100
-                                            ? "#22c55e"
-                                            : progress > 0
-                                                ? "#f59e0b"
-                                                : "#a1a1aa",
-                                }}
-                            />
-                        </div>
+                        )}
                     </div>
-
-                    <p className="text-[15px] font-sfpro font-bold text-[#18181b] dark:text-[#f4f4f5] line-clamp-3 leading-snug">
-                        {task.taskName}
-                    </p>
-
-                    <div className="flex items-end flex-wrap justify-between">
-                        <div className={`text-2xl lg:text-3xl font-sfpro-bold tracking-tighter ${progressColor}`}>
-                            {progress}%
-                        </div>
-                        <div className="flex -space-x-2">
-                            {task.assignedTo?.slice(0, 4).map((user, i) => (
-                                <Tooltip
-                                    content={user.name || "Unknown"}
-                                    side="bottom"
-                                    key={user.id || user.keycloakId || i}
-                                >
-                                    <div>
-                                        <UserAvatar user={user} size={28} />
-                                    </div>
-                                </Tooltip>
-                            ))}
-                            {task.assignedTo?.length > 4 && (
-                                <Tooltip
-                                    content={`+${task.assignedTo.length - 4} more`}
-                                    side="bottom"
-                                >
-                                    <div className="w-7 h-7 rounded-full border-2 border-[#f4f4f5] dark:border-[#18181b] bg-[#e4e4e7] dark:bg-[#3f3f46] flex items-center justify-center text-xs font-sfpro-medium text-[#71717a]">
-                                        +{task.assignedTo.length - 4}
-                                    </div>
-                                </Tooltip>
-                            )}
-                        </div>
+                    <div onClick={(e) => e.stopPropagation()} className="shrink-0 relative z-10 -mt-1 -mr-1">
+                        <ThreeDotMenu
+                            items={menuItems}
+                            size="sm"
+                            header={{
+                                title: task.taskName,
+                                subtitle: `Phase: ${phaseName}`,
+                                statusColor:
+                                    progress === 100
+                                        ? "#22c55e"
+                                        : progress > 0
+                                            ? "#f59e0b"
+                                            : "#a1a1aa",
+                            }}
+                        />
                     </div>
-                </SmoothCorners>
+                </div>
+
+                <p className="text-sm font-sfpro-medium text-[#121212] dark:text-[#f4f4f5] line-clamp-3 leading-snug">
+                    {task.taskName}
+                </p>
+
+                <div className="flex items-end flex-wrap justify-between">
+                    <div className={`text-2xl lg:text-3xl font-sfpro-bold tracking-tighter ${progressColor}`}>
+                        {progress}%
+                    </div>
+                    <div className="flex -space-x-2">
+                        {task.assignedTo?.slice(0, 4).map((user, i) => (
+                            <Tooltip
+                                content={user.name || "Unknown"}
+                                side="bottom"
+                                key={user.id || user.keycloakId || i}
+                            >
+                                <div>
+                                    <UserAvatar user={user} size={28} />
+                                </div>
+                            </Tooltip>
+                        ))}
+                        {task.assignedTo?.length > 4 && (
+                            <Tooltip
+                                content={`+${task.assignedTo.length - 4} more`}
+                                side="bottom"
+                            >
+                                <div className="w-7 h-7 rounded-full border-2 border-[#f4f4f5] dark:border-[#18181b] bg-[#e4e4e7] dark:bg-[#3f3f46] flex items-center justify-center text-xs font-sfpro-medium text-[#71717a]">
+                                    +{task.assignedTo.length - 4}
+                                </div>
+                            </Tooltip>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <TaskManageMembersModal

@@ -144,7 +144,7 @@ export default function DashboardPage() {
   }, [loadKPIs, loadProjectChart, loadInventoryChart, loadExpenseChart, loadTasksFlow])
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-6 md:p-8 lg:p-10">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
       <DashboardHeader
         title="Dashboard"
         description="Overview of your construction management operations, purchase orders, work orders, and project progress across all active sites."

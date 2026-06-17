@@ -64,9 +64,9 @@ export default function PhasesHeader({
   const showClearButton = searchValue.length > 0
   return (
     <>
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-8 transition-colors duration-300 font-sfpro">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-4 transition-colors duration-300 font-sfpro">
         <div className="min-w-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <h1 className="text-[30px] sm:text-[36px] lg:text-[42px] font-sfpro-bold text-[#a3a3a3] dark:text-[#a1a1aa] leading-none tracking-tight transition-colors break-word">
               Phases
             </h1>
@@ -76,11 +76,11 @@ export default function PhasesHeader({
               </span>
             )}
           </div>
-          <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-3 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
+          <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-1 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
             Manage project phases and track progress
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 w-full lg:w-auto">
           <div className="relative flex items-center w-full sm:w-[320px] lg:w-65">
             <Search className="w-5 h-5 text-gray-400 absolute left-3 pointer-events-none" />
             <input
@@ -106,7 +106,7 @@ export default function PhasesHeader({
               )}
             </div>
           </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-1 w-full sm:w-auto">
             <div className="shrink-0">
               <FilterOptions
                 filters={PHASE_FILTERS}

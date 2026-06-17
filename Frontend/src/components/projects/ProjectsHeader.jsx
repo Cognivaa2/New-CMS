@@ -39,7 +39,7 @@ const PROJECT_FILTERS = [
 
 export default function ProjectsHeader({
   count = 0,
-  description = "Manage your company projects — create, update, track progress, and export project data from one place.",
+  description = "Manage your company projects create, update, track progress, and export project data from one place.",
   onAction,
   onSearch,
   onFilter,
@@ -74,7 +74,7 @@ export default function ProjectsHeader({
   return (
     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-8 transition-colors duration-300 font-sfpro">
       <div className="min-w-0">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <h1 className="text-[30px] sm:text-[36px] lg:text-[42px] font-sfpro-bold text-[#a3a3a3] dark:text-[#a1a1aa] leading-none tracking-tight transition-colors break-word">
             Projects
           </h1>
@@ -89,7 +89,7 @@ export default function ProjectsHeader({
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
         <div className="relative flex items-center w-full sm:w-[320px] lg:w-65">
           <Search className="w-5 h-5 text-gray-400 absolute left-3 pointer-events-none" />
           <input
@@ -116,7 +116,7 @@ export default function ProjectsHeader({
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="shrink-0">
             <FilterOptions
               filters={PROJECT_FILTERS}
