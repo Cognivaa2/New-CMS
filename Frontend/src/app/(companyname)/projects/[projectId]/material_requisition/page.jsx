@@ -403,7 +403,7 @@ export default function MaterialRequisitionPage() {
   if (isInitialLoad) return <Loading />
 
   return (
-    <div className="w-full mx-auto p-4 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen font-sfpro">
+    <div className="w-full mx-auto p-4 flex flex-col gap-4 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen font-sfpro">
       <RequisitionHeader
         title="Material Requisition"
         description={
