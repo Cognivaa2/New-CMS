@@ -92,7 +92,7 @@ app.use("/api/v1/finance", financeRoutes);
 app.use("/api/v1/adjustments", adjustmentRoutes);
 app.use("/api/v1/reconciliation", reconciliationRoutes);
 app.use("/api/v1/safety", safetyRoutes);
-app.use("/api/import", importRoutes);
+app.use("/api/v1/import", importRoutes);
 
 
 app.get("/api/health", (req, res) => {

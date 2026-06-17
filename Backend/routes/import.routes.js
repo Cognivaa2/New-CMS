@@ -7,7 +7,7 @@ import { uploadDocument } from "../middlewares/upload.middlewares.js"
 
 const router = express.Router();
 
-router.post("/upload", verifyToken, uploadDocument.single("file"), uploadImport);
+router.post("/upload", uploadDocument.single("file"), uploadImport);
 router.get("/status/:jobId", getImportStatus);
 router.get("/history", getImportHistory);
 

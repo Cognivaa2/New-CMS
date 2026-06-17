@@ -62,19 +62,17 @@ export default function PhaseCard({
   return (
     <article
       onClick={handleCardClick}
-      className={`group/card flex flex-col h-full transition-all duration-300 ${
-        isDragging ? "cursor-grabbing" : "cursor-pointer"
-      }`}
+      className={`group/card flex flex-col h-full transition-all duration-300 ${isDragging ? "cursor-grabbing" : "cursor-pointer"
+        }`}
     >
       <div
-        className={`relative rounded-2xl p-4 flex flex-col flex-1 gap-2 bg-[#f4f4f5] dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] transition-all duration-300 ${
-          isDragging
+        className={`relative rounded-2xl p-4 flex flex-col flex-1 gap-2 dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] transition-all duration-300 ${isDragging
             ? "bg-white dark:bg-[#1f1f1f] shadow-2xl shadow-black/10 dark:shadow-black/30 scale-[1.02]"
-            : "hover:bg-[#e4e4e7] dark:hover:bg-[#222222]"
-        }`}
+            : "hover:bg-[#f4f4f5] dark:hover:bg-[#222222]"
+          }`}
       >
         <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#18181b] dark:bg-[#f4f4f5] text-white dark:text-black text-xs font-sfpro-bold flex items-center justify-center shadow-sm z-10">
-          {phase.sequence || "—"}
+          {phase.sequence || "Not Available"}
         </div>
 
         <div className="flex items-start justify-between gap-2">
@@ -89,11 +87,10 @@ export default function PhaseCard({
               <Tooltip content="Drag to reorder" side="top">
                 <div
                   {...dragHandleProps}
-                  className={`p-1.5 rounded-lg transition-all duration-200 ${
-                    isDragging
+                  className={`p-1.5 rounded-lg transition-all duration-200 ${isDragging
                       ? "opacity-100 bg-[#d4d4d8] dark:bg-[#3f3f46] cursor-grabbing"
                       : "hover:bg-[#d4d4d8] dark:hover:bg-[#3f3f46] cursor-grab"
-                  }`}
+                    }`}
                   aria-label="Drag to reorder phase"
                 >
                   <Hand className="w-4 h-4 text-[#71717a] dark:text-[#a1a1aa]" />
@@ -116,7 +113,7 @@ export default function PhaseCard({
           <p className="text-xs font-sfpro text-[#71717a] dark:text-[#a1a1aa] transition-colors duration-300 max-w-[65%] line-clamp-2">
             {phase.description || "No description"}
           </p>
-          <div className="relative shrink-0 w-15 h-15 -mb-1">
+          <div className="relative shrink-0 w-15 h-15 -mb-4">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -157,7 +154,7 @@ export default function PhaseCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mt-2 px-0.5">
+      <div className="flex items-center gap-2 m-1 px-0.5">
         <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
           <Tooltip content="Start Date" side="bottom">
             <span className="text-xs font-sfpro-medium px-3 py-1.5 rounded-full w-fit bg-[#e4e4e7] dark:bg-[#27272a] text-[#3f3f46] dark:text-[#a1a1aa] transition-colors duration-300">
@@ -170,14 +167,14 @@ export default function PhaseCard({
             </span>
           </Tooltip>
         </div>
-        <Tooltip content="View phase details" side="left">
+        {/* <Tooltip content="View phase details" side="left">
           <div
             className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-[#e4e4e7] dark:bg-[#27272a] hover:bg-[#d4d4d8] dark:hover:bg-[#3f3f46] text-[#3f3f46] dark:text-[#a1a1aa] transition-colors duration-200"
             aria-label="View phase"
           >
             <ArrowRight size={16} strokeWidth={2} />
           </div>
-        </Tooltip>
+        </Tooltip> */}
       </div>
     </article>
   )

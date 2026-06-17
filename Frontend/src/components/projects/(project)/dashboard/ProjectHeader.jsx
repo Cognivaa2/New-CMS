@@ -4,11 +4,11 @@ export default function ProjectHeader({ activeTab, setActiveTab }) {
   // const tabs = ["Overview", "Execution", "Insights"];
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start mb-8 w-full">
+    <div className="flex flex-col md:flex-row justify-between items-start mb-2 w-full">
       <div>
         <h1 className="text-4xl font-sfpro-bold text-gray-400 dark:text-white">Dashboard</h1>
         <p className="text-gray-400 text-sm mt-1 max-w-sm">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+          Get a complete overview of project performance, inventory, procurement, and workforce activities.
         </p>
       </div>
 

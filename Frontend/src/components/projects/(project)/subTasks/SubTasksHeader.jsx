@@ -54,10 +54,8 @@ function colorFor(name = "") {
     return BG_COLORS[sum % BG_COLORS.length]
 }
 
-// ── Avatar — now accepts isSelected + onClick ─────────────────────────
 function Avatar({ user, size = "md", className = "", isSelected = false, onClick }) {
     const sizeClass = size === "sm" ? "w-7 h-7 text-[10px]" : "w-8 h-8 text-xs"
-
     return (
         <Tooltip content={isSelected ? `${user.name} (filtering)` : user.name} side="bottom">
             <button
@@ -66,10 +64,8 @@ function Avatar({ user, size = "md", className = "", isSelected = false, onClick
                 className={[
                     sizeClass,
                     "rounded-full ring-2 overflow-hidden shrink-0 transition-all duration-200 cursor-pointer",
-                    // selected → accent ring, slight scale up
-                    isSelected
-                        ? "ring-[#212121] dark:ring-white scale-110"
-                        : "ring-white dark:ring-[#09090b] hover:scale-105 hover:ring-[#a1a1aa] dark:hover:ring-[#52525b]",
+                    isSelected ? "ring-[#212121] dark:ring-white scale-110"
+                        : "ring-white dark:ring-[#09090b] hover:scale-105 ",
                     className,
                 ].join(" ")}
             >
@@ -85,14 +81,13 @@ function Avatar({ user, size = "md", className = "", isSelected = false, onClick
     )
 }
 
-// ── MembersModal — unchanged ──────────────────────────────────────────
+
+
 function MembersModal({ users, isOpen, onClose, triggerRef }) {
     const dropdownRef = useRef(null)
     const [style, setStyle] = useState({})
     const [mounted, setMounted] = useState(false)
-
     useEffect(() => { setMounted(true) }, [])
-
     useEffect(() => {
         if (!isOpen || !triggerRef?.current) return
         const rect = triggerRef.current.getBoundingClientRect()
@@ -218,7 +213,6 @@ function AvatarStack({ users, isLoading, selectedUserKeycloakId, onUserAvatarCli
                         />
                     ))}
 
-                    {/* +N pill — opens full list modal, does NOT filter */}
                     {overflow > 0 && (
                         <Tooltip content={`${overflow} more member${overflow > 1 ? "s" : ""}`} side="bottom">
                             <button
@@ -341,9 +335,9 @@ export default function SubTasksHeader({
 
     return (
         <>
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-8 transition-colors duration-300 font-sfpro">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-4 transition-colors duration-300 font-sfpro">
                 <div className="min-w-0">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <h1 className="text-[26px] sm:text-[32px] lg:text-[38px] leading-none tracking-tight transition-colors break-word">
                             <span className="text-[#a3a3a3] dark:text-[#858585] font-sfpro-medium">{phaseName} / </span>
                             <span className="text-[#a3a3a3] dark:text-[#858585] font-sfpro-medium">{taskName} / </span>
@@ -356,15 +350,15 @@ export default function SubTasksHeader({
                         )}
                         {isRefreshing && <Loader2 className="w-4 h-4 text-[#71717a] animate-spin mt-1" />}
                     </div>
-                    <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-3 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
+                    <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-1 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
                         Manage subtasks and track progress for this task
                     </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 w-full lg:w-auto">
                     <AvatarStack
                         users={taskUsers}
-                        isLoading={false} 
+                        isLoading={false}
                         selectedUserKeycloakId={selectedUserKeycloakId}
                         onUserAvatarClick={onUserAvatarClick}
                     />
@@ -397,7 +391,7 @@ export default function SubTasksHeader({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex items-center gap-1 w-full sm:w-auto">
                         <div className="shrink-0">
                             <FilterOptions
                                 filters={SUBTASK_FILTERS}
@@ -412,7 +406,7 @@ export default function SubTasksHeader({
                                     className="cursor-pointer w-full flex items-center justify-center gap-2 bg-[#222222] dark:bg-white hover:bg-black dark:hover:bg-gray-200 text-white dark:text-black px-4 py-2.5 rounded-xl text-sm font-sfpro-bold transition-colors duration-300"
                                 >
                                     <Plus className="w-4 h-4" />
-                                    <span className="truncate">Add task</span>
+                                    <span className="truncate">Add Sub Task</span>
                                 </button>
                             </Tooltip>
                         </div>

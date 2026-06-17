@@ -1,4 +1,3 @@
-// controllers/import.controller.js
 import xlsx from "xlsx";
 import ImportJob from "../models/importJob.models.js";
 import Company from "../models/company.models.js";
@@ -15,16 +14,19 @@ const VALID_MODULES = [
     "expenses", "payables", "issues",
 ];
 
+
+
 const resolveCompanyAndUser = async (companyUUID, keycloakId) => {
     const company = await Company.findOne({ companyId: companyUUID, isDeleted: false }).lean();
     if (!company) return { error: "Company not found" };
-
     const user = keycloakId
         ? await User.findOne({ keycloakId, companyId: company._id, isDeleted: false }).lean()
         : null;
-
     return { company, user };
 };
+
+
+
 
 export const uploadImport = async (req, res) => {
     try {
@@ -34,26 +36,21 @@ export const uploadImport = async (req, res) => {
                 new ApiErrors(400, "Missing Header", "x-company-id header is required")
             );
         }
-
         const { module, uploadedBy } = req.body;
-
         if (!module || !VALID_MODULES.includes(module)) {
             return res.status(400).json(
                 new ApiErrors(400, "Invalid Module", `module must be one of: ${VALID_MODULES.join(", ")}`)
             );
         }
-
         if (!req.file) {
             return res.status(400).json(
                 new ApiErrors(400, "No File", "Please upload an Excel (.xlsx) or CSV file")
             );
         }
-
         const { company, error } = await resolveCompanyAndUser(companyUUID, uploadedBy);
         if (error) {
             return res.status(404).json(new ApiErrors(404, "Company Not Found", error));
         }
-
         let rows;
         try {
             const workbook = xlsx.read(req.file.buffer, { type: "buffer", cellDates: true });
@@ -64,17 +61,14 @@ export const uploadImport = async (req, res) => {
                 new ApiErrors(400, "Invalid File", "Could not parse file. Ensure it is a valid .xlsx or .csv file")
             );
         }
-
         if (!rows || rows.length === 0) {
             return res.status(400).json(
                 new ApiErrors(400, "Empty File", "The uploaded file has no data rows")
             );
         }
-
         const user = uploadedBy
             ? await User.findOne({ keycloakId: uploadedBy, companyId: company._id, isDeleted: false }).lean()
             : null;
-
         const job = await ImportJob.create({
             companyId: company._id,
             module,
@@ -82,7 +76,6 @@ export const uploadImport = async (req, res) => {
             totalRows: rows.length,
             createdBy: user?._id || null,
         });
-
         setImmediate(() => {
             processImport({
                 jobId: job._id,
@@ -95,9 +88,7 @@ export const uploadImport = async (req, res) => {
                 logger.error("processImport unhandled error", { jobId: job._id, error: err.message })
             );
         });
-
         logger.info("Import job created", { jobId: job._id, module, rows: rows.length });
-
         return res.status(202).json(
             new ApiResponse(
                 202,
@@ -114,29 +105,29 @@ export const uploadImport = async (req, res) => {
     }
 };
 
+
+
+
+
 export const getImportStatus = async (req, res) => {
     try {
         const { jobId } = req.params;
         const companyUUID = req.headers["x-company-id"];
-
         if (!companyUUID?.trim()) {
             return res.status(400).json(
                 new ApiErrors(400, "Missing Header", "x-company-id header is required")
             );
         }
-
         const company = await Company.findOne({ companyId: companyUUID, isDeleted: false }).lean();
         if (!company) {
             return res.status(404).json(new ApiErrors(404, "Company Not Found", "Invalid companyId"));
         }
-
         const job = await ImportJob.findOne({ _id: jobId, companyId: company._id }).lean();
         if (!job) {
             return res.status(404).json(
                 new ApiErrors(404, "Job Not Found", "No import job found with the provided jobId")
             );
         }
-
         return res.status(200).json(
             new ApiResponse(
                 200,
@@ -164,6 +155,9 @@ export const getImportStatus = async (req, res) => {
     }
 };
 
+
+
+
 export const getImportHistory = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -172,20 +166,16 @@ export const getImportHistory = async (req, res) => {
                 new ApiErrors(400, "Missing Header", "x-company-id header is required")
             );
         }
-
         const company = await Company.findOne({ companyId: companyUUID, isDeleted: false }).lean();
         if (!company) {
             return res.status(404).json(new ApiErrors(404, "Company Not Found", "Invalid companyId"));
         }
-
         const { page = 1, limit = 20, module, status } = req.query;
         const pageNumber = Math.max(1, parseInt(page));
         const pageSize = Math.min(50, Math.max(1, parseInt(limit)));
-
         const filter = { companyId: company._id };
         if (module && VALID_MODULES.includes(module)) filter.module = module;
         if (status) filter.status = status;
-
         const [jobs, total] = await Promise.all([
             ImportJob.find(filter)
                 .select("-results")
@@ -195,7 +185,6 @@ export const getImportHistory = async (req, res) => {
                 .lean(),
             ImportJob.countDocuments(filter),
         ]);
-
         return res.status(200).json(
             new ApiResponse(
                 200,

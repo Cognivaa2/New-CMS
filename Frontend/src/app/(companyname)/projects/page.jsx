@@ -285,7 +285,7 @@ export default function Projects() {
   if (isInitialLoad) return <ProjectsLoading />
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212]  rounded-lg py-12 px-6 lg:px-12 transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212]  rounded-lg p-4 transition-colors duration-300">
       <ProjectsHeader
         count={pagination.total}
         description="Manage your company projects — create, update, track progress, and export project data from one place."
