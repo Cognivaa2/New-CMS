@@ -87,7 +87,7 @@ export default function CEHeader({
     const showControls = activeTab === "All Entries"
 
     return (
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 w-full mb-8 font-sfpro transition-colors duration-300">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-2 w-full mb-8 font-sfpro transition-colors duration-300">
             <div className="min-w-0">
                 <div className="flex items-center gap-3">
                     <h1 className="text-[30px] sm:text-[36px] lg:text-[42px] font-sfpro-bold text-[#a3a3a3] dark:text-[#858585] leading-none tracking-tight transition-colors wrap-break-words">
@@ -110,7 +110,7 @@ export default function CEHeader({
                 </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
                 {showControls && (
                     <>
                         <div className="relative flex items-center w-full sm:w-[320px] lg:w-[320px]">
@@ -140,7 +140,7 @@ export default function CEHeader({
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                             <div className="shrink-0">
                                 <FilterOptions
                                     filters={CE_FILTERS}

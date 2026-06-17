@@ -151,7 +151,7 @@ export default function ThreeWayMatchPage() {
             <TWMStats stats={stats} />
 
             {error && !isRefreshing ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="flex flex-col items-center justify-center py-20 gap-2">
                     <p className="text-sm text-gray-400 dark:text-[#71717a] font-sfpro">
                         {error}
                     </p>
