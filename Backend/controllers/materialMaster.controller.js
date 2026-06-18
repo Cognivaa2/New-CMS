@@ -34,7 +34,7 @@ export const createMaterial = async (req, res) => {
                 new ApiErrors(400, "Missing Header", ["x-company-id header is required"])
             );
         }
-        const { name, category, unit, description, createdBy } = req.body;
+        const { name, category, unit, description, sacNumber, createdBy } = req.body;
         const missing = [];
         if (!name?.trim()) missing.push("name");
         if (!unit?.trim()) missing.push("unit");
@@ -59,6 +59,7 @@ export const createMaterial = async (req, res) => {
         const material = await MaterialMaster.create({
             companyId: company._id,
             name: name.trim(),
+            sacNumber: sacNumber?.trim() || null,
             category: category?.trim() || null,
             unit: unit.trim(),
             description: description?.trim() || null,
@@ -77,6 +78,7 @@ export const createMaterial = async (req, res) => {
                     name: material.name,
                     category: material.category,
                     unit: material.unit,
+                    sacNumber: material.sacNumber,
                     description: material.description,
                     isActive: material.isActive,
                     createdBy: material.createdBy,
@@ -226,7 +228,7 @@ export const getMaterialsLookup = async (req, res) => {
             filter.name = { $regex: search.trim(), $options: "i" };
         }
         const materials = await MaterialMaster.find(filter)
-            .select("_id name unit category")
+            .select("_id name unit category sacNumber")
             .sort({ name: 1 })
             .limit(200)
             .lean();
@@ -328,8 +330,8 @@ export const editMaterial = async (req, res) => {
                 new ApiErrors(404, "Material Not Found", ["No material found with the given ID for this company"])
             );
         }
-        const { name, category, unit, description, updatedBy } = req.body;
-        const allowedFields = ["name", "category", "unit", "description"];
+        const { name, category, unit, description, updatedBy, sacNumber } = req.body;
+        const allowedFields = ["name", "category", "unit", "description", "sacNumber"];
         const provided = allowedFields.filter((f) => req.body[f] !== undefined);
         if (provided.length === 0) {
             return res.status(400).json(
@@ -368,6 +370,9 @@ export const editMaterial = async (req, res) => {
         if (description !== undefined) {
             updates.description = description === null || description === "" ? null : description.trim();
         }
+        if (sacNumber !== undefined) {
+            updates.sacNumber = sacNumber === null || sacNumber === "" ? null : sacNumber.trim();
+        }
         if (errors.length > 0) {
             return res.status(400).json(
                 new ApiErrors(400, "Validation Failed", errors)
@@ -399,6 +404,7 @@ export const editMaterial = async (req, res) => {
                     name: updated.name,
                     category: updated.category,
                     unit: updated.unit,
+                    sacNumber: updated.sacNumber,
                     description: updated.description,
                     isActive: updated.isActive,
                     updatedAt: updated.updatedAt,

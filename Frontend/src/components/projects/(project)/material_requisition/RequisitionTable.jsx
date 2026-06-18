@@ -350,37 +350,37 @@ function RequisitionRow({ row, menuItems, isLast, onView }) {
       className={`group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 cursor-pointer ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""
         }`}
     >
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.mrNumber
           ? <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">{row.mrNumber}</span>
           : <NA />}
       </td>
-      <td className="px-5 py-4">
+      <td className="px-5 py-2">
         {row.materials
           ? <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] line-clamp-2 max-w-55">{row.materials}</p>
           : <NA />}
       </td>
-      <td className="px-5 py-4">
+      <td className="px-5 py-2">
         {row.quantities
           ? <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-45">{row.quantities}</p>
           : <NA />}
       </td>
-      <td className="px-5 py-4"><TextCell text={row.reason} maxLines={2} /></td>
-      <td className="px-5 py-4"><TextCell text={row.remarks} maxLines={2} /></td>
-      <td className="px-5 py-4 whitespace-nowrap"><StatusPill status={row.status} /></td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2"><TextCell text={row.reason} maxLines={2} /></td>
+      <td className="px-5 py-2"><TextCell text={row.remarks} maxLines={2} /></td>
+      <td className="px-5 py-2 whitespace-nowrap"><StatusPill status={row.status} /></td>
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.neededBy
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.neededBy}</span>
           : <NA />}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap"><UserCell user={row.requestedBy} /></td>
-      <td className="px-5 py-4"><ActionedByCell row={row} /></td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap"><UserCell user={row.requestedBy} /></td>
+      <td className="px-5 py-2"><ActionedByCell row={row} /></td>
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.createdAt
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.createdAt}</span>
           : <NA />}
       </td>
-      <td className="px-4 py-4 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+      <td className="px-4 py-2 whitespace-nowrap" onClick={e => e.stopPropagation()}>
         <div className="flex justify-center">
           <ThreeDotMenu
             items={menuItems} size="sm"
@@ -396,7 +396,7 @@ function SkeletonRow() {
   return (
     <tr className="border-b border-[#f0f0f0] dark:border-[#1e1e1e]">
       {HEADERS.map((_, i) => (
-        <td key={i} className="px-5 py-4">
+        <td key={i} className="px-5 py-2">
           <div className="h-4 bg-gray-100 dark:bg-[#27272a] rounded animate-pulse" />
         </td>
       ))}

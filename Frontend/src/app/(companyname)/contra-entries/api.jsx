@@ -41,6 +41,36 @@ export function formatCurrency(val) {
     })}`
 }
 
+export function formatCompactNumber(val) {
+    if (val == null || isNaN(val)) return "0"
+
+    const num = Number(val)
+    const abs = Math.abs(num)
+    const sign = num < 0 ? "-" : ""
+    const short = (n) => Number(n.toFixed(1)).toString()
+
+    if (abs >= 1e7) return `${sign}${short(abs / 1e7)}Cr`
+    if (abs >= 1e5) return `${sign}${short(abs / 1e5)}L`
+    if (abs >= 1e3) return `${sign}${short(abs / 1e3)}K`
+
+    return `${num}`
+}
+
+export function formatCompactCurrency(val) {
+    if (val == null || isNaN(val)) return "₹0"
+
+    const num = Number(val)
+    const abs = Math.abs(num)
+    const sign = num < 0 ? "-" : ""
+    const short = (n) => Number(n.toFixed(1)).toString()
+
+    if (abs >= 1e7) return `${sign}₹${short(abs / 1e7)}Cr`
+    if (abs >= 1e5) return `${sign}₹${short(abs / 1e5)}L`
+    if (abs >= 1e3) return `${sign}₹${short(abs / 1e3)}K`
+
+    return `${sign}₹${abs.toLocaleString("en-IN")}`
+}
+
 export const CE_STATUS_CONFIG = {
     Draft: {
         label: "Draft",
@@ -135,10 +165,10 @@ export function mapCE(raw) {
     }
 }
 export function computeCEStats(records) {
-    const draft = records.filter((r) => r.status === "Draft").length
+    const draft     = records.filter((r) => r.status === "Draft").length
     const submitted = records.filter((r) => r.status === "Submitted").length
-    const approved = records.filter((r) => r.status === "Approved").length
-    const rejected = records.filter((r) => r.status === "Rejected").length
+    const approved  = records.filter((r) => r.status === "Approved").length
+    const rejected  = records.filter((r) => r.status === "Rejected").length
 
     const totalAmount = records.reduce((s, r) => s + (r.adjustmentAmount || 0), 0)
     const approvedAmount = records
@@ -147,29 +177,38 @@ export function computeCEStats(records) {
 
     return [
         {
-            id: 1, title: "Draft",
-            value: draft, subtitle: "Pending submission",
+            id: 1,
+            title: "Draft",
+            value: formatCompactNumber(draft),
+            subtitle: "Pending submission",
             colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
         },
         {
-            id: 2, title: "Submitted",
-            value: submitted, subtitle: "Awaiting approval",
+            id: 2,
+            title: "Submitted",
+            value: formatCompactNumber(submitted),
+            subtitle: "Awaiting approval",
             colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
         },
         {
-            id: 3, title: "Approved",
-            value: approved, subtitle: "Applied to POs",
+            id: 3,
+            title: "Approved",
+            value: formatCompactNumber(approved),
+            subtitle: "Applied to POs",
             colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
         },
         {
-            id: 4, title: "Rejected",
-            value: rejected, subtitle: "Declined entries",
+            id: 4,
+            title: "Rejected",
+            value: formatCompactNumber(rejected),
+            subtitle: "Declined entries",
             colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
         },
         {
-            id: 5, title: "Approved Amt",
-            value: formatCurrency(approvedAmount),
-            subtitle: `Total: ${formatCurrency(totalAmount)}`,
+            id: 5,
+            title: "Approved Amt",
+            value: formatCompactCurrency(approvedAmount),
+            subtitle: `Total: ${formatCompactCurrency(totalAmount)}`,
             colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
         },
     ]

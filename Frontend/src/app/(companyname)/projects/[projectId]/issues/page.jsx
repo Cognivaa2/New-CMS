@@ -34,9 +34,9 @@ const ISSUE_FILTERS = [
     key: "status",
     label: "Status",
     options: [
-      { value: "Resolved", label: "Resolved" },
+      { value: "Resolved",    label: "Resolved" },
       { value: "In Progress", label: "In Progress" },
-      { value: "Blocked", label: "Blocked" },
+      { value: "Blocked",     label: "Blocked" },
     ],
   },
   {
@@ -44,9 +44,9 @@ const ISSUE_FILTERS = [
     label: "Priority",
     options: [
       { value: "critical", label: "Critical" },
-      { value: "high", label: "High" },
-      { value: "medium", label: "Medium" },
-      { value: "low", label: "Low" },
+      { value: "high",     label: "High" },
+      { value: "medium",   label: "Medium" },
+      { value: "low",      label: "Low" },
     ],
   },
   {
@@ -55,95 +55,99 @@ const ISSUE_FILTERS = [
     options: [
       { value: "createdAt", label: "Created Date" },
       { value: "updatedAt", label: "Updated Date" },
-      { value: "priority", label: "Priority" },
-      { value: "dueDate", label: "Due Date" },
-      { value: "title", label: "Title" },
+      { value: "priority",  label: "Priority" },
+      { value: "dueDate",   label: "Due Date" },
+      { value: "title",     label: "Title" },
     ],
   },
 ]
 
+const LIMIT = 20
+
 export default function IssuesPage() {
   const { projectId } = useParams()
-
   const [stats, setStats] = useState([])
-  const [issues, setIssues] = useState([])
-  const [pagination, setPagination] = useState({
-    page: 1, limit: 20, total: 0, totalPages: 0,
-  })
+
+  const [issues, setIssues]         = useState([])
+  const [total, setTotal]           = useState(0)
+  const [hasMore, setHasMore]       = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+
   const [filters, setFilters] = useState({
-    page: 1, limit: 20, search: "", status: undefined,
-    priority: undefined, sortBy: "createdAt", order: "desc",
+    search: "", status: undefined, priority: undefined,
+    sortBy: "createdAt", order: "desc",
   })
 
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isInitialLoad,  setIsInitialLoad]  = useState(true)
+  const [isRefreshing,   setIsRefreshing]   = useState(false)
+  const [isLoadingMore,  setIsLoadingMore]  = useState(false)
 
-  const [isAddOpen, setIsAddOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [editingIssue, setEditingIssue] = useState(null)
-  const [isEditLoading, setIsEditLoading] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-  const [rejectTarget, setRejectTarget] = useState(null)
-  const [isRejecting, setIsRejecting] = useState(false)
+  const [isAddOpen,          setIsAddOpen]          = useState(false)
+  const [isEditOpen,         setIsEditOpen]          = useState(false)
+  const [editingIssue,       setEditingIssue]        = useState(null)
+  const [isEditLoading,      setIsEditLoading]       = useState(false)
+  const [isDeleteModalOpen,  setIsDeleteModalOpen]   = useState(false)
+  const [deleteTarget,       setDeleteTarget]        = useState(null)
+  const [isDeleting,         setIsDeleting]          = useState(false)
+  const [isRejectModalOpen,  setIsRejectModalOpen]   = useState(false)
+  const [rejectTarget,       setRejectTarget]        = useState(null)
+  const [isRejecting,        setIsRejecting]         = useState(false)
 
-  const [projectUsers, setProjectUsers] = useState([])
-  const [isLoadingUsers, setIsLoadingUsers] = useState(false)
+  const [projectUsers,    setProjectUsers]    = useState([])
+  const [isLoadingUsers,  setIsLoadingUsers]  = useState(false)
 
-  const filtersRef = useRef(filters)
-  const isInitialLoadRef = useRef(true)
-  const fetchLockRef = useRef(false)
-  const controllerRef = useRef(null)
+  const filtersRef           = useRef(filters)
+  const isInitialLoadRef     = useRef(true)
+  const controllerRef        = useRef(null)
   const summaryControllerRef = useRef(null)
-  const editFetchRef = useRef(null)
-  const usersControllerRef = useRef(null)
-
+  const editFetchRef         = useRef(null)
+  const usersControllerRef   = useRef(null)
   filtersRef.current = filters
 
   const debouncedSetSearch = useRef(
     debounce((query) => {
-      setFilters((prev) => ({ ...prev, search: query, page: 1 }))
+      setFilters((prev) => ({ ...prev, search: query }))
     }, 400)
   ).current
 
   const loadSummary = useCallback(async () => {
-    if (summaryControllerRef.current) summaryControllerRef.current.abort()
+    summaryControllerRef.current?.abort()
     const controller = new AbortController()
     summaryControllerRef.current = controller
     try {
       const result = await fetchIssueSummary(projectId || null, controller.signal)
-      if (!controller.signal.aborted) {
-        setStats(result.stats)
-      }
+      if (!controller.signal.aborted) setStats(result.stats)
     } catch (err) {
-      if (err.name !== "CanceledError") {
-        console.error("Failed to load issue summary:", err)
-      }
+      if (err.name !== "CanceledError") console.error("Failed to load issue summary:", err)
     } finally {
-      if (summaryControllerRef.current === controller) {
-        summaryControllerRef.current = null
-      }
+      if (summaryControllerRef.current === controller) summaryControllerRef.current = null
     }
   }, [projectId])
 
-  const loadIssues = useCallback(async () => {
-    if (fetchLockRef.current) return
-    fetchLockRef.current = true
-    if (controllerRef.current) controllerRef.current.abort()
+  const loadFresh = useCallback(async (showLoader = false) => {
+    controllerRef.current?.abort()
     const controller = new AbortController()
     controllerRef.current = controller
+
+    if (showLoader) setIsRefreshing(true)
+
     try {
-      if (!isInitialLoadRef.current) setIsRefreshing(true)
-      const { issues: fetched, pagination: newPag } = await fetchAllIssues({
+      const { issues: fetched, pagination } = await fetchAllIssues({
         ...filtersRef.current,
+        page: 1,
+        limit: LIMIT,
         projectId: projectId || undefined,
         signal: controller.signal,
       })
       if (controller.signal.aborted) return
+
       setIssues(fetched)
-      setPagination(newPag)
+      setTotal(pagination.total ?? fetched.length)
+      setHasMore(
+        pagination.hasNext ??
+        (pagination.page < (pagination.totalPages ?? 1))
+      )
+      setCurrentPage(1)
     } catch (err) {
       if (err.name !== "CanceledError") {
         toast.error("Failed to load issues", { description: formatToastError(err) })
@@ -153,26 +157,48 @@ export default function IssuesPage() {
       isInitialLoadRef.current = false
       setIsInitialLoad(false)
       setIsRefreshing(false)
-      fetchLockRef.current = false
-      controllerRef.current = null
     }
   }, [projectId])
 
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || !projectId) return
+
+    setIsLoadingMore(true)
+    const nextPage = currentPage + 1
+
+    try {
+      const { issues: fetched, pagination } = await fetchAllIssues({
+        ...filtersRef.current,
+        page: nextPage,
+        limit: LIMIT,
+        projectId: projectId || undefined,
+      })
+
+      setIssues(prev => [...prev, ...fetched])
+      setHasMore(
+        pagination.hasNext ??
+        (pagination.page < (pagination.totalPages ?? 1))
+      )
+      setCurrentPage(nextPage)
+    } catch (err) {
+      if (err.name !== "CanceledError") {
+        toast.error("Failed to load more issues", { description: formatToastError(err) })
+      }
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [projectId, isLoadingMore, hasMore, currentPage])
   const loadProjectUsers = useCallback(async () => {
     if (!projectId) return
-    if (usersControllerRef.current) usersControllerRef.current.abort()
+    usersControllerRef.current?.abort()
     const controller = new AbortController()
     usersControllerRef.current = controller
     setIsLoadingUsers(true)
     try {
       const users = await fetchProjectUsers(projectId, controller.signal)
-      if (!controller.signal.aborted) {
-        setProjectUsers(users)
-      }
+      if (!controller.signal.aborted) setProjectUsers(users)
     } catch (err) {
-      if (err.name !== "CanceledError") {
-        console.error("Failed to load project users:", err)
-      }
+      if (err.name !== "CanceledError") console.error("Failed to load project users:", err)
     } finally {
       if (!controller.signal.aborted) setIsLoadingUsers(false)
       if (usersControllerRef.current === controller) usersControllerRef.current = null
@@ -181,16 +207,12 @@ export default function IssuesPage() {
 
   useEffect(() => {
     loadSummary()
-    return () => summaryControllerRef.current?.abort()
-  }, [loadSummary])
-
-  useEffect(() => {
-    loadIssues()
+    loadFresh(isInitialLoadRef.current ? false : true)
     return () => controllerRef.current?.abort()
   }, [
     filters.search, filters.status, filters.priority,
-    filters.sortBy, filters.order, filters.page,
-    loadIssues,
+    filters.sortBy, filters.order,
+    loadFresh, loadSummary,
   ])
 
   useEffect(() => {
@@ -198,13 +220,11 @@ export default function IssuesPage() {
     return () => usersControllerRef.current?.abort()
   }, [loadProjectUsers])
 
-  useEffect(() => {
-    return () => {
-      controllerRef.current?.abort()
-      summaryControllerRef.current?.abort()
-      editFetchRef.current?.abort()
-      usersControllerRef.current?.abort()
-    }
+  useEffect(() => () => {
+    controllerRef.current?.abort()
+    summaryControllerRef.current?.abort()
+    editFetchRef.current?.abort()
+    usersControllerRef.current?.abort()
   }, [])
 
   const handleResolve = useCallback(async (issue) => {
@@ -217,8 +237,8 @@ export default function IssuesPage() {
     try {
       const res = await resolveIssue(issue.id)
       toast.success(res.message, { description: res.description })
-      setIssues((prev) =>
-        prev.map((i) =>
+      setIssues(prev =>
+        prev.map(i =>
           i.id === issue.id
             ? { ...i, status: "Resolved", backendStatus: "resolved", resolvedAt: new Date().toLocaleString() }
             : i
@@ -249,12 +269,12 @@ export default function IssuesPage() {
 
   const handleConfirmReject = async (remark) => {
     if (!rejectTarget || !remark?.trim()) return
+    setIsRejecting(true)
     try {
-      setIsRejecting(true)
       const res = await rejectIssue(rejectTarget.id, remark)
       toast.success(res.message, { description: res.description })
-      setIssues((prev) =>
-        prev.map((i) =>
+      setIssues(prev =>
+        prev.map(i =>
           i.id === rejectTarget.id
             ? { ...i, status: "Blocked", backendStatus: "rejected", rejectionRemark: remark, rejectedAt: new Date().toLocaleString() }
             : i
@@ -279,27 +299,24 @@ export default function IssuesPage() {
     try {
       const res = await assignUserToIssue(issueId, keycloakId)
       toast.success(res.message, { description: res.description })
-      setIssues((prev) =>
-        prev.map((issue) => {
-          if (issue.id === issueId) {
-            const alreadyAssigned = (issue.assignedTo || []).some((a) => a.keycloakId === keycloakId)
-            if (!alreadyAssigned) {
-              return {
-                ...issue,
-                assignedTo: [
-                  ...(issue.assignedTo || []),
-                  {
-                    keycloakId: user.keycloakId || user.id,
-                    name: user.name || "Unknown",
-                    email: user.email || "",
-                    avatar: user.avatar || null,
-                    role: user.role || "Team Member",
-                  },
-                ],
-              }
-            }
+      setIssues(prev =>
+        prev.map(issue => {
+          if (issue.id !== issueId) return issue
+          const already = (issue.assignedTo || []).some(a => a.keycloakId === keycloakId)
+          if (already) return issue
+          return {
+            ...issue,
+            assignedTo: [
+              ...(issue.assignedTo || []),
+              {
+                keycloakId: user.keycloakId || user.id,
+                name: user.name || "Unknown",
+                email: user.email || "",
+                avatar: user.avatar || null,
+                role: user.role || "Team Member",
+              },
+            ],
           }
-          return issue
         })
       )
       return res
@@ -318,16 +335,12 @@ export default function IssuesPage() {
     try {
       const res = await unassignUserFromIssue(issueId, keycloakId)
       toast.success(res.message, { description: res.description })
-      setIssues((prev) =>
-        prev.map((issue) => {
-          if (issue.id === issueId) {
-            return {
-              ...issue,
-              assignedTo: (issue.assignedTo || []).filter((a) => a.keycloakId !== keycloakId),
-            }
-          }
-          return issue
-        })
+      setIssues(prev =>
+        prev.map(issue =>
+          issue.id === issueId
+            ? { ...issue, assignedTo: (issue.assignedTo || []).filter(a => a.keycloakId !== keycloakId) }
+            : issue
+        )
       )
       return res
     } catch (err) {
@@ -343,27 +356,15 @@ export default function IssuesPage() {
 
   const handleFilter = useCallback((selectedFilters) => {
     const updates = {}
-    if (selectedFilters?.status?.length > 0) {
-      updates.status = selectedFilters.status[selectedFilters.status.length - 1]
-    } else {
-      updates.status = undefined
-    }
-    if (selectedFilters?.priority?.length > 0) {
-      updates.priority = selectedFilters.priority[selectedFilters.priority.length - 1]
-    } else {
-      updates.priority = undefined
-    }
+    updates.status   = selectedFilters?.status?.length   > 0 ? selectedFilters.status[selectedFilters.status.length - 1]     : undefined
+    updates.priority = selectedFilters?.priority?.length > 0 ? selectedFilters.priority[selectedFilters.priority.length - 1] : undefined
     if (selectedFilters?.sortBy?.length > 0) {
       updates.sortBy = selectedFilters.sortBy[selectedFilters.sortBy.length - 1]
     }
-    setFilters((prev) => ({ ...prev, ...updates, page: 1 }))
+    setFilters(prev => ({ ...prev, ...updates }))
   }, [])
 
-  const handlePageChange = useCallback((newPage) => {
-    setFilters((prev) => ({ ...prev, page: newPage }))
-  }, [])
-
-  const handleOpenAdd = useCallback(() => setIsAddOpen(true), [])
+  const handleOpenAdd  = useCallback(() => setIsAddOpen(true),  [])
   const handleCloseAdd = useCallback(() => setIsAddOpen(false), [])
 
   const handleSaveNewIssue = async (payload) => {
@@ -371,7 +372,7 @@ export default function IssuesPage() {
       const res = await createIssue({ ...payload, projectId })
       toast.success(res.message, { description: res.description })
       setIsAddOpen(false)
-      loadIssues()
+      loadFresh(true)
       loadSummary()
     } catch (err) {
       toast.error("Create Failed", { description: formatToastError(err) })
@@ -391,12 +392,8 @@ export default function IssuesPage() {
     setIsEditLoading(true)
     setIsEditOpen(true)
     fetchIssueById(issue.id, controller.signal)
-      .then((fullIssue) => {
-        if (!controller.signal.aborted) setEditingIssue(fullIssue)
-      })
-      .catch((err) => {
-        if (err.name !== "CanceledError") console.error("Failed to fetch issue details:", err)
-      })
+      .then(full => { if (!controller.signal.aborted) setEditingIssue(full) })
+      .catch(err => { if (err.name !== "CanceledError") console.error("Failed to fetch issue:", err) })
       .finally(() => {
         if (!controller.signal.aborted) setIsEditLoading(false)
         if (editFetchRef.current === controller) editFetchRef.current = null
@@ -417,7 +414,7 @@ export default function IssuesPage() {
       const res = await editIssue(editingIssue.id, formData)
       toast.success(res.message, { description: res.description })
       handleCloseEdit()
-      loadIssues()
+      loadFresh(true)
       loadSummary()
     } catch (err) {
       toast.error("Update Failed", { description: formatToastError(err) })
@@ -442,12 +439,12 @@ export default function IssuesPage() {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
+    setIsDeleting(true)
     try {
-      setIsDeleting(true)
       const res = await deleteIssue(deleteTarget.id)
       toast.success(res.message, { description: res.description })
-      setIssues((prev) => prev.filter((i) => i.id !== deleteTarget.id))
-      setPagination((prev) => ({ ...prev, total: prev.total - 1 }))
+      setIssues(prev => prev.filter(i => i.id !== deleteTarget.id))
+      setTotal(prev => Math.max(0, prev - 1))
       setIsDeleteModalOpen(false)
       setDeleteTarget(null)
       loadSummary()
@@ -461,10 +458,10 @@ export default function IssuesPage() {
   if (isInitialLoad) return <Loading />
 
   return (
-    <div className="w-full mx-auto py-8 px-4 sm:px-6 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
+    <div className="w-full mx-auto p-4 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
       <IssueHeader
         title="Issues"
-        badgeCount={pagination.total}
+        badgeCount={total}
         description="Track and manage all project issues, bugs and blockers"
         filters={ISSUE_FILTERS}
         onSearch={handleSearch}
@@ -473,18 +470,19 @@ export default function IssuesPage() {
         isRefreshing={isRefreshing}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat) => (
-          <SummaryCard key={stat.id} item={stat} />
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        {stats.map(stat => <SummaryCard key={stat.id} item={stat} />)}
       </div>
 
       <IssueTable
         data={issues}
+        isLoading={isRefreshing}
+        loadingMore={isLoadingMore}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
+        total={total}
         onEdit={handleEditClick}
         onDelete={handleDeleteClick}
-        pagination={pagination}
-        onPageChange={handlePageChange}
         projectUsers={projectUsers}
         isLoadingUsers={isLoadingUsers}
         onAssignMember={handleAssignMember}
@@ -498,7 +496,6 @@ export default function IssuesPage() {
         onClose={handleCloseAdd}
         onSave={handleSaveNewIssue}
       />
-
       <EditIssueModal
         open={isEditOpen}
         onClose={handleCloseEdit}
@@ -506,7 +503,6 @@ export default function IssuesPage() {
         issue={editingIssue}
         isEditLoading={isEditLoading}
       />
-
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDelete}
@@ -516,7 +512,6 @@ export default function IssuesPage() {
         itemName={deleteTarget?.title || deleteTarget?.issue}
         isLoading={isDeleting}
       />
-
       <RejectModal
         isOpen={isRejectModalOpen}
         onClose={handleCloseReject}

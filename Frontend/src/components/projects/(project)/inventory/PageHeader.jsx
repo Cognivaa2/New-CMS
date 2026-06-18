@@ -3,6 +3,7 @@
 import { Search, SlidersHorizontal, X, Loader2, Plus } from "lucide-react"
 import { useState } from "react"
 import FilterOptions from "@/components/ui/FilterOptions"
+import  Tooltip  from "@/components/ui/Tooltip"
 
 const INVENTORY_FILTERS = [
   {
@@ -113,6 +114,7 @@ export default function InventoryPageHeader({
                 onChange={(selected) => onFilterChange?.(selected)}
               />
             </div>
+            <Tooltip content="Add Materials to This Project" side="left">
             <button
               onClick={onAddMaterial}
               className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 h-10 bg-[#222222] dark:bg-white hover:bg-black dark:hover:bg-gray-200 text-white dark:text-black px-4 rounded-xl text-sm font-sfpro-bold transition-colors duration-300"
@@ -120,6 +122,7 @@ export default function InventoryPageHeader({
               <Plus className="w-4 h-4" />
               <span>Add Material</span>
             </button>
+            </Tooltip>
           </div>
         )}
       </div>

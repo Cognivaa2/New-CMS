@@ -112,8 +112,8 @@ function ReconciliationContent() {
   }, [activeTab, pagination.page, loadData]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg py-12 px-6 lg:px-12 transition-colors duration-300">
-      <div className="max-w-400 mx-auto">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
+      <div className="max-w-screen mx-auto">
 
         <ReconciliationHeader />
 
@@ -123,7 +123,7 @@ function ReconciliationContent() {
         />
 
         {tableError ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="flex flex-col items-center justify-center py-20 gap-2">
             <p className="text-sm text-gray-400 dark:text-[#71717a] font-sfpro">
               {tableError}
             </p>

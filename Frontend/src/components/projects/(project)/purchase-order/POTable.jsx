@@ -5,7 +5,7 @@ import {
   CheckCircle2, Clock, Send, XCircle, FileCheck,
   Truck, PackageCheck, Eye, Edit, Trash2,
   ThumbsUp, ThumbsDown, Ban, Loader2, IndianRupee,
-  Package, PackageOpen,Download,
+  Package, PackageOpen, Download,
 } from "lucide-react"
 import ThreeDotMenu from "@/components/ui/ThreeDotMenu"
 import ViewPOModal from "./ViewPOModal"
@@ -43,6 +43,12 @@ function NA() {
       Not available
     </span>
   )
+}
+
+function sumQty(items = [], field) {
+  if (!items.length) return null
+  const total = items.reduce((acc, item) => acc + (item[field] || 0), 0)
+  return total
 }
 
 function aggregateQty(items = [], field) {
@@ -118,20 +124,18 @@ function UserCell({ user, sublabel }) {
   )
 }
 
-function QtyCell({ items = [], field, icon: Icon, colorClass }) {
-  const lines = aggregateQty(items, field)
-  if (!lines || lines.length === 0) return <NA />
+function TotalQtyCell({ items = [], field, icon: Icon, colorClass }) {
+  const total = sumQty(items, field)
+  if (total === null) return <NA />
   return (
-    <div className="flex flex-col gap-0.5">
-      {lines.map(({ qty, unit }) => (
-        <div key={unit} className="flex items-center gap-1">
-          <Icon className={`w-3 h-3 shrink-0 ${colorClass}`} />
-          <span className={`text-sm font-sfpro-bold ${colorClass}`}>
-            {qty.toLocaleString("en-IN")}
-          </span>
-          <span className="text-[11px] text-gray-400 dark:text-[#71717a] font-sfpro">{unit}</span>
-        </div>
-      ))}
+    <div className="flex items-center gap-1.5">
+      <Icon className={`w-3.5 h-3.5 shrink-0 ${colorClass}`} strokeWidth={2} />
+      <span className={`text-[13px] font-sfpro-bold tabular-nums ${colorClass}`}>
+        {total.toLocaleString("en-IN")}
+      </span>
+      <span className="text-[11px] text-gray-400 dark:text-[#71717a] font-sfpro">
+        {items.length === 1 ? (items[0].unit || "units") : "total"}
+      </span>
     </div>
   )
 }
@@ -202,7 +206,6 @@ function LoadMoreTrigger({ onLoadMore, loadingMore, hasMore }) {
     if (!hasMore || !onLoadMore) return
     const el = ref.current
     if (!el) return
-
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting && !loadingMore) onLoadMore() },
       { threshold: 0.1 }
@@ -227,6 +230,7 @@ function LoadMoreTrigger({ onLoadMore, loadingMore, hasMore }) {
     </div>
   )
 }
+
 export default function POTable({
   data = [],
   isLoading = false,
@@ -239,7 +243,7 @@ export default function POTable({
   onApprove,
   onReject,
   onCancel,
-  onExportPdf,   
+  onExportPdf,
   actionLoading = {},
   projectId,
   total = 0,
@@ -277,65 +281,65 @@ export default function POTable({
 
   useEffect(() => () => { viewFetchRef.current?.abort() }, [])
 
-const buildMenuItems = useCallback((row) => {
-  const loading = actionLoading[row.id]
-  const items = [
-    { 
-      label: "View Details", 
-      icon: <Eye className="w-4 h-4" />, 
-      onClick: () => handleView(row) 
-    },
-    { 
-      label: "Export PDF",
-      icon: <Download className="w-4 h-4" />,   
-      onClick: () => onExportPdf?.(row),
-    },
-  ]
+  const buildMenuItems = useCallback((row) => {
+    const loading = actionLoading[row.id]
+    const items = [
+      {
+        label: "View Details",
+        icon: <Eye className="w-4 h-4" />,
+        onClick: () => handleView(row),
+      },
+      {
+        label: "Export PDF",
+        icon: <Download className="w-4 h-4" />,
+        onClick: () => onExportPdf?.(row),
+      },
+    ]
 
-  if (["Draft", "Rejected"].includes(row.status)) {
-    items.push({ label: "Edit PO", icon: <Edit className="w-4 h-4" />, onClick: () => onEdit?.(row) })
-    items.push({
-      label: loading === "submitting" ? "Submitting…" : "Submit for Approval",
-      icon: loading === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />,
-      onClick: () => !loading && onSubmit?.(row),
-      disabled: !!loading,
-    })
-  }
-  if (row.status === "Submitted") {
-    items.push({
-      label: loading === "approving" ? "Approving…" : "Approve",
-      icon: loading === "approving" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />,
-      onClick: () => !loading && onApprove?.(row),
-      disabled: !!loading,
-    })
-    items.push({
-      label: loading === "rejecting" ? "Rejecting…" : "Reject",
-      icon: loading === "rejecting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />,
-      onClick: () => !loading && onReject?.(row),
-      disabled: !!loading,
-      variant: "danger",
-    })
-  }
-  if (row.status === "Approved") {
-    items.push({
-      label: loading === "cancelling" ? "Cancelling…" : "Cancel PO",
-      icon: loading === "cancelling" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />,
-      onClick: () => !loading && onCancel?.(row),
-      disabled: !!loading,
-      variant: "danger",
-    })
-  }
-  if (["Draft", "Rejected"].includes(row.status)) {
-    items.push("divider")
-    items.push({ 
-      label: "Delete", 
-      icon: <Trash2 className="w-4 h-4" />, 
-      variant: "danger", 
-      onClick: () => onDelete?.(row) 
-    })
-  }
-  return items
-}, [actionLoading, onApprove, onCancel, onDelete, onEdit, onReject, onSubmit, onExportPdf, handleView])
+    if (["Draft", "Rejected"].includes(row.status)) {
+      items.push({ label: "Edit PO", icon: <Edit className="w-4 h-4" />, onClick: () => onEdit?.(row) })
+      items.push({
+        label: loading === "submitting" ? "Submitting…" : "Submit for Approval",
+        icon: loading === "submitting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />,
+        onClick: () => !loading && onSubmit?.(row),
+        disabled: !!loading,
+      })
+    }
+    if (row.status === "Submitted") {
+      items.push({
+        label: loading === "approving" ? "Approving…" : "Approve",
+        icon: loading === "approving" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsUp className="w-4 h-4" />,
+        onClick: () => !loading && onApprove?.(row),
+        disabled: !!loading,
+      })
+      items.push({
+        label: loading === "rejecting" ? "Rejecting…" : "Reject",
+        icon: loading === "rejecting" ? <Loader2 className="w-4 h-4 animate-spin" /> : <ThumbsDown className="w-4 h-4" />,
+        onClick: () => !loading && onReject?.(row),
+        disabled: !!loading,
+        variant: "danger",
+      })
+    }
+    if (row.status === "Approved") {
+      items.push({
+        label: loading === "cancelling" ? "Cancelling…" : "Cancel PO",
+        icon: loading === "cancelling" ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />,
+        onClick: () => !loading && onCancel?.(row),
+        disabled: !!loading,
+        variant: "danger",
+      })
+    }
+    if (["Draft", "Rejected"].includes(row.status)) {
+      items.push("divider")
+      items.push({
+        label: "Delete",
+        icon: <Trash2 className="w-4 h-4" />,
+        variant: "danger",
+        onClick: () => onDelete?.(row),
+      })
+    }
+    return items
+  }, [actionLoading, onApprove, onCancel, onDelete, onEdit, onReject, onSubmit, onExportPdf, handleView])
 
   const POCard = ({ row }) => {
     const config = STATUS_CONFIG[row.status] || STATUS_CONFIG.Draft
@@ -378,10 +382,14 @@ const buildMenuItems = useCallback((row) => {
           <DetailRow label="Items">{row.items?.length ?? 0} item(s)</DetailRow>
           <DetailRow label="Payment Terms">{row.paymentTerms || <NA />}</DetailRow>
           <DetailRow label="Ordered Qty">
-            {fmtQtyLines(ordLines) ? <span className="font-sfpro text-gray-700 dark:text-[#d4d4d8]">{fmtQtyLines(ordLines)}</span> : <NA />}
+            {fmtQtyLines(ordLines)
+              ? <span className="font-sfpro text-gray-700 dark:text-[#d4d4d8]">{fmtQtyLines(ordLines)}</span>
+              : <NA />}
           </DetailRow>
           <DetailRow label="Received Qty">
-            {fmtQtyLines(recvLines) ? <span className="font-sfpro text-gray-700 dark:text-[#d4d4d8]">{fmtQtyLines(recvLines)}</span> : <NA />}
+            {fmtQtyLines(recvLines)
+              ? <span className="font-sfpro text-gray-700 dark:text-[#d4d4d8]">{fmtQtyLines(recvLines)}</span>
+              : <NA />}
           </DetailRow>
         </div>
 
@@ -425,30 +433,51 @@ const buildMenuItems = useCallback((row) => {
     return (
       <tr
         onClick={() => handleView(row)}
-        className={`group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 cursor-pointer ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""
-          }`}
+        className={`group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 cursor-pointer ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""}`}
       >
-        <td className="px-4 py-4 whitespace-nowrap">
-          {row.poId ? <span className="text-[13.5px] font-sfpro-bold text-gray-900 dark:text-white">{row.poId}</span> : <NA />}
+        <td className="px-4 py-2 whitespace-nowrap">
+          {row.poId
+            ? <span className="text-[13.5px] font-sfpro-bold text-gray-900 dark:text-white">{row.poId}</span>
+            : <NA />}
         </td>
-        <td className="px-4 py-4 whitespace-nowrap">
-          {row.vendorName ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.vendorName}</span> : <NA />}
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          {row.vendorName
+            ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.vendorName}</span>
+            : <NA />}
         </td>
-        <td className="px-4 py-4">
-          {row.materials ? <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-50">{row.materials}</p> : <NA />}
+
+        <td className="px-4 py-2">
+          {row.materials
+            ? <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-50">{row.materials}</p>
+            : <NA />}
         </td>
-        <td className="px-4 py-4 whitespace-nowrap text-center">
+
+        <td className="px-4 py-2 whitespace-nowrap text-center">
           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-[#27272a] text-[11px] font-sfpro-bold text-gray-600 dark:text-[#a1a1aa]">
             {row.items?.length ?? 0}
           </span>
         </td>
-        <td className="px-4 py-4 whitespace-nowrap">
-          <QtyCell items={row.items} field="orderedQuantity" icon={Package} colorClass="text-gray-700 dark:text-[#d4d4d8]" />
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          <TotalQtyCell
+            items={row.items}
+            field="orderedQuantity"
+            icon={Package}
+            colorClass="text-gray-700 dark:text-[#d4d4d8]"
+          />
         </td>
-        <td className="px-4 py-4 whitespace-nowrap">
-          <QtyCell items={row.items} field="receivedQuantity" icon={PackageOpen} colorClass="text-emerald-600 dark:text-emerald-400" />
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          <TotalQtyCell
+            items={row.items}
+            field="receivedQuantity"
+            icon={PackageOpen}
+            colorClass="text-emerald-600 dark:text-emerald-400"
+          />
         </td>
-        <td className="px-4 py-4 whitespace-nowrap">
+
+        <td className="px-4 py-2 whitespace-nowrap">
           <div className="flex items-center gap-1">
             <IndianRupee className="w-3 h-3 text-gray-400" />
             <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
@@ -456,18 +485,32 @@ const buildMenuItems = useCallback((row) => {
             </span>
           </div>
         </td>
-        <td className="px-4 py-4 whitespace-nowrap"><StatusPill status={row.status} /></td>
-        <td className="px-4 py-4 whitespace-nowrap">
-          {row.expectedDelivery ? <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.expectedDelivery}</span> : <NA />}
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          <StatusPill status={row.status} />
         </td>
-        <td className="px-4 py-4 whitespace-nowrap"><UserCell user={row.createdBy} /></td>
-        <td className="px-4 py-4 whitespace-nowrap">
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          {row.expectedDelivery
+            ? <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.expectedDelivery}</span>
+            : <NA />}
+        </td>
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          <UserCell user={row.createdBy} />
+        </td>
+
+        <td className="px-4 py-2 whitespace-nowrap">
           {actioned?.user ? <UserCell user={actioned.user} sublabel={actioned.label} /> : <NA />}
         </td>
-        <td className="px-4 py-4 whitespace-nowrap">
-          {row.createdAt ? <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.createdAt}</span> : <NA />}
+
+        <td className="px-4 py-2 whitespace-nowrap">
+          {row.createdAt
+            ? <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.createdAt}</span>
+            : <NA />}
         </td>
-        <td className="px-4 py-4 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+
+        <td className="px-4 py-2 whitespace-nowrap" onClick={e => e.stopPropagation()}>
           <div className="flex justify-center">
             <ThreeDotMenu
               items={buildMenuItems(row)} size="sm"
@@ -494,6 +537,7 @@ const buildMenuItems = useCallback((row) => {
               </>
           }
         </div>
+
         <div className="hidden lg:block w-full rounded-2xl border border-[#EAEAEA] dark:border-[#252525] overflow-hidden shadow-sm">
           <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
             <table className="w-full border-collapse">

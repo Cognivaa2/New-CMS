@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import PurchaseOrder from "../models/purchaseOrder.models.js";
 import MaterialRequisition from "../models/materialRequisition.models.js";
+import MaterialMaster from "../models/materialMaster.models.js";
 import Vendor from "../models/vendors.models.js";
 import Project from "../models/project.models.js";
 import ApiErrors from "../utils/ApiErrors.js";
@@ -19,7 +20,7 @@ import { createExpenseEntry, reverseExpenseEntry, recalcProjectHealth } from "..
 import { pushDprEvent } from "../helpers/dprHelper.js";
 import { enrichUser } from "../helpers/mrHelper.js";
 import NotificationService from "../services/notification.service.js";
-import {generatePOPdf} from "../helpers/poPdfGenerator.js"
+import { generatePOPdf } from "../helpers/poPdfGenerator.js"
 
 
 // This function creates a new purchase order (PO). takes x-company-id in headers, projectId in params and createdBy, mrId, vendorId, items, expectedDeliveryDate, deliveryAddress, paymentTerms, specialInstructions in body. validates MR and vendor, processes items, calculates total value and creates PO in Draft state with auto MR conversion if applicable. -------------------------- Ayan
@@ -863,24 +864,25 @@ export const exportPOAsPdf = async (req, res) => {
             );
         }
         const [project, vendor, enrichedPO] = await Promise.all([
-            Project.findOne({
-                _id: projectId,
-                companyId,
-                isDeleted: false,
-            })
+            Project.findOne({ _id: projectId, companyId, isDeleted: false })
                 .select("projectName projectCode location clientName status startDate endDate")
                 .lean(),
-
-            Vendor.findOne({
-                _id: po.vendorId,
-                companyId,
-                isDeleted: false,
-            })
+            Vendor.findOne({ _id: po.vendorId, companyId, isDeleted: false })
                 .select("name vendorType contactPerson phone email address legalDetails")
                 .lean(),
-
             enrichPOUsers(po),
         ]);
+        const materialIds = (enrichedPO.items || []).map((it) => it.materialMasterId).filter(Boolean);
+        const materialDocs = await MaterialMaster.find(
+            { _id: { $in: materialIds } },
+            { _id: 1, sacNumber: 1 }
+        ).lean();
+        const sacMap = {};
+        materialDocs.forEach((m) => { sacMap[m._id.toString()] = m.sacNumber || null; });
+        enrichedPO.items = (enrichedPO.items || []).map((item) => ({
+            ...item,
+            sacNumber: sacMap[item.materialMasterId?.toString()] || null,
+        }));
         if (!project) {
             return res.status(404).json(
                 new ApiErrors(404, "Project Not Found", "Project linked to this PO no longer exists")

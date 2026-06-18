@@ -650,7 +650,7 @@ export default function ExpenseTable({
                     }`}
                   >
                     {columns.map((col) => (
-                      <td key={col.accessor} className="px-5 py-4 align-middle">
+                      <td key={col.accessor} className="px-5 py-2 align-middle">
                         {renderCell(row, col, handlers)}
                       </td>
                     ))}

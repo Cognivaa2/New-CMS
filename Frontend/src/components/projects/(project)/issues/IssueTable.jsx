@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"  // added useEffect, useRef
 import {
     CheckCircle2,
     Clock,
@@ -279,6 +279,38 @@ function SkeletonRow() {
     )
 }
 
+function LoadMoreTrigger({ onLoadMore, loadingMore, hasMore }) {
+    const ref = useRef(null)
+
+    useEffect(() => {
+        if (!hasMore || !onLoadMore) return
+        const el = ref.current
+        if (!el) return
+        const observer = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting && !loadingMore) onLoadMore() },
+            { threshold: 0.1 }
+        )
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [hasMore, onLoadMore, loadingMore])
+
+    return (
+        <div ref={ref} className="flex items-center justify-center py-6 min-h-px">
+            {hasMore && loadingMore && (
+                <div className="flex items-center gap-2 text-gray-400 dark:text-[#52525b]">
+                    <div className="w-4 h-4 border-2 border-gray-300 dark:border-[#3f3f46] border-t-gray-600 dark:border-t-[#a1a1aa] rounded-full animate-spin" />
+                    <span className="text-[13px] font-sfpro">Loading more…</span>
+                </div>
+            )}
+            {!hasMore && !loadingMore && (
+                <span className="text-[12px] text-gray-300 dark:text-[#3f3f46] font-sfpro">
+                    All records loaded
+                </span>
+            )}
+        </div>
+    )
+}
+
 function IssueCard({ row, menuItems, onResolve, onReject, onClick }) {
     const hasAttachments = row.attachments && row.attachments.length > 0
 
@@ -405,7 +437,7 @@ function IssueRow({ row, menuItems, isLast, onRowClick, onResolve, onReject }) {
             onClick={() => onRowClick?.(row)}
             className={`cursor-pointer group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""}`}
         >
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <div className="flex items-center gap-2">
                     <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">
                         {row.issue || row.title}
@@ -415,24 +447,24 @@ function IssueRow({ row, menuItems, isLast, onRowClick, onResolve, onReject }) {
                     )}
                 </div>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     {row.issueType || "—"}
                 </span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <PriorityPill priority={row.priority} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <StatusPill status={row.status} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <AssignedToCell assignedTo={row.assignedTo} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <UserCell user={row.createdBy} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 {hasAttachments ? (
                     <button
                         onClick={(e) => {
@@ -452,12 +484,12 @@ function IssueRow({ row, menuItems, isLast, onRowClick, onResolve, onReject }) {
                     </span>
                 )}
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     {row.createdAt}
                 </span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                     {row.backendStatus === "submitted" && onResolve && (
                         <button onClick={() => onResolve(row)} title="Resolve"
@@ -479,7 +511,7 @@ function IssueRow({ row, menuItems, isLast, onRowClick, onResolve, onReject }) {
                     )}
                 </div>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <div onClick={(e) => e.stopPropagation()} className="flex justify-center">
                     <ThreeDotMenu
                         items={menuItems}
@@ -505,11 +537,13 @@ function IssueRow({ row, menuItems, isLast, onRowClick, onResolve, onReject }) {
 export default function IssueTable({
     data = [],
     isLoading = false,
+    loadingMore = false,      
+    hasMore = false,          
+    onLoadMore,               
+    total = 0,                
     onDelete,
     onEdit,
     onRefresh,
-    pagination,
-    onPageChange,
     projectUsers = [],
     isLoadingUsers = false,
     onAssignMember,
@@ -601,21 +635,30 @@ export default function IssueTable({
 
     return (
         <div className="w-full font-sfpro pb-10">
+
             <div className="lg:hidden space-y-3">
                 {isLoading
                     ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
                     : data.length === 0
                         ? <EmptyState />
-                        : data.map((row) => (
-                            <IssueCard
-                                key={row.id}
-                                row={row}
-                                menuItems={buildMenuItems(row)}
-                                onResolve={onResolve}
-                                onReject={onReject}
-                                onClick={handleViewClick}
+                        : <>
+                            {data.map((row) => (
+                                <IssueCard
+                                    key={row.id}
+                                    row={row}
+                                    menuItems={buildMenuItems(row)}
+                                    onResolve={onResolve}
+                                    onReject={onReject}
+                                    onClick={handleViewClick}
+                                />
+                            ))}
+                            <LoadMoreTrigger
+                                onLoadMore={onLoadMore}
+                                loadingMore={loadingMore}
+                                hasMore={hasMore}
                             />
-                        ))}
+                        </>
+                }
             </div>
 
             <div className="hidden lg:block w-full rounded-2xl border border-[#EAEAEA] dark:border-[#252525] overflow-hidden shadow-sm">
@@ -655,36 +698,20 @@ export default function IssueTable({
                         </tbody>
                     </table>
                 </div>
+
+                {!isLoading && data.length > 0 && (
+                    <LoadMoreTrigger
+                        onLoadMore={onLoadMore}
+                        loadingMore={loadingMore}
+                        hasMore={hasMore}
+                    />
+                )}
             </div>
 
-            {pagination && pagination.totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 px-2 gap-3">
-                    <p className="text-[13px] sm:text-sm font-sfpro text-gray-500 dark:text-[#71717a] text-center sm:text-left">
-                        Showing{" "}
-                        {Math.min((pagination.page - 1) * pagination.limit + 1, pagination.total)}–
-                        {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-                        {pagination.total}
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => onPageChange?.(pagination.page - 1)}
-                            disabled={pagination.page <= 1}
-                            className="cursor-pointer px-3 py-1.5 rounded-lg text-[13px] sm:text-sm font-sfpro-medium border border-gray-200 dark:border-[#27272a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-100 dark:hover:bg-[#27272a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Previous
-                        </button>
-                        <span className="text-[13px] sm:text-sm font-sfpro-medium text-gray-600 dark:text-[#a1a1aa] px-2 whitespace-nowrap">
-                            {pagination.page} / {pagination.totalPages}
-                        </span>
-                        <button
-                            onClick={() => onPageChange?.(pagination.page + 1)}
-                            disabled={pagination.page >= pagination.totalPages}
-                            className="cursor-pointer px-3 py-1.5 rounded-lg text-[13px] sm:text-sm font-sfpro-medium border border-gray-200 dark:border-[#27272a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-100 dark:hover:bg-[#27272a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        >
-                            Next
-                        </button>
-                    </div>
-                </div>
+            {!isLoading && data.length > 0 && (
+                <p className="mt-3 px-1 text-[13px] text-gray-400 dark:text-[#71717a] font-sfpro">
+                    {data.length} of {total} issue{total !== 1 ? "s" : ""}
+                </p>
             )}
 
             <IssueCommentsModal

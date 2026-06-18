@@ -275,8 +275,8 @@ export default function StockTransfersPage() {
   const hasMore = pagination?.hasNext ?? false
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg py-12 px-6 lg:px-12 transition-colors duration-300">
-      <div className="max-w-400 mx-auto space-y-10">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
+      <div className="max-w-screen mx-auto space-y-2">
         <PageHeader
           title={PAGE_META.title}
           count={totalTransfers}

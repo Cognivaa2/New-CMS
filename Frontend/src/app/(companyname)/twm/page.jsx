@@ -132,7 +132,7 @@ export default function ThreeWayMatchPage() {
     if (isInitialLoad) return <Loading />
 
     return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg py-12 px-6 lg:px-12 transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
             <TWMHeader
                 title="Three Way Match"
                 description={
