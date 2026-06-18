@@ -253,7 +253,7 @@ function ConsumptionCard({ row, menuItems }) {
 function ConsumptionRow({ row, menuItems, isLast }) {
     return (
         <tr className={`group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""}`}>
-            <td className="px-4 py-4">
+            <td className="px-4 py-2">
                 <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[13.5px] font-sfpro-bold text-gray-900 dark:text-white truncate max-w-45">
@@ -268,7 +268,7 @@ function ConsumptionRow({ row, menuItems, isLast }) {
                     )}
                 </div>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <div className="flex items-center gap-1">
                     <Package className="w-3.5 h-3.5 text-gray-400 dark:text-[#52525b]" />
                     <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
@@ -279,21 +279,21 @@ function ConsumptionRow({ row, menuItems, isLast }) {
                     </span>
                 </div>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     ₹{row.pricePerUnit.toLocaleString("en-IN")}
                 </span>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
                     ₹{row.totalCost.toLocaleString("en-IN")}
                 </span>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <SourcePill source={row.source} />
             </td>
 
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 {row.phaseName ? (
                     <div className="flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-gray-400 dark:text-[#52525b] shrink-0" />
@@ -306,7 +306,7 @@ function ConsumptionRow({ row, menuItems, isLast }) {
                 )}
             </td>
 
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 {row.taskName ? (
                     <div className="flex items-center gap-1.5">
                         <CheckSquare className="w-3.5 h-3.5 text-gray-400 dark:text-[#52525b] shrink-0" />
@@ -319,7 +319,7 @@ function ConsumptionRow({ row, menuItems, isLast }) {
                 )}
             </td>
 
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 {row.subTaskName ? (
                     <div className="flex items-center gap-1.5">
                         <FileText className="w-3.5 h-3.5 text-gray-400 dark:text-[#52525b] shrink-0" />
@@ -332,15 +332,15 @@ function ConsumptionRow({ row, menuItems, isLast }) {
                 )}
             </td>
 
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <UserCell user={row.recordedBy} />
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">
                     {row.createdAt}
                 </span>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+            <td className="px-4 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-center">
                     <ThreeDotMenu items={menuItems} size="sm" />
                 </div>

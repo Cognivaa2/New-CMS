@@ -12,7 +12,7 @@ import {
   computePayableSummaryCards,
   formatPayableError,
   PAYABLE_TABS,
-  exportPayablePdf,   
+  exportPayablePdf,
   TAB_TO_STATUS,
   fetchSinglePayable,
   TAB_TO_SOURCE_TYPE,
@@ -65,17 +65,20 @@ export default function PayablesPage() {
 
   const [activeTab, setActiveTab] = useState("All")
   const [payables, setPayables] = useState([])
-  const [pagination, setPagination] = useState({
-    total: 0, page: 1, totalPages: 1, hasNext: false, hasPrev: false,
-  })
-  const [searchQuery, setSearchQuery] = useState("")
+  const [total, setTotal] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+
+  const [searchQuery, setSearchQuery] = useState("")
   const [summaryCards, setSummaryCards] = useState([])
   const [tabCounts, setTabCounts] = useState({})
+
   const [isSummaryLoading, setIsSummaryLoading] = useState(true)
   const [isTableLoading, setIsTableLoading] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [error, setError] = useState(null)
+
   const [paymentModalPayable, setPaymentModalPayable] = useState(null)
   const [viewPayable, setViewPayable] = useState(null)
   const [isViewOpen, setIsViewOpen] = useState(false)
@@ -83,13 +86,13 @@ export default function PayablesPage() {
   const [isHistoryLoading, setIsHistoryLoading] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+
   const listControllerRef = useRef(null)
   const summaryControllerRef = useRef(null)
   const searchRef = useRef(searchQuery)
   const activeTabRef = useRef(activeTab)
   searchRef.current = searchQuery
   activeTabRef.current = activeTab
-
 
   const loadSummary = useCallback(async () => {
     if (!projectId) return
@@ -123,170 +126,179 @@ export default function PayablesPage() {
     }
   }, [projectId])
 
+  const loadFresh = useCallback(async ({
+    search = "",
+    tab = "All",
+    showLoader = false,
+  } = {}) => {
+    if (!projectId) { setIsInitialLoad(false); return }
 
+    listControllerRef.current?.abort()
+    const controller = new AbortController()
+    listControllerRef.current = controller
 
-  const loadPayables = useCallback(
-    async (search = "", page = 1, tab = "All", showLoader = false) => {
-      if (!projectId) {
-        setIsInitialLoad(false)
-        return
-      }
-      listControllerRef.current?.abort()
-      const controller = new AbortController()
-      listControllerRef.current = controller
-      if (showLoader) setIsTableLoading(true)
-      setError(null)
-      try {
-        const statusFilter = TAB_TO_STATUS[tab] || "all"
-        const sourceTypeFilter = TAB_TO_SOURCE_TYPE?.[tab]
-        const { payables: fetched, pagination: pag } = await fetchPayables(
-          projectId,
-          {
-            page,
-            limit: 10,
-            search,
-            status: statusFilter !== "all" ? statusFilter : undefined,
-            sourceType: sourceTypeFilter,
-            signal: controller.signal,
-          }
-        )
-        if (controller.signal.aborted) return
-        setPayables(fetched)
-        setPagination(pag)
-      } catch (err) {
-        if (err.name === "CanceledError" || err.name === "AbortError") return
-        setError(err.message)
-        toast.error("Failed to load payables", { description: formatPayableError(err) })
-      } finally {
-        setIsInitialLoad(false)
-        setIsTableLoading(false)
-      }
-    },
-    [projectId]
-  )
+    if (showLoader) setIsTableLoading(true)
+    setError(null)
 
-  const debouncedSearchRef = useRef(null)
+    try {
+      const statusFilter = TAB_TO_STATUS[tab] || "all"
+      const sourceTypeFilter = TAB_TO_SOURCE_TYPE?.[tab]
 
-  useEffect(() => {
-    debouncedSearchRef.current = debounce((q, tab) => {
-      loadPayables(q, 1, tab, true)
-    }, 400)
-  }, [loadPayables])
-  useEffect(() => {
-    if (!projectId) {
+      const { payables: fetched, pagination } = await fetchPayables(projectId, {
+        page: 1,
+        limit: 10,
+        search,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        sourceType: sourceTypeFilter,
+        signal: controller.signal,
+      })
+
+      if (controller.signal.aborted) return
+
+      setPayables(fetched)
+      setTotal(pagination.total ?? fetched.length)
+      setHasMore(pagination.hasNext ?? false)
+      setCurrentPage(1)
+    } catch (err) {
+      if (err.name === "CanceledError" || err.name === "AbortError") return
+      setError(err.message)
+      toast.error("Failed to load payables", { description: formatPayableError(err) })
+    } finally {
       setIsInitialLoad(false)
-      return
+      setIsTableLoading(false)
     }
+  }, [projectId])
+  const loadMore = useCallback(async () => {
+    if (isLoadingMore || !hasMore || !projectId) return
+
+    setIsLoadingMore(true)
+    const nextPage = currentPage + 1
+
+    try {
+      const statusFilter = TAB_TO_STATUS[activeTabRef.current] || "all"
+      const sourceTypeFilter = TAB_TO_SOURCE_TYPE?.[activeTabRef.current]
+
+      const { payables: fetched, pagination } = await fetchPayables(projectId, {
+        page: nextPage,
+        limit: 10,
+        search: searchRef.current,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        sourceType: sourceTypeFilter,
+      })
+
+      setPayables(prev => [...prev, ...fetched])
+      setHasMore(pagination.hasNext ?? false)
+      setCurrentPage(nextPage)
+    } catch (err) {
+      if (err.name === "CanceledError" || err.name === "AbortError") return
+      toast.error("Failed to load more", { description: formatPayableError(err) })
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [projectId, isLoadingMore, hasMore, currentPage])
+  useEffect(() => {
+    if (!projectId) { setIsInitialLoad(false); return }
     loadSummary()
-    loadPayables("", 1, "All", false)
+    loadFresh({ search: "", tab: "All", showLoader: false })
     return () => {
       listControllerRef.current?.abort()
       summaryControllerRef.current?.abort()
     }
   }, [projectId])
 
-
-
   useEffect(() => () => {
     listControllerRef.current?.abort()
     summaryControllerRef.current?.abort()
   }, [])
 
+  const debouncedSearchRef = useRef(null)
+  useEffect(() => {
+    debouncedSearchRef.current = debounce((q, tab) => {
+      loadFresh({ search: q, tab, showLoader: true })
+    }, 400)
+  }, [loadFresh])
+
   const refreshAll = () =>
     Promise.all([
-      loadPayables(searchRef.current, currentPage, activeTabRef.current, true),
+      loadFresh({ search: searchRef.current, tab: activeTabRef.current, showLoader: true }),
       loadSummary(),
     ])
 
-
   const handleTabChange = (tab) => {
     setActiveTab(tab)
-    setCurrentPage(1)
     setSearchQuery("")
-    loadPayables("", 1, tab, true)
+    loadFresh({ search: "", tab, showLoader: true })
   }
 
-
-  const handleSearchChange = useCallback(
-    (query) => {
-      setSearchQuery(query)
-      setCurrentPage(1)
-      debouncedSearchRef.current(query, activeTab)
-    },
-    [debouncedSearchRef, activeTab]
-  )
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page)
-    loadPayables(searchRef.current, page, activeTab, true)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
+  const handleSearchChange = useCallback((query) => {
+    setSearchQuery(query)
+    debouncedSearchRef.current?.(query, activeTabRef.current)
+  }, [])
 
   const handleAction = useCallback(async (action, payable) => {
-  switch (action) {
+    switch (action) {
+      case "view":
+        setViewPayable(payable)
+        setIsViewOpen(true)
+        break
 
-    case "view":
-      setViewPayable(payable)
-      setIsViewOpen(true)
-      break
+      case "history":
+        setIsHistoryOpen(true)
+        setIsHistoryLoading(true)
+        try {
+          const detailed = await fetchSinglePayable(projectId, payable.id)
+          setHistoryPayable(detailed)
+        } catch (err) {
+          toast.error("Failed to load transaction history", {
+            description: formatPayableError(err),
+          })
+          setIsHistoryOpen(false)
+        } finally {
+          setIsHistoryLoading(false)
+        }
+        break
 
-    case "history":
-      setIsHistoryOpen(true)
-      setIsHistoryLoading(true)
-      try {
-        const detailedPayable = await fetchSinglePayable(projectId, payable.id)
-        setHistoryPayable(detailedPayable)
-      } catch (err) {
-        toast.error("Failed to load transaction history", {
-          description: formatPayableError(err),
+      case "pay":
+        setPaymentModalPayable(payable)
+        break
+
+      case "void":
+        toast.warning(`Void ${payable.payableNumber}?`, {
+          description: "This action cannot be undone.",
         })
-        setIsHistoryOpen(false)
-      } finally {
-        setIsHistoryLoading(false)
+        break
+
+      case "exportPdf": {
+        const toastId = toast.loading("Generating PDF…", {
+          description: `Preparing ${payable.payableNumber}`,
+        })
+        try {
+          await exportPayablePdf(projectId, payable.id, payable.payableNumber)
+          toast.success("PDF Downloaded", {
+            id: toastId,
+            description: `${payable.payableNumber} saved to downloads`,
+          })
+        } catch (err) {
+          toast.error("Export Failed", {
+            id: toastId,
+            description: formatPayableError(err),
+          })
+        }
+        break
       }
-      break
 
-    case "pay":
-      setPaymentModalPayable(payable)
-      break
-
-    case "void":
-      toast.warning(`Void ${payable.payableNumber}?`, {
-        description: "This action cannot be undone.",
-      })
-      break
-
-    case "exportPdf": {                                        
-      const toastId = toast.loading("Generating PDF…", {
-        description: `Preparing ${payable.payableNumber}`,
-      })
-      try {
-        await exportPayablePdf(projectId, payable.id, payable.payableNumber)
-        toast.success("PDF Downloaded", {
-          id: toastId,
-          description: `${payable.payableNumber} saved to downloads`,
-        })
-      } catch (err) {
-        toast.error("Export Failed", {
-          id: toastId,
-          description: formatPayableError(err),
-        })
-      }
-      break
+      default:
+        break
     }
-
-    default:
-      break
-  }
-}, [projectId])
-
+  }, [projectId])
 
   const handleRecordPayment = async (form) => {
     if (!paymentModalPayable) return
     const keycloakId = getKeycloakId()
     if (!keycloakId) {
-      toast.error("Authentication error", { description: "User session not found. Please log in again." })
+      toast.error("Authentication error", {
+        description: "User session not found. Please log in again.",
+      })
       throw new Error("No keycloakId")
     }
     try {
@@ -302,11 +314,12 @@ export default function PayablesPage() {
     }
   }
 
-
   const handleExport = async () => {
     if (isExporting) return
     setIsExporting(true)
-    const toastId = toast.loading("Generating payable report…", { description: "This may take a moment" })
+    const toastId = toast.loading("Generating payable report…", {
+      description: "This may take a moment",
+    })
     try {
       await exportPayablesReport(projectId)
       toast.success("Export Downloaded", {
@@ -333,7 +346,6 @@ export default function PayablesPage() {
 
         <SummaryCards cards={summaryCards} isLoading={isSummaryLoading} />
 
-
         <div className="flex items-center gap-2 mb-2 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] lg:w-fit">
           {PAYABLE_TABS.map((tab) => {
             const count = tabCounts[tab] ?? 0
@@ -341,20 +353,20 @@ export default function PayablesPage() {
               <button
                 key={tab}
                 onClick={() => handleTabChange(tab)}
-                className={`relative h-10 px-4 sm:px-5 rounded-xl text-sm font-sfpro-medium transition-all whitespace-nowrap border ${activeTab === tab
-                  ? "bg-[#212121] text-white border-[#212121] shadow-sm dark:bg-white dark:text-black dark:border-white"
-                  : "bg-white text-[#3f3f46] border-transparent hover:bg-[#fafafa] hover:border-[#e5e7eb] dark:bg-[#1f1f1f] dark:text-[#d4d4d8] dark:hover:bg-[#262626] dark:hover:border-[#3f3f46]"
-                  }`}
+                className={`relative h-10 px-4 sm:px-5 rounded-xl text-sm font-sfpro-medium transition-all whitespace-nowrap border ${
+                  activeTab === tab
+                    ? "bg-[#212121] text-white border-[#212121] shadow-sm dark:bg-white dark:text-black dark:border-white"
+                    : "bg-white text-[#3f3f46] border-transparent hover:bg-[#fafafa] hover:border-[#e5e7eb] dark:bg-[#1f1f1f] dark:text-[#d4d4d8] dark:hover:bg-[#262626] dark:hover:border-[#3f3f46]"
+                }`}
               >
                 <span className="flex items-center gap-1.5">
                   {tab}
                   {count > 0 && (
-                    <span
-                      className={`text-[10px] leading-none font-bold px-1.5 py-0.5 rounded-full ${activeTab === tab
+                    <span className={`text-[10px] leading-none font-bold px-1.5 py-0.5 rounded-full ${
+                      activeTab === tab
                         ? "bg-white/15 text-white dark:bg-black/10 dark:text-black"
                         : "bg-gray-100 text-gray-500 dark:bg-[#2f2f2f] dark:text-[#a1a1aa]"
-                        }`}
-                    >
+                    }`}>
                       {count}
                     </span>
                   )}
@@ -364,12 +376,11 @@ export default function PayablesPage() {
           })}
         </div>
 
-
         {error && !isTableLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <p className="text-sm text-gray-400 dark:text-[#71717a] font-sfpro">{error}</p>
             <button
-              onClick={() => loadPayables(searchQuery, currentPage, activeTab, true)}
+              onClick={() => loadFresh({ search: searchQuery, tab: activeTab, showLoader: true })}
               className="text-sm font-sfpro-medium text-gray-600 dark:text-gray-300 underline underline-offset-2"
             >
               Try again
@@ -380,14 +391,14 @@ export default function PayablesPage() {
             activeTab={activeTab}
             rows={payables}
             isLoading={isInitialLoad || isTableLoading}
-            pagination={pagination}
-            onPageChange={handlePageChange}
+            loadingMore={isLoadingMore}
+            hasMore={hasMore}
+            onLoadMore={loadMore}
+            total={total}
             onAction={handleAction}
           />
         )}
-
       </div>
-
 
       {paymentModalPayable && (
         <PaymentModal
@@ -407,7 +418,6 @@ export default function PayablesPage() {
         payable={viewPayable}
         projectId={projectId}
       />
-
 
       <TransactionHistoryModal
         open={isHistoryOpen}

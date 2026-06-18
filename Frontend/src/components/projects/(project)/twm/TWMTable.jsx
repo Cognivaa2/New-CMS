@@ -330,7 +330,7 @@ function TWMRow({ row, isLast, onView }) {
 
     return (
         <tr onClick={() => onView?.(row)} className={`cursor-pointer group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""}`}>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <p className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
                     {row.poNumber}
                 </p>
@@ -339,36 +339,36 @@ function TWMRow({ row, isLast, onView }) {
                 </p>
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">
                     {row.vendorName}
                 </span>
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <POStatusText
                     poStatus={row.poStatus}
                     poStatusConfig={row.poStatusConfig}
                 />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <MatchStatusPill status={row.matchStatus} />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     {f.orderedValueFormatted || <NA />}
                 </span>
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     {f.billedValueFormatted || <NA />}
                 </span>
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 {(f.contraAdjustment ?? 0) !== 0 ? (
                     <span className={`text-[13px] font-sfpro-medium ${(f.contraAdjustment ?? 0) > 0
                         ? "text-green-600 dark:text-green-400"
@@ -382,29 +382,29 @@ function TWMRow({ row, isLast, onView }) {
                 )}
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <VariancePctCell financials={row.financials} />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     {q.orderedQty ?? <NA />}
                     <span className="text-[11px] text-gray-400 dark:text-[#52525b] ml-1">{q.unit || "units"}</span>
                 </span>
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                     {q.receivedQty ?? <NA />}
                     <span className="text-[11px] text-gray-400 dark:text-[#52525b] ml-1">{q.unit || "units"}</span>
                 </span>
             </td>
 
-            <td className="px-5 py-4">
+            <td className="px-5 py-2">
                 <FulfilmentBar rate={q.fulfilmentRate || 0} />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <DocCountCell
                     icon={Package}
                     count={row.grnCount ?? 0}
@@ -412,7 +412,7 @@ function TWMRow({ row, isLast, onView }) {
                 />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <DocCountCell
                     icon={Receipt}
                     count={row.payableCount ?? 0}
@@ -420,7 +420,7 @@ function TWMRow({ row, isLast, onView }) {
                 />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <DocCountCell
                     icon={ArrowRightLeft}
                     count={row.contraEntryCount ?? 0}
@@ -429,7 +429,7 @@ function TWMRow({ row, isLast, onView }) {
             </td>
 
             {/* Actions */}
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <div
                     onClick={(e) => e.stopPropagation()}
                     className="flex justify-center"
