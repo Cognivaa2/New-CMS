@@ -458,7 +458,7 @@ export default function StockTransferPage() {
         </div>
       ) : (
         <div
-          className="grid gap-5 pb-10"
+          className="grid gap-2 "
           style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}
         >
           {isRefreshing
