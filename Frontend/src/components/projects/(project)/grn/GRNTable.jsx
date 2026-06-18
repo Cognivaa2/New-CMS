@@ -220,7 +220,7 @@ function GRNRow({ row, menuItems, isLast, onRowClick }) {
       className={`cursor-pointer group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""
         }`}
     >
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         <div className="flex items-center gap-2">
           {row.grnNumber
             ? <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">{row.grnNumber}</span>
@@ -228,34 +228,34 @@ function GRNRow({ row, menuItems, isLast, onRowClick }) {
           {row.attachment && <Paperclip className="w-4 h-4 text-blue-700 dark:text-blue-500" />}
         </div>
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.poNumber
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.poNumber}</span>
           : <NA />}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.vendorName
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.vendorName}</span>
           : <NA />}
       </td>
-      <td className="px-5 py-4">
+      <td className="px-5 py-2">
         {row.materials
           ? <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-50">{row.materials}</p>
           : <NA />}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.totalAmount !== null && row.totalAmount !== undefined
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
             ₹{Number(row.totalAmount).toLocaleString("en-IN")}
           </span>
           : <NA />}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
           {row.items?.reduce((sum, item) => sum + (item.receivedQuantity || 0), 0) || 0}
         </span>
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.attachment ? (
           <button
             onClick={(e) => {
@@ -270,23 +270,23 @@ function GRNRow({ row, menuItems, isLast, onRowClick }) {
           <span className="italic text-[12px] font-sfpro text-[#a1a1aa] dark:text-[#71717a]">No Attachment</span>
         )}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.deliveryDateFormatted
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.deliveryDateFormatted}</span>
           : <NA />}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.deliveryChallanNumber
           ? <span className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa]">{row.deliveryChallanNumber}</span>
           : <NA />}
       </td>
-      <td className="px-5 py-4 whitespace-nowrap"><UserCell user={row.createdBy} /></td>
-      <td className="px-5 py-4 whitespace-nowrap">
+      <td className="px-5 py-2 whitespace-nowrap"><UserCell user={row.createdBy} /></td>
+      <td className="px-5 py-2 whitespace-nowrap">
         {row.createdAt
           ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.createdAt}</span>
           : <NA />}
       </td>
-      <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+      <td className="px-4 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center">
           <ThreeDotMenu
             items={menuItems} size="sm"
