@@ -1,4 +1,3 @@
-// components/material-list/MaterialFormFields.js
 "use client"
 
 export function Field({
@@ -87,6 +86,14 @@ export function MaterialFormContent({ form, setForm, disabled }) {
           colSpan="col-span-2"
           value={form.category}
           onChange={update("category")}
+          disabled={disabled}
+        />
+        <Field
+          label="SAC Number"
+          placeholder="e.g. 995411"
+          colSpan="col-span-2"
+          value={form.sacNumber}
+          onChange={update("sacNumber")}
           disabled={disabled}
         />
       </div>

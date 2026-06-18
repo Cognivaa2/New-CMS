@@ -105,11 +105,11 @@ function absText(doc, text, x, y, opts = {}) {
 function drawFooter(doc, ctx) {
     const fy = PH - MB + 4;
     hLine(doc, MX, MX + CW, fy - 2, C.border, 0.3);
-    absText(doc, `${ctx.companyName}  ·  PO ${ctx.poNumber}`, MX, fy + 4, {
-        size: 7, color: C.muted, width: CW * 0.55,
+    absText(doc, `${ctx.companyName}  ·  PO ${ctx.poNumber}  ·  Subject to Kolkata jurisdiction`, MX, fy + 4, {
+        size: 7, color: C.muted, width: CW * 0.65,
     });
-    absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.55, fy + 4, {
-        size: 7, color: C.muted, width: CW * 0.27, align: "center",
+    absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.65, fy + 4, {
+        size: 7, color: C.muted, width: CW * 0.17, align: "center",
     });
     absText(doc, `Page ${ctx.page}`, MX + CW * 0.82, fy + 4, {
         size: 7, color: C.muted, width: CW * 0.18, align: "right",
@@ -261,14 +261,15 @@ function drawRightRow(doc, leftField, rightField, x, y, width, height) {
 
 const COLS = [
     { k: "no", lbl: "Sl", fr: 0.04, a: "center" },
-    { k: "name", lbl: "Material", fr: 0.28, a: "left" },
-    { k: "unit", lbl: "Unit", fr: 0.08, a: "center" },
-    { k: "qty", lbl: "Qty", fr: 0.08, a: "right" },
-    { k: "price", lbl: "Price", fr: 0.12, a: "right" },
-    { k: "gst", lbl: "GST %", fr: 0.08, a: "right" },
-    { k: "disc", lbl: "Disc %", fr: 0.08, a: "right" },
-    { k: "total", lbl: "Total", fr: 0.12, a: "right" },
-    { k: "rmk", lbl: "Remarks", fr: 0.12, a: "left" },
+    { k: "name", lbl: "Material", fr: 0.24, a: "left" },
+    { k: "sac", lbl: "SAC", fr: 0.08, a: "center" },
+    { k: "unit", lbl: "Unit", fr: 0.07, a: "center" },
+    { k: "qty", lbl: "Qty", fr: 0.07, a: "right" },
+    { k: "price", lbl: "Price", fr: 0.11, a: "right" },
+    { k: "gst", lbl: "GST %", fr: 0.07, a: "right" },
+    { k: "disc", lbl: "Disc %", fr: 0.07, a: "right" },
+    { k: "total", lbl: "Total", fr: 0.11, a: "right" },
+    { k: "rmk", lbl: "Remarks", fr: 0.14, a: "left" },
 ];
 COLS.forEach((c) => { c.w = Math.round(c.fr * CW * 10) / 10; });
 const drift = CW - COLS.reduce((s, c) => s + c.w, 0);
@@ -283,6 +284,7 @@ function rowHeight(doc, item, i) {
     const vals = [
         String(i + 1),
         String(item.materialName || ""),
+        String(item.sacNumber || ""),
         String(item.unit || ""),
         fmtN(item.orderedQuantity),
         fmtN(item.unitPrice),
@@ -301,7 +303,6 @@ function rowHeight(doc, item, i) {
 
 function tableHeader(doc, y) {
     strokeRect(doc, MX, y, CW, TH, C.border, 0.3);
-
     let cx = MX;
     COLS.forEach((col) => {
         absText(doc, col.lbl, cx + TPX, y + TPY, {
@@ -315,7 +316,6 @@ function tableHeader(doc, y) {
         cx += col.w;
         vLine(doc, cx, y, y + TH, C.border, 0.3);
     });
-
     return y + TH;
 }
 
@@ -324,6 +324,7 @@ function tableRow(doc, y, item, i) {
     const vals = [
         String(i + 1),
         String(item.materialName || ""),
+        String(item.sacNumber || ""),
         String(item.unit || ""),
         fmtN(item.orderedQuantity),
         fmtN(item.unitPrice),
@@ -332,7 +333,6 @@ function tableRow(doc, y, item, i) {
         fmtN(item.totalPrice),
         String(item.remarks || ""),
     ];
-
     let cx = MX;
     COLS.forEach((col, ci) => {
         absText(doc, vals[ci], cx + TPX, y + TPY, {
@@ -349,38 +349,21 @@ function tableRow(doc, y, item, i) {
     });
     vLine(doc, MX, y, y + rh, C.border, 0.3);
     vLine(doc, MX + CW, y, y + rh, C.border, 0.3);
-
     return y + rh;
 }
 
-function tableTotals(doc, y, items, totalValue) {
-    const tot = (f) => items.reduce((s, it) => s + (it[f] || 0), 0);
-    const qty = tot("orderedQuantity");
-    const totalP = tot("totalPrice");
+function tableTotals(doc, y, items) {
+    const qty = items.reduce((s, it) => s + (it.orderedQuantity || 0), 0);
+    const totalP = items.reduce((s, it) => s + (it.totalPrice || 0), 0);
     const RH = 19;
     strokeRect(doc, MX, y, CW, RH, C.border, 0.3);
-    const vals = [
-        "",
-        `Total (${items.length} item${items.length !== 1 ? "s" : ""})`,
-        "",
-        fmtN(qty),
-        "",
-        "",
-        "",
-        fmtN(totalP),
-        "",
-    ];
-
+    const vals = ["", `Total (${items.length} item${items.length !== 1 ? "s" : ""})`, "", "", fmtN(qty), "", "", "", fmtN(totalP), ""];
     let cx = MX;
     COLS.forEach((col, ci) => {
         if (vals[ci]) {
             absText(doc, vals[ci], cx + TPX, y + (RH - TFS) / 2, {
-                font: F.bold,
-                size: TFS,
-                color: C.black,
-                width: col.w - TPX * 2,
-                align: col.a,
-                lineBreak: false,
+                font: F.bold, size: TFS, color: C.black,
+                width: col.w - TPX * 2, align: col.a, lineBreak: false,
             });
         }
         cx += col.w;
@@ -390,30 +373,54 @@ function tableTotals(doc, y, items, totalValue) {
         cx += col.w;
         vLine(doc, cx, y, y + RH, C.border, 0.3);
     });
-    absText(
-        doc,
-        `Total Order Value : Rs. ${fmtN(totalValue || totalP, 2)}`,
-        MX + CW - 180,
-        y + RH + 8,
-        {
-            font: F.bold,
-            size: 9,
-            color: C.black,
-            width: 180,
-            align: "right",
-        }
-    );
+    return y + RH;
+}
 
-    return y + RH + 22;
+function tableAmountBreakdown(doc, y, items) {
+    const subtotal = items.reduce((s, it) => s + (it.totalPrice || 0), 0);
+    const totalGst = items.reduce((s, it) => s + (it.gstAmount || 0), 0);
+    const totalDiscount = items.reduce((s, it) => s + (it.discountAmount || 0), 0);
+    const finalAmount = subtotal;
+
+    const RH = 22;
+    const summaryWidth = 260;
+    const summaryX = MX + CW - summaryWidth;
+    const labelWidth = 160;
+    const valueWidth = 90;
+
+    const rows = [
+        { label: "Sub Total (Before Tax)", value: `Rs. ${fmtN(subtotal + totalDiscount - totalGst, 2)}`, bold: false },
+        totalDiscount > 0 ? { label: "Total Discount", value: `- Rs. ${fmtN(totalDiscount, 2)}`, bold: false } : null,
+        totalGst > 0 ? { label: "Total GST", value: `+ Rs. ${fmtN(totalGst, 2)}`, bold: false } : null,
+        { label: "Final Payable Amount", value: `Rs. ${fmtN(finalAmount, 2)}`, bold: true },
+    ].filter(Boolean);
+
+    rows.forEach((row, i) => {
+        const isLast = i === rows.length - 1;
+        if (isLast) fillRect(doc, summaryX, y, summaryWidth, RH, "#f9f9f9");
+        strokeRect(doc, summaryX, y, summaryWidth, RH, C.border, isLast ? 0.6 : 0.3);
+        absText(doc, row.label, summaryX + 8, y + 6, {
+            font: row.bold ? F.bold : F.regular,
+            size: row.bold ? 10 : 8,
+            width: labelWidth,
+            align: "left",
+            lineBreak: false,
+        });
+        absText(doc, row.value, summaryX + summaryWidth - valueWidth - 8, y + 6, {
+            font: row.bold ? F.bold : F.regular,
+            size: row.bold ? 10 : 8,
+            width: valueWidth,
+            align: "right",
+            lineBreak: false,
+        });
+        y += RH;
+    });
+    return y;
 }
 
 export async function generatePOPdf(res, { po, company, vendor, project, createdByUser }) {
     const logoBuffer = await fetchImageBuffer(company?.logo);
-    const ctx = {
-        page: 1,
-        poNumber: po.poNumber,
-        companyName: company?.companyName || "",
-    };
+    const ctx = { page: 1, poNumber: po.poNumber, companyName: company?.companyName || "" };
 
     const doc = new PDFDocument({
         size: "A4",
@@ -435,18 +442,26 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
     doc.addPage();
     let y = MT;
 
-    // Title Section
     absText(doc, "Purchase Order", MX, y, {
         font: F.bold, size: 12, color: C.black, width: CW * 0.6,
     });
-    absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
+
+    const logoSize = 34;
+    if (logoBuffer) {
+        try {
+            doc.image(logoBuffer, MX + CW - logoSize, y, { fit: [logoSize, logoSize] });
+        } catch { drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize); }
+    } else {
+        drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize);
+    }
+
+    absText(doc, "Original Copy", MX + CW * 0.6, y + 2, {
         font: F.regular, size: 8, color: C.muted,
-        width: CW * 0.4, align: "right",
+        width: CW * 0.4 - logoSize - 6, align: "right",
     });
 
-    y += 28;
+    y += logoSize + 14;
 
-    // Prepare Grid Contents
     const leftWidth = CW * 0.55;
     const rightWidth = CW - leftWidth;
 
@@ -469,7 +484,7 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
         { type: "title", text: "Vendor (Supplier)" },
         { type: "header", text: vendor?.name || "Vendor Name" },
         { type: "text", text: vendor?.address },
-        { type: "pair", label: "Contact", value: vendor?.contactPerson },
+        { type: "pair", label: "Contact Person", value: vendor?.contactPerson },
         { type: "pair", label: "Phone", value: vendor?.phone },
         { type: "pair", label: "Email", value: vendor?.email },
         { type: "pair", label: "GSTIN", value: vendor?.legalDetails?.gstin },
@@ -479,12 +494,11 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
     const rightRows = [
         { left: { lbl: "PO Number", val: po.poNumber }, right: { lbl: "Dated", val: fmt(po.createdAt) } },
         { left: { lbl: "Expected Delivery", val: fmt(po.expectedDeliveryDate) }, right: { lbl: "Status", val: po.status } },
-        { left: { lbl: "Payment terms", val: po.paymentTerms } },
-        { left: { lbl: "Special instructions", val: po.specialInstructions } },
-        { left: { lbl: "Delivery address", val: po.deliveryAddress } },
+        { left: { lbl: "Payment Terms", val: po.paymentTerms } },
+        { left: { lbl: "Special Instructions", val: po.specialInstructions } },
+        { left: { lbl: "Delivery Address", val: po.deliveryAddress } },
     ];
 
-    // Responsive Spacing calculations
     const paddingOffset = 12;
     const H_L1 = measureBlockHeight(doc, itemsL1, leftWidth - paddingOffset) + 12;
     const H_L2 = measureBlockHeight(doc, itemsL2, leftWidth - paddingOffset) + 12;
@@ -506,40 +520,26 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
     const H_RIGHT = rowHeights.reduce((sum, h) => sum + h, 0);
     const H_MAX = Math.max(H_LEFT, H_RIGHT);
 
-    // Dynamic grid extension for Right Column to stretch to bottom boundary
     if (H_MAX > H_RIGHT) {
         rowHeights[rowHeights.length - 1] += (H_MAX - H_RIGHT);
     }
 
-    // Draw Grid borders
     strokeRect(doc, MX, y, CW, H_MAX, C.border, 0.3);
     vLine(doc, MX + leftWidth, y, y + H_MAX, C.border, 0.3);
 
-    // Draw Left Column Blocks
     let curL_y = y;
 
-    // Draw L1
-    let logoSize = 34;
     let logoDrawWidth = 0;
-    if (logoBuffer) {
-        try {
-            doc.image(logoBuffer, MX + 6, curL_y + 6, { fit: [logoSize, logoSize] });
-            logoDrawWidth = logoSize + 8;
-        } catch { }
-    }
     drawBlock(doc, itemsL1, MX + 6 + logoDrawWidth, curL_y + 6, leftWidth - 12 - logoDrawWidth);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L1, C.border, 0.3);
     curL_y += H_L1;
 
-    // Draw L2
     drawBlock(doc, itemsL2, MX + 6, curL_y + 6, leftWidth - 12);
     hLine(doc, MX, MX + leftWidth, curL_y + H_L2, C.border, 0.3);
     curL_y += H_L2;
 
-    // Draw L3
     drawBlock(doc, itemsL3, MX + 6, curL_y + 6, leftWidth - 12);
 
-    // Draw Right Column Rows
     let curR_y = y;
     rightRows.forEach((row, idx) => {
         const h = rowHeights[idx];
@@ -549,9 +549,8 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
 
     y += H_MAX + 16;
 
-    // Draw Table
     y = space(doc, y, TH + 30, ctx);
-    y = label(doc, y, "Order items");
+    y = label(doc, y, "Order Items");
     y = tableHeader(doc, y);
 
     po.items.forEach((item, i) => {
@@ -567,23 +566,21 @@ export async function generatePOPdf(res, { po, company, vendor, project, created
     });
 
     y = space(doc, y, 19, ctx);
-    y = tableTotals(doc, y, po.items, po.totalOrderValue);
+    y = tableTotals(doc, y, po.items);
+    y = tableAmountBreakdown(doc, y, po.items);
     y += 14;
 
-    // Signatures / Authorisation Box
     const SIG_H = 68;
     const sigColW = CW / 3;
 
     y = space(doc, y, SIG_H + 25, ctx);
-    y = label(doc, y, "Authorisation & signatures");
+    y = label(doc, y, "Authorisation & Signatures");
 
     strokeRect(doc, MX, y, CW, SIG_H, C.border, 0.3);
 
-    ["Prepared by", "Verified by", "Authorised by"].forEach((lbl, s) => {
+    ["Prepared by", "Verified by", "Authorized Signatory"].forEach((lbl, s) => {
         const sx = MX + s * sigColW;
-        if (s > 0) {
-            vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
-        }
+        if (s > 0) vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
         hLine(doc, sx, sx + sigColW, y + SIG_H - 18, C.border, 0.3);
         absText(doc, lbl, sx, y + SIG_H - 12, {
             font: F.bold, size: 8, color: C.black,

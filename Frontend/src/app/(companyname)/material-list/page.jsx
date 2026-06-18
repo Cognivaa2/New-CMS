@@ -267,6 +267,7 @@ export default function MaterialMasterPage() {
     const payload = {
       name: formData.name?.trim(),
       unit: formData.unit?.trim(),
+      sacNumber: formData.sacNumber?.trim() || undefined,
       category: formData.category?.trim() || undefined,
       description: formData.description?.trim() || undefined,
       createdBy: keycloakId,
@@ -318,6 +319,7 @@ export default function MaterialMasterPage() {
     const payload = {}
     if (formData.name !== undefined) payload.name = formData.name.trim()
     if (formData.unit !== undefined) payload.unit = formData.unit.trim()
+      if (formData.sacNumber !== undefined) payload.sacNumber = formData.sacNumber.trim()
     if (formData.category !== undefined) payload.category = formData.category.trim()
     if (formData.description !== undefined) payload.description = formData.description.trim()
     if (keycloakId) payload.updatedBy = keycloakId
@@ -389,7 +391,7 @@ export default function MaterialMasterPage() {
   if (isInitialLoad) return <Loading />
 
   return (
-    <div  className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
       <MaterialHeader
         title="Material Master List"
         badgeCount={pagination.total}

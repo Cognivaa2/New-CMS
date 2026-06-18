@@ -12,18 +12,17 @@ function Backdrop({ visible, onClose }) {
     <div
       onClick={onClose}
       style={{ transitionDuration: "400ms" }}
-      className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity ease-in-out ${
-        visible ? "opacity-100" : "opacity-0 pointer-events-none"
-      }`}
+      className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity ease-in-out ${visible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
     />
   )
 }
 
 export default function AddMaterialModal({ open, onClose, onSave }) {
-  const [form,       setForm]       = useState(INITIAL)
+  const [form, setForm] = useState(INITIAL)
   const [submitting, setSubmitting] = useState(false)
-  const [mounted,    setMounted]    = useState(false)
-  const [visible,    setVisible]    = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -82,9 +81,8 @@ export default function AddMaterialModal({ open, onClose, onSave }) {
           transitionDuration: "1000ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         }}
-        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform ${
-          visible ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform ${visible ? "translate-y-0" : "translate-y-full"
+          }`}
       >
         <div className="w-full bg-white dark:bg-[#09090b] border-t-2 border-gray-200 dark:border-[#27272a] rounded-t-2xl max-h-[88dvh] lg:max-h-[55dvh] flex flex-col transition-colors duration-300">
           <div className="flex justify-center pt-3 shrink-0">

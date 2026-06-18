@@ -39,6 +39,7 @@ export function mapMaterial(raw) {
     category: raw.category || "",
     unit: raw.unit || "",
     description: raw.description || "",
+    sacNumber: raw.sacNumber || "",
     isActive: raw.isActive ?? true,
     createdBy: raw.createdBy || null,
     updatedBy: raw.updatedBy || null,
