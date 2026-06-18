@@ -159,12 +159,11 @@ helpdeskSchema.index(
 );
 
 // ─── Auto-generate ticket number before save ──────────────────────────────────
-helpdeskSchema.pre("save", async function (next) {
+helpdeskSchema.pre("save", async function () {
     if (this.isNew && !this.ticketNumber) {
         const count = await mongoose.model("Helpdesk").countDocuments();
         this.ticketNumber = `TKT-${String(count + 1).padStart(5, "0")}`;
     }
-    next();
 });
 
 // ─── Instance method: resolve ticket ─────────────────────────────────────────
