@@ -37,15 +37,12 @@ export default function SummaryCards({ cards = [], isLoading = false }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-4">
       {cards.map((card) => {
         const Icon = ICON_MAP[card.icon] || Activity;
         return (
-          <div
-            key={card.id}
-            className={`${card.colorClass} rounded-2xl p-8 flex flex-col relative overflow-hidden transition-colors duration-300`}
-          >
-            <div className="flex items-center gap-3 mb-4">
+          <div key={card.id} className={`${card.colorClass} rounded-2xl p-4 flex flex-col relative overflow-hidden transition-colors duration-300`}>
+            <div className="flex items-center gap-2 mb-1">
               <span className="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
                 {card.value}
               </span>

@@ -132,7 +132,7 @@ export default function ThreeWayMatchPage() {
     if (isInitialLoad) return <Loading />
 
     return (
-    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg py-12 px-6 lg:px-12 transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 ">
             <TWMHeader
                 title="Three Way Match"
                 description={
@@ -151,7 +151,7 @@ export default function ThreeWayMatchPage() {
             <TWMStats stats={stats} />
 
             {error && !isRefreshing ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="flex flex-col items-center justify-center py-20 gap-2">
                     <p className="text-sm text-gray-400 dark:text-[#71717a] font-sfpro">
                         {error}
                     </p>

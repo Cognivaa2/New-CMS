@@ -50,7 +50,7 @@ export default function WorkspaceSection({
   const showClearButton = searchValue.length > 0
 
   return (
-    <div className="mt-12 space-y-6">
+    <div className="mt-2 space-y-2">
 
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
@@ -62,7 +62,7 @@ export default function WorkspaceSection({
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <div className="relative flex items-center w-full sm:w-[320px] lg:w-65">
             <Search className="w-5 h-5 text-gray-400 absolute left-3 pointer-events-none" />
             <input
@@ -89,7 +89,7 @@ export default function WorkspaceSection({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <FilterOptions
               filters={filters}
               align="right"

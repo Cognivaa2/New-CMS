@@ -19,7 +19,17 @@ import { createPayableFromWO, reversePayable } from "../helpers/payableHelper.js
 import NotificationService from "../services/notification.service.js";
 
 
-// This function creates a new work order (WO). takes x-company-id in headers, projectId in params and createdBy, vendorId, title, description, workItems, hasMilestones, milestones, startDate, expectedEndDate, workLocation, paymentTerms, specialInstructions, phaseId in body. validates inputs, processes items and milestones, calculates contract value and creates WO in Draft state. -------------------------- Ayan
+function computeAmounts(totalContractValue, gst = 0, discount = 0) {
+    const base = parseFloat(totalContractValue) || 0;
+    const gstPct = parseFloat(gst) || 0;
+    const discountPct = parseFloat(discount) || 0;
+    const discountAmount = parseFloat(((discountPct / 100) * base).toFixed(2));
+    const gstAmount = parseFloat(((gstPct / 100) * base).toFixed(2));
+    const finalAmount = parseFloat((base - discountAmount + gstAmount).toFixed(2));
+    return { gstAmount, discountAmount, finalAmount };
+}
+
+
 export const createWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -44,6 +54,7 @@ export const createWO = async (req, res) => {
             workItems, hasMilestones, milestones,
             startDate, expectedEndDate, workLocation,
             paymentTerms, specialInstructions, phaseId,
+            gst, discount,
         } = req.body;
         const missing = [];
         if (!createdBy?.trim()) missing.push("createdBy");
@@ -70,18 +81,30 @@ export const createWO = async (req, res) => {
         if (phaseId && !isValidObjectId(phaseId)) {
             return res.status(400).json(new ApiErrors(400, "Invalid Phase ID", "phaseId must be a valid MongoDB ObjectId"));
         }
+
+        const gstPct = gst !== undefined ? parseFloat(gst) : 0;
+        const discountPct = discount !== undefined ? parseFloat(discount) : 0;
+        if (isNaN(gstPct) || gstPct < 0 || gstPct > 100) {
+            return res.status(400).json(new ApiErrors(400, "Invalid GST", "gst must be a number between 0 and 100"));
+        }
+        if (isNaN(discountPct) || discountPct < 0 || discountPct > 100) {
+            return res.status(400).json(new ApiErrors(400, "Invalid Discount", "discount must be a number between 0 and 100"));
+        }
+
         const { processedItems, error: itemError } = processWorkItems(workItems);
         if (itemError) return res.status(itemError.statusCode).json(itemError);
         const totalContractValue = parseFloat(
             processedItems.reduce((sum, item) => sum + item.amount, 0).toFixed(2)
         );
+        const { gstAmount, discountAmount, finalAmount } = computeAmounts(totalContractValue, gstPct, discountPct);
+
         const resolvedHasMilestones = hasMilestones === true || hasMilestones === "true";
         let processedMilestones = [];
         if (resolvedHasMilestones) {
             if (!Array.isArray(milestones) || milestones.length === 0) {
                 return res.status(400).json(new ApiErrors(400, "Missing Milestones", "milestones array is required when hasMilestones is true"));
             }
-            const { processedMilestones: ms, error: msError } = processMilestones(milestones, totalContractValue);
+            const { processedMilestones: ms, error: msError } = processMilestones(milestones, finalAmount);
             if (msError) return res.status(msError.statusCode).json(msError);
             processedMilestones = ms;
         }
@@ -114,6 +137,11 @@ export const createWO = async (req, res) => {
             description: description?.trim() || null,
             workItems: processedItems,
             totalContractValue,
+            gst: gstPct,
+            discount: discountPct,
+            gstAmount,
+            discountAmount,
+            finalAmount,
             hasMilestones: resolvedHasMilestones,
             milestones: processedMilestones,
             startDate: parsedStart,
@@ -138,6 +166,11 @@ export const createWO = async (req, res) => {
                 title: wo.title,
                 vendorName: wo.vendorName,
                 totalContractValue: wo.totalContractValue,
+                gst: wo.gst,
+                discount: wo.discount,
+                gstAmount: wo.gstAmount,
+                discountAmount: wo.discountAmount,
+                finalAmount: wo.finalAmount,
                 itemCount: wo.workItems.length,
                 hasMilestones: wo.hasMilestones,
                 milestoneCount: wo.milestones?.length || 0,
@@ -155,8 +188,6 @@ export const createWO = async (req, res) => {
 };
 
 
-
-// This function returns all work orders for a project. takes x-company-id in headers and projectId in params. supports pagination, search (woNumber, title, vendorName), filtering (status, vendorId) and sorting with enriched user data. -------------------------- Ayan
 export const getAllWOs = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -184,7 +215,7 @@ export const getAllWOs = async (req, res) => {
         const pageNumber = Math.max(Number(page), 1);
         const pageSize = Math.min(Math.max(Number(limit), 1), 100);
         const validStatuses = ["Draft", "Submitted", "Approved", "Rejected", "InProgress", "Completed", "Cancelled"];
-        const allowedSortFields = ["createdAt", "woNumber", "totalContractValue", "expectedEndDate", "status", "title"];
+        const allowedSortFields = ["createdAt", "woNumber", "totalContractValue", "finalAmount", "expectedEndDate", "status", "title"];
         const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
         const sortOrder = order === "asc" ? 1 : -1;
 
@@ -233,8 +264,6 @@ export const getAllWOs = async (req, res) => {
 };
 
 
-
-// This function fetches a specific work order by ID. takes x-company-id in headers, projectId and woId in params. returns complete WO details with enriched user information. -------------------------- Ayan
 export const getSingleWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -271,8 +300,6 @@ export const getSingleWO = async (req, res) => {
 };
 
 
-
-// This function updates a work order. takes x-company-id in headers, projectId and woId in params and editable fields like vendorId, title, description, workItems, milestones, dates, phaseId and updatedBy in body. allows update only in Draft state and recalculates contract value and milestones. -------------------------- Ayan
 export const editWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -306,7 +333,7 @@ export const editWO = async (req, res) => {
         if (wo.status !== "Draft") {
             return res.status(400).json(new ApiErrors(400, "Invalid Action", `Cannot edit a Work Order in '${wo.status}' status. Only Draft Work Orders can be edited`));
         }
-        const EDITABLE = ["vendorId", "title", "description", "workItems", "hasMilestones", "milestones", "startDate", "expectedEndDate", "workLocation", "paymentTerms", "specialInstructions", "phaseId"];
+        const EDITABLE = ["vendorId", "title", "description", "workItems", "hasMilestones", "milestones", "startDate", "expectedEndDate", "workLocation", "paymentTerms", "specialInstructions", "phaseId", "gst", "discount"];
         const provided = EDITABLE.filter((f) => req.body[f] !== undefined);
         if (provided.length === 0) {
             return res.status(400).json(new ApiErrors(400, "No Updates Provided", "Send at least one field to update"));
@@ -337,6 +364,7 @@ export const editWO = async (req, res) => {
             }
             updates.phaseId = req.body.phaseId ? new mongoose.Types.ObjectId(req.body.phaseId) : null;
         }
+
         let newTotalContractValue = wo.totalContractValue;
         if (req.body.workItems !== undefined) {
             const { processedItems, error: itemError } = processWorkItems(req.body.workItems);
@@ -345,13 +373,37 @@ export const editWO = async (req, res) => {
             newTotalContractValue = parseFloat(processedItems.reduce((sum, item) => sum + item.amount, 0).toFixed(2));
             updates.totalContractValue = newTotalContractValue;
         }
+
+        let newGst = wo.gst;
+        let newDiscount = wo.discount;
+
+        if (req.body.gst !== undefined) {
+            newGst = parseFloat(req.body.gst);
+            if (isNaN(newGst) || newGst < 0 || newGst > 100) {
+                return res.status(400).json(new ApiErrors(400, "Invalid GST", "gst must be a number between 0 and 100"));
+            }
+            updates.gst = newGst;
+        }
+        if (req.body.discount !== undefined) {
+            newDiscount = parseFloat(req.body.discount);
+            if (isNaN(newDiscount) || newDiscount < 0 || newDiscount > 100) {
+                return res.status(400).json(new ApiErrors(400, "Invalid Discount", "discount must be a number between 0 and 100"));
+            }
+            updates.discount = newDiscount;
+        }
+
+        const { gstAmount, discountAmount, finalAmount } = computeAmounts(newTotalContractValue, newGst, newDiscount);
+        updates.gstAmount = gstAmount;
+        updates.discountAmount = discountAmount;
+        updates.finalAmount = finalAmount;
+
         const newHasMilestones = req.body.hasMilestones !== undefined
             ? (req.body.hasMilestones === true || req.body.hasMilestones === "true")
             : wo.hasMilestones;
         updates.hasMilestones = newHasMilestones;
         if (newHasMilestones) {
             const milestonesSource = req.body.milestones !== undefined ? req.body.milestones : wo.milestones;
-            const { processedMilestones: ms, error: msError } = processMilestones(milestonesSource, newTotalContractValue);
+            const { processedMilestones: ms, error: msError } = processMilestones(milestonesSource, finalAmount);
             if (msError) return res.status(msError.statusCode).json(msError);
             updates.milestones = ms;
         } else {
@@ -378,8 +430,6 @@ export const editWO = async (req, res) => {
 };
 
 
-
-// This function submits a work order for approval. takes x-company-id in headers, projectId and woId in params and updatedBy in body. allows submission only from Draft state and updates status to Submitted. -------------------------- Ayan
 export const submitWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -421,6 +471,9 @@ export const submitWO = async (req, res) => {
                 vendorName: wo.vendorName,
                 submittedAt: wo.submittedAt,
                 totalContractValue: wo.totalContractValue,
+                gst: wo.gst,
+                discount: wo.discount,
+                finalAmount: wo.finalAmount,
                 status: wo.status,
             },
             eventAt: new Date(),
@@ -434,8 +487,6 @@ export const submitWO = async (req, res) => {
 };
 
 
-
-// This function approves a work order. takes x-company-id in headers, projectId and woId in params and actionBy in body. validates state, prevents self-approval and updates status to Approved. -------------------------- Ayan
 export const approveWO = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -481,6 +532,9 @@ export const approveWO = async (req, res) => {
                 vendorName: wo.vendorName,
                 approvedAt: wo.approvedAt,
                 totalContractValue: wo.totalContractValue,
+                gst: wo.gst,
+                discount: wo.discount,
+                finalAmount: wo.finalAmount,
                 status: wo.status,
             },
             eventAt: new Date(),
@@ -490,7 +544,7 @@ export const approveWO = async (req, res) => {
             projectId: new mongoose.Types.ObjectId(projectId),
             woId: wo._id,
             woNumber: wo.woNumber,
-            totalContractValue: wo.totalContractValue,
+            totalContractValue: wo.finalAmount,
             vendorId: wo.vendorId,
             vendorName: wo.vendorName,
             phaseId: wo.phaseId || null,
@@ -521,7 +575,6 @@ export const approveWO = async (req, res) => {
 };
 
 
-// This function rejects a work order. takes x-company-id in headers, projectId and woId in params and actionBy with rejectionRemarks in body. validates state, prevents self-rejection and updates status to Rejected. -------------------------- Ayan
 export const rejectWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -577,6 +630,7 @@ export const rejectWO = async (req, res) => {
                 rejectedAt: wo.rejectedAt,
                 rejectionRemarks: wo.rejectionRemarks || null,
                 totalContractValue: wo.totalContractValue,
+                finalAmount: wo.finalAmount,
                 status: wo.status,
             },
             eventAt: new Date(),
@@ -590,7 +644,6 @@ export const rejectWO = async (req, res) => {
 };
 
 
-// This function cancels a work order. takes x-company-id in headers, projectId and woId in params and actionBy with cancellationRemarks in body. allows cancellation only in Approved or InProgress state and updates status to Cancelled. -------------------------- Ayan
 export const cancelWO = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -652,6 +705,7 @@ export const cancelWO = async (req, res) => {
                 cancelledAt: wo.cancelledAt,
                 cancellationRemarks: wo.cancellationRemarks || null,
                 totalContractValue: wo.totalContractValue,
+                finalAmount: wo.finalAmount,
                 status: wo.status,
             },
             eventAt: new Date(),
@@ -685,7 +739,6 @@ export const cancelWO = async (req, res) => {
 };
 
 
-// This function marks a work order as InProgress. takes x-company-id in headers, projectId and woId in params and actionBy in body. validates state transition from Approved and updates execution details. -------------------------- Ayan
 export const markWOInProgress = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -728,10 +781,10 @@ export const markWOInProgress = async (req, res) => {
                 vendorName: wo.vendorName,
                 inProgressAt: wo.inProgressAt,
                 totalContractValue: wo.totalContractValue,
+                finalAmount: wo.finalAmount,
                 completionPercent: wo.completionPercent,
                 status: wo.status,
             },
-
             eventAt: new Date(),
         });
         logger.info("WO marked InProgress", { woId: wo._id, woNumber: wo.woNumber, projectId, companyId });
@@ -743,8 +796,6 @@ export const markWOInProgress = async (req, res) => {
 };
 
 
-
-// This function marks a work order as completed. takes x-company-id in headers, projectId and woId in params and actionBy, completionRemarks, actualEndDate in body. validates state, updates completion details, milestones and sets completion to 100%. -------------------------- Ayan
 export const markWOComplete = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -845,6 +896,7 @@ export const markWOComplete = async (req, res) => {
                 actualEndDate: wo.actualEndDate,
                 completionPercent: wo.completionPercent,
                 totalContractValue: wo.totalContractValue,
+                finalAmount: wo.finalAmount,
                 status: wo.status,
             },
             eventAt: new Date(),
@@ -858,7 +910,6 @@ export const markWOComplete = async (req, res) => {
 };
 
 
-// This function soft deletes a work order. takes x-company-id in headers, projectId and woId in params and deletedBy in body. allows deletion only in Draft or Rejected state and marks WO as deleted. -------------------------- Ayan
 export const deleteWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -913,7 +964,6 @@ export const deleteWO = async (req, res) => {
 };
 
 
-// This function exports a work order as PDF. takes x-company-id in headers, projectId and woId in params. fetches project, vendor and user details and generates formatted WO document for download. -------------------------- Ayan
 export const exportWOAsPdf = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -942,7 +992,7 @@ export const exportWOAsPdf = async (req, res) => {
                 .select("projectName projectCode location clientName status startDate endDate")
                 .lean(),
             Vendor.findOne({ _id: wo.vendorId, companyId, isDeleted: false })
-                .select("name vendorType contactPerson phone email address legalDetails")
+                .select("name vendorType contactPerson phone email address legalDetails bankDetails")
                 .lean(),
             enrichWOUsers(wo),
         ]);
@@ -961,7 +1011,6 @@ export const exportWOAsPdf = async (req, res) => {
 };
 
 
-// This function exports work completion certificate (WCC) as PDF. takes x-company-id in headers, projectId and woId in params. allows export only for Completed WOs and generates completion certificate document. -------------------------- Ayan
 export const exportWCCAsPdf = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -988,7 +1037,7 @@ export const exportWCCAsPdf = async (req, res) => {
                 .select("projectName projectCode location clientName status startDate endDate")
                 .lean(),
             Vendor.findOne({ _id: wo.vendorId, companyId, isDeleted: false })
-                .select("name vendorType contactPerson phone email address legalDetails")
+                .select("name vendorType contactPerson phone email address legalDetails bankDetails")
                 .lean(),
             enrichWOUsers(wo),
         ]);
@@ -1005,7 +1054,6 @@ export const exportWCCAsPdf = async (req, res) => {
 };
 
 
-// This function returns vendor lookup data for WO creation. takes x-company-id in headers and optional search in query. returns active vendors with minimal details for selection. -------------------------- Ayan
 export const getVendorLookupForWO = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -1035,7 +1083,6 @@ export const getVendorLookupForWO = async (req, res) => {
 };
 
 
-// This function returns work order lookup data. takes x-company-id in headers and projectId in params with optional search. returns active WOs (Approved/InProgress) with minimal details for linking. -------------------------- Ayan
 export const getWOLookup = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -1057,7 +1104,7 @@ export const getWOLookup = async (req, res) => {
             filter.$or = [{ woNumber: searchRegex }, { title: searchRegex }, { vendorName: searchRegex }];
         }
         const wos = await WorkOrder.find(filter)
-            .select("_id woNumber title status vendorName totalContractValue completionPercent hasMilestones expectedEndDate")
+            .select("_id woNumber title status vendorName totalContractValue gst discount gstAmount discountAmount finalAmount completionPercent hasMilestones expectedEndDate")
             .sort({ createdAt: -1 })
             .lean();
 
@@ -1070,6 +1117,11 @@ export const getWOLookup = async (req, res) => {
                     status: wo.status,
                     vendorName: wo.vendorName,
                     totalContractValue: wo.totalContractValue,
+                    gst: wo.gst,
+                    discount: wo.discount,
+                    gstAmount: wo.gstAmount,
+                    discountAmount: wo.discountAmount,
+                    finalAmount: wo.finalAmount,
                     completionPercent: wo.completionPercent,
                     hasMilestones: wo.hasMilestones,
                     expectedEndDate: wo.expectedEndDate,
@@ -1087,9 +1139,6 @@ export const getWOLookup = async (req, res) => {
 };
 
 
-
-
-// This function returns global work order (WO) summary analytics across all projects. takes x-company-id in headers. computes WO status counts, total contract value, active projects, active vendors, overdue WOs, milestone stats and average approval time KPIs. -------------------------- Ayan
 export const getGlobalWOSummary = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -1121,6 +1170,9 @@ export const getGlobalWOSummary = async (req, res) => {
                             $group: {
                                 _id: null,
                                 total: { $sum: "$totalContractValue" },
+                                totalFinal: { $sum: "$finalAmount" },
+                                totalGst: { $sum: "$gstAmount" },
+                                totalDiscount: { $sum: "$discountAmount" },
                             },
                         },
                     ],
@@ -1225,6 +1277,9 @@ export const getGlobalWOSummary = async (req, res) => {
         const completedWOs = statusMap["Completed"] || 0;
         const cancelledWOs = statusMap["Cancelled"] || 0;
         const totalContractValue = Math.round((agg?.totalContractValue?.[0]?.total ?? 0) * 100) / 100;
+        const totalFinalAmount = Math.round((agg?.totalContractValue?.[0]?.totalFinal ?? 0) * 100) / 100;
+        const totalGstAmount = Math.round((agg?.totalContractValue?.[0]?.totalGst ?? 0) * 100) / 100;
+        const totalDiscountAmount = Math.round((agg?.totalContractValue?.[0]?.totalDiscount ?? 0) * 100) / 100;
         const activeProjects = agg?.activeProjects?.[0]?.count ?? 0;
         const activeVendors = agg?.activeVendors?.[0]?.count ?? 0;
         const overdueWOs = agg?.overdueWOs?.[0]?.count ?? 0;
@@ -1255,6 +1310,9 @@ export const getGlobalWOSummary = async (req, res) => {
                         completedWOs,
                         cancelledWOs,
                         totalContractValue,
+                        totalGstAmount,
+                        totalDiscountAmount,
+                        totalFinalAmount,
                         activeProjects,
                         activeVendors,
                         overdueWOs,
@@ -1286,7 +1344,6 @@ export const getGlobalWOSummary = async (req, res) => {
 };
 
 
-// This function returns all work orders (WOs) across the company. takes x-company-id in headers. supports pagination, cursor pagination, search (woNumber, title, vendorName), filtering (status, projectId, vendorId, date range, overdueOnly) and sorting with enriched project, user and milestone details. -------------------------- Ayan
 export const getAllWOsGlobal = async (req, res) => {
     try {
         const companyUUID = req.headers["x-company-id"];
@@ -1333,6 +1390,7 @@ export const getAllWOsGlobal = async (req, res) => {
             "createdAt",
             "woNumber",
             "totalContractValue",
+            "finalAmount",
             "expectedEndDate",
             "status",
         ];
@@ -1495,6 +1553,11 @@ export const getAllWOsGlobal = async (req, res) => {
                 vendorName: wo.vendorName,
                 totalItems,
                 totalContractValue,
+                gst: wo.gst ?? 0,
+                discount: wo.discount ?? 0,
+                gstAmount: wo.gstAmount ?? 0,
+                discountAmount: wo.discountAmount ?? 0,
+                finalAmount: wo.finalAmount ?? 0,
                 completionPercent: wo.completionPercent ?? 0,
                 hasMilestones: wo.hasMilestones,
                 milestoneSummary,

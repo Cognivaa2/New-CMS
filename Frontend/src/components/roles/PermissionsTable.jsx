@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { ChevronDown, Check, AlertCircle, ShieldCheck, ShieldOff } from "lucide-react"
 import { toast } from "sonner"
+import Tooltip from "@/components/ui/Tooltip"
 
 function humaniseKey(key) {
   return key
@@ -52,6 +53,11 @@ const MODULE_DESCRIPTIONS = {
   "project-safety": "Safety inspections and compliance tracking",
 }
 
+const TAB_TOOLTIPS = {
+  company: "Manage company-level module permissions",
+  project: "Manage project-level module permissions",
+}
+
 const ACTION_LABELS = {
   create: "Create",
   view: "View",
@@ -64,6 +70,7 @@ const ACTION_LABELS = {
 }
 
 const COL_WIDTH = 64
+
 function CustomCheck({ isChecked, onClick, disabled }) {
   return (
     <button
@@ -86,6 +93,7 @@ function CustomCheck({ isChecked, onClick, disabled }) {
     </button>
   )
 }
+
 function RoleDropdown({ roles, activeRoleId, onSelect }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -141,9 +149,11 @@ function RoleDropdown({ roles, activeRoleId, onSelect }) {
     </div>
   )
 }
+
 function ToggleAllButton({ allEnabled, disabled, isLoading, onClick }) {
   const enable = !allEnabled
   return (
+    <Tooltip content="Toggle all buttons simultaneously" side="left">
     <button
       onClick={() => onClick(enable)}
       disabled={disabled || isLoading}
@@ -166,8 +176,10 @@ function ToggleAllButton({ allEnabled, disabled, isLoading, onClick }) {
         </>
       )}
     </button>
+    </Tooltip>
   )
 }
+
 function buildStateFromPermissions(permissions, allModules) {
   const state = {}
   allModules.forEach((mod) => {
@@ -175,6 +187,7 @@ function buildStateFromPermissions(permissions, allModules) {
   })
   return state
 }
+
 function buildPayload(state) {
   const payload = {}
   Object.entries(state).forEach(([mod, actionSet]) => {
@@ -182,9 +195,11 @@ function buildPayload(state) {
   })
   return payload
 }
+
 function countActive(state, moduleKeys) {
   return moduleKeys.filter((k) => state[k]?.size > 0).length
 }
+
 export default function PermissionsTable({
   roles = [],
   activeRoleId,
@@ -201,6 +216,7 @@ export default function PermissionsTable({
   const [isSaving, setIsSaving] = useState(false)
   const [isTogglingAll, setIsTogglingAll] = useState(false)
   const saveTimeoutRef = useRef(null)
+
   const tabs = useMemo(() => {
     if (!schema) return []
     return [
@@ -216,16 +232,20 @@ export default function PermissionsTable({
       },
     ]
   }, [schema])
+
   const actions = useMemo(() => schema?.actions || [], [schema])
   const allModules = useMemo(() => schema?.modules || [], [schema])
+
   useEffect(() => {
     if (allModules.length === 0) return
     setPermState(buildStateFromPermissions(permissions, allModules))
   }, [activeRoleId, permissions, allModules])
+
   useEffect(
     () => () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current) },
     []
   )
+
   const currentModuleKeys = useMemo(
     () => {
       const keys = tabs.find((t) => t.id === activeTab)?.moduleKeys || []
@@ -233,16 +253,19 @@ export default function PermissionsTable({
     },
     [tabs, activeTab]
   )
+
   const tabCounts = useMemo(
     () => Object.fromEntries(tabs.map((t) => [t.id, countActive(permState, t.moduleKeys)])),
     [tabs, permState]
   )
+
   const allEnabled = useMemo(() => {
     if (allModules.length === 0 || actions.length === 0) return false
     return allModules.every((mod) =>
       actions.every((action) => permState[mod]?.has(action))
     )
   }, [allModules, actions, permState])
+
   const scheduleSave = useCallback(
     (nextState, prevState) => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
@@ -269,6 +292,7 @@ export default function PermissionsTable({
     },
     [activeRoleId, onUpdatePermissions]
   )
+
   const toggleAction = useCallback(
     (moduleKey, action) => {
       if (!activeRoleIsActive) return
@@ -287,6 +311,7 @@ export default function PermissionsTable({
     },
     [activeRoleIsActive, scheduleSave]
   )
+
   const handleToggleAll = useCallback(
     async (enable) => {
       if (!activeRoleIsActive || isTogglingAll) return
@@ -318,6 +343,7 @@ export default function PermissionsTable({
     },
     [activeRoleIsActive, isTogglingAll, permState, allModules, actions, activeRoleId, onToggleAllPermissions]
   )
+
   if (!schema || tabs.length === 0) {
     return (
       <div className="w-full mt-10 flex items-center justify-center py-16">
@@ -327,46 +353,49 @@ export default function PermissionsTable({
       </div>
     )
   }
+
   const actionGridStyle = {
     gridTemplateColumns: `repeat(${actions.length}, ${COL_WIDTH}px)`,
   }
 
   return (
-    <div className="w-full font-sfpro mt-6 md:mt-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4 md:gap-6 px-2">
+    <div className="w-full font-sfpro mt-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-4 md:gap-6 px-2">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
           <RoleDropdown roles={roles} activeRoleId={activeRoleId} onSelect={onRoleChange} />
           <div className="flex items-center p-1 bg-[#f4f4f5] dark:bg-[#1c1c1e] rounded-xl border border-transparent dark:border-[#27272a] w-full sm:w-auto">
             {tabs.map((tab) => {
               const count = tabCounts[tab.id] ?? 0
               const isSelected = activeTab === tab.id
+              const tooltipContent = TAB_TOOLTIPS[tab.id] || `${tab.label} permissions`
 
               return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    relative flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-lg text-sm font-sfpro-medium transition-all duration-200
-                    ${isSelected
-                      ? "bg-[#18181b] text-white shadow-md dark:bg-white dark:text-black"
-                      : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5"
-                    }
-                  `}
-                >
-                  <span>{tab.label}</span>
-
-                  {count > 0 && (
-                    <span className={`
-                      flex items-center justify-center min-w-4.5 h-4.5 px-1 text-[10px] font-bold rounded-full
+                <Tooltip key={tab.id} content={tooltipContent} side="bottom">
+                  <button
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`
+                      relative flex items-center justify-center gap-2 flex-1 sm:flex-none px-4 sm:px-5 py-2 rounded-lg text-sm font-sfpro-medium transition-all duration-200
                       ${isSelected
-                        ? "bg-white/20 text-white dark:bg-black/10 dark:text-black"
-                        : "bg-gray-200 text-gray-600 dark:bg-[#3f3f46] dark:text-gray-300"
+                        ? "bg-[#18181b] text-white shadow-md dark:bg-white dark:text-black"
+                        : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-black/5 dark:hover:bg-white/5"
                       }
-                    `}>
-                      {count}
-                    </span>
-                  )}
-                </button>
+                    `}
+                  >
+                    <span>{tab.label}</span>
+
+                    {count > 0 && (
+                      <span className={`
+                        flex items-center justify-center min-w-4.5 h-4.5 px-1 text-[10px] font-bold rounded-full
+                        ${isSelected
+                          ? "bg-white/20 text-white dark:bg-black/10 dark:text-black"
+                          : "bg-gray-200 text-gray-600 dark:bg-[#3f3f46] dark:text-gray-300"
+                        }
+                      `}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                </Tooltip>
               )
             })}
           </div>
@@ -388,8 +417,8 @@ export default function PermissionsTable({
           )}
         </div>
       </div>
-      <div className="rounded-xl border border-[#EAEAEA] dark:border-[#27272a] overflow-hidden bg-white dark:bg-[#09090b]">
 
+      <div className="rounded-xl border border-[#EAEAEA] dark:border-[#27272a] overflow-hidden bg-white dark:bg-[#09090b]">
         <div className="hidden md:block overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           <div className="min-w-160">
             <div className="flex items-center justify-between px-6 py-3 bg-[#fafafa] dark:bg-[#111113] border-b border-[#EAEAEA] dark:border-[#27272a]">
@@ -457,6 +486,7 @@ export default function PermissionsTable({
             </div>
           </div>
         </div>
+
         <div className="md:hidden divide-y divide-[#EAEAEA] dark:divide-[#27272a]">
           {currentModuleKeys.map((moduleKey) => {
             const enabledActions = permState[moduleKey] || new Set()

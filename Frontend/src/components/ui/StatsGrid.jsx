@@ -41,7 +41,7 @@ export default function StatsGrid({ stats = [], isLoading = false }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
       {stats.map((stat) => (
         <StatCard
           key={stat.id}

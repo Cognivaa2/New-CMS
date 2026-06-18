@@ -16,6 +16,7 @@ import DprHeader from "@/components/projects/(project)/dpr/DprHeader";
 import SummaryCards from "@/components/projects/(project)/dpr/SummaryCards";
 import WorkTable from "@/components/projects/(project)/dpr/WorkTable";
 import Loading from "./loding";
+import Tooltip from "@/components/ui/Tooltip";
 
 const TABS = [
   "Tasks", "Sub Tasks", "Progress", "Consumptions", "Transfers",
@@ -174,7 +175,7 @@ export default function DprPage() {
   if (isInitialLoad && !tableError) return <Loading />;
 
   return (
-    <div className="w-full min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg  p-4 sm:p-8 font-sans transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 transition-colors duration-300">
       <div className="max-w-400 mx-auto">
 
         <DprHeader
@@ -192,34 +193,35 @@ export default function DprPage() {
           isLoading={isSummaryLoading}
         />
 
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide rounded-2xl bg-[#f7f7f7] dark:bg-[#18181b] p-1.5 border border-[#ececec] dark:border-[#252525] lg:w-fit">
+        <div className="flex items-center gap-1 mb-4 overflow-x-auto pb-2 scrollbar-hide rounded-lg bg-[#f7f7f7] dark:bg-[#18181b] p-1 border border-[#ececec] dark:border-[#252525] lg:w-fit">
           {TABS.map((tab) => {
             const moduleName = TAB_TO_MODULE[tab];
             const mod = availableModules.find((m) => m.module === moduleName);
 
             return (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`relative h-10 px-4 sm:px-5 rounded-xl text-sm font-sfpro-medium transition-all whitespace-nowrap border ${activeTab === tab
-                    ? "bg-[#212121] text-white border-[#212121] shadow-sm dark:bg-white dark:text-black dark:border-white"
-                    : "bg-white text-[#3f3f46] border-transparent hover:bg-[#fafafa] hover:border-[#e5e7eb] dark:bg-[#1f1f1f] dark:text-[#d4d4d8] dark:hover:bg-[#262626] dark:hover:border-[#3f3f46]"
-                  }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  {tab}
-                  {mod && mod.count > 0 && (
+              <Tooltip content={"All operations of "+tab} side="top">
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`cursor-pointer relative h-10 px-4 sm:px-5 rounded-lg text-sm font-sfpro-medium transition-all whitespace-nowrap border ${activeTab === tab ? "bg-[#212121] text-white border-[#212121] dark:bg-white dark:text-black dark:border-white"
+                    : "bg-white text-[#3f3f46] border-transparent hover:bg-[#fafafa] hover:border-[#d1d1d1] dark:bg-[#1f1f1f] dark:text-[#d4d4d8] dark:hover:bg-[#262626] dark:hover:border-[#3f3f46]"
+                    }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    {tab}
+                    {/* {mod && mod.count > 0 && (
                     <span
                       className={`text-[10px] leading-none font-bold px-1.5 py-0.5 rounded-full ${activeTab === tab
-                          ? "bg-white/15 text-white dark:bg-black/10 dark:text-black"
-                          : "bg-gray-100 text-gray-500 dark:bg-[#2f2f2f] dark:text-[#a1a1aa]"
+                        ? "bg-white/15 text-white dark:bg-black/10 dark:text-black"
+                        : "bg-gray-100 text-gray-500 dark:bg-[#2f2f2f] dark:text-[#a1a1aa]"
                         }`}
                     >
                       {mod.count}
                     </span>
-                  )}
-                </span>
-              </button>
+                  )} */}
+                  </span>
+                </button>
+              </Tooltip>
             );
           })}
         </div>
@@ -247,6 +249,6 @@ export default function DprPage() {
         )}
 
       </div>
-    </div>
+    </div >
   );
 }

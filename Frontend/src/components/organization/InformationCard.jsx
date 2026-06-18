@@ -5,7 +5,7 @@ const NotProvided = () => (
 )
 export default function InformationCard({ data }) {
   return (
-    <div className="bg-[#f9f9fa] dark:bg-[#18181b] border border-transparent dark:border-[#27272a] rounded-3xl p-8 h-full transition-colors duration-300 font-sfpro">
+    <div className="bg-[#f0f0f0] dark:bg-[#18181b] border border-transparent dark:border-[#27272a] rounded-2xl p-8 h-full transition-colors duration-300 font-sfpro">
       <h3 className="text-lg font-sfpro-medium text-gray-900 dark:text-[#f4f4f5] mb-6 transition-colors">
         Information
       </h3>      

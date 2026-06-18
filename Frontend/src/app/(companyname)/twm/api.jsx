@@ -37,6 +37,38 @@ export function formatCurrency(val) {
     })}`
 }
 
+export function formatCompactNumber(val) {
+    if (val == null || isNaN(val)) return "0"
+
+    const num = Number(val)
+    const abs = Math.abs(num)
+    const sign = num < 0 ? "-" : ""
+    const short = (n) => Number(n.toFixed(1)).toString()
+
+    if (abs >= 1e7) return `${sign}${short(abs / 1e7)}Cr`   
+    if (abs >= 1e6) return `${sign}${short(abs / 1e6)}M`    
+    if (abs >= 1e5) return `${sign}${short(abs / 1e5)}L`   
+    if (abs >= 1e3) return `${sign}${short(abs / 1e3)}K`   
+
+    return `${num}`
+}
+
+export function formatCompactCurrency(val) {
+    if (val == null || isNaN(val)) return "₹0"
+
+    const num = Number(val)
+    const abs = Math.abs(num)
+    const sign = num < 0 ? "-" : ""
+    const short = (n) => Number(n.toFixed(1)).toString()
+
+    if (abs >= 1e7) return `${sign}₹${short(abs / 1e7)}Cr`
+    if (abs >= 1e6) return `${sign}₹${short(abs / 1e6)}M`
+    if (abs >= 1e5) return `${sign}₹${short(abs / 1e5)}L`
+    if (abs >= 1e3) return `${sign}₹${short(abs / 1e3)}K`
+
+    return `${sign}₹${abs.toLocaleString("en-IN")}`
+}
+
 
 export const MATCH_STATUS_CONFIG = {
     MATCHED: {
@@ -350,47 +382,41 @@ export function computeTWMStats(records) {
 
     const totalOrderedValue = records.reduce((s, r) => s + (r.financials?.orderedValue || 0), 0)
     const totalOutstanding = records.reduce((s, r) => s + (r.financials?.outstandingValue || 0), 0)
+
     return {
         cards: [
             {
                 id: 1,
                 title: "Matched",
-                value: matched,
+                value: formatCompactNumber(matched),
                 subtitle: "POs fully reconciled",
                 colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
             },
             {
                 id: 2,
                 title: "Unmatched",
-                value: unmatched,
+                value: formatCompactNumber(unmatched),
                 subtitle: "POs with discrepancies",
                 colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
             },
-            // {
-            //     id: 3,
-            //     title: "Partial",
-            //     value: partial,
-            //     subtitle: "Partially matched POs",
-            //     colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
-            // },
             {
                 id: 3,
                 title: "Pending",
-                value: pending,
+                value: formatCompactNumber(pending),
                 subtitle: "Awaiting GRN / Invoice",
                 colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
             },
             {
                 id: 4,
                 title: "Total Ordered",
-                value: formatCurrency(totalOrderedValue),
-                subtitle: `Outstanding: ${formatCurrency(totalOutstanding)}`,
+                value: formatCompactCurrency(totalOrderedValue),
+                subtitle: `Outstanding: ${formatCompactCurrency(totalOutstanding)}`,
                 colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
             },
             {
                 id: 5,
                 title: "Tolerated",
-                value: tolerated,
+                value: formatCompactNumber(tolerated),
                 subtitle: "Within 2% variance",
                 colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
             },

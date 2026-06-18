@@ -317,8 +317,8 @@ export default function ExpensesPage() {
   if (isInitialLoad) return <Loading />
 
   return (
-    <div className="w-full min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg  px-6 pt-8 pb-16 lg:px-10 font-sans">
-      <div className="mx-auto space-y-8">
+    <div className="w-full min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg  p-4 font-sans">
+      <div className="mx-auto space-y-2">
 
         <ExpenseHeader
           onSearch={handleSearch}
@@ -327,7 +327,7 @@ export default function ExpensesPage() {
           isExporting={isExporting}
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
           {isDashLoading
             ? Array.from({ length: 5 }).map((_, i) => (
               <div

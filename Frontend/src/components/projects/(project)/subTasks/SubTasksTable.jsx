@@ -6,10 +6,10 @@ import Tooltip from "@/components/ui/Tooltip"
 import SubTaskDetailsModal from "./SubTasksDetailsModal"
 import ThreeDotMenu from "@/components/ui/ThreeDotMenu"
 import SubTaskManageMembersModal from "./SubTaskManageMembersModal"
-import SubTaskDocumentsModal from "./SubTaskDocumentsModal"  
+import SubTaskDocumentsModal from "./SubTaskDocumentsModal"
 
 function getDuration(start, end) {
-    if (!start || !end) return "—"
+    if (!start || !end) return null
     const parseDate = (d) => {
         if (!d) return null
         if (d instanceof Date) return d
@@ -18,10 +18,10 @@ function getDuration(start, end) {
     }
     const s = parseDate(start)
     const e = parseDate(end)
-    if (!s || !e) return "—"
+    if (!s || !e) return null
     const diffMs = e - s
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
-    if (diffDays < 0) return "—"
+    if (diffDays < 0) return null
     return `${diffDays} Days`
 }
 
@@ -101,6 +101,9 @@ function UserAvatar({ user, size = 28 }) {
 }
 
 function AvatarStack({ members = [] }) {
+    if (members.length === 0) {
+        return <NA>Not assigned yet</NA>
+    }
     return (
         <div className="flex -space-x-2 shrink-0">
             {members.slice(0, 3).map((user, i) => (
@@ -182,6 +185,16 @@ function SubTaskMobileCard({ subtask, onClick, onEdit, onDelete, onManageMembers
     )
 }
 
+
+function NA({ children }) {
+    return (
+        <span className="text-[#c4c4c7] dark:text-[#52525b] italic text-sm font-sfpro">
+            {children || "Not available"}
+        </span>
+    )
+}
+
+
 function SubTaskRow({ subtask, onClick, onEdit, onDelete, onManageMembers, onUpdateProgress, onViewDocuments }) {
     const completionColor = subtask.status === "Completed" ? "text-[#73A464]" : "text-[#71717a] dark:text-[#a1a1aa]"
     const menuItems = [
@@ -201,22 +214,34 @@ function SubTaskRow({ subtask, onClick, onEdit, onDelete, onManageMembers, onUpd
     }
     return (
         <tr onClick={onClick} className="group cursor-pointer border-b border-[#f0f0f0] dark:border-[#1e1e1e] last:border-0 hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150">
-            <td className="px-5 py-4 whitespace-nowrap">
-                <div className="flex items-center gap-2.5">
+            <td className="px-4 py-2 whitespace-nowrap">
+                <div className="flex items-center gap-1">
                     <UserAvatar user={subtask.createdBy} size={32} />
                     <div className="min-w-0">
-                        <p className="text-sm font-sfpro-medium text-[#212121] dark:text-[#f4f4f5] truncate max-w-27.5">{subtask.createdBy?.name || "Unknown"}</p>
+                        <p className="text-sm font-sfpro-medium text-[#212121] dark:text-[#f4f4f5] truncate max-w-27.5">{subtask.createdBy?.name || "User"}</p>
                         <p className="text-xs font-sfpro text-[#a1a1aa] dark:text-[#71717a] truncate max-w-27.5">{subtask.createdBy?.role || "Team Member"}</p>
                     </div>
                 </div>
             </td>
-            <td className="px-5 py-4 max-w-60"><p className="text-sm font-sfpro text-[#3f3f46] dark:text-[#d4d4d8] line-clamp-2 leading-snug">{subtask.title}</p></td>
-            <td className="px-5 py-4 whitespace-nowrap"><AvatarStack members={subtask.assignedTo} /></td>
-            <td className="px-5 py-4 whitespace-nowrap"><StatusBadge status={subtask.status} /></td>
-            <td className="px-5 py-4 whitespace-nowrap text-sm font-sfpro text-[#3f3f46] dark:text-[#a1a1aa]">{subtask.startDate || "—"}</td>
-            <td className="px-5 py-4 whitespace-nowrap text-sm font-sfpro text-[#3f3f46] dark:text-[#a1a1aa]">{subtask.endDate || "—"}</td>
-            <td className="px-5 py-4 whitespace-nowrap text-sm font-sfpro text-[#3f3f46] dark:text-[#a1a1aa]">{getDuration(subtask.startDate, subtask.endDate)}</td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 max-w-60"><p className="text-sm font-sfpro-medium text-[#212121] dark:text-[#d4d4d8] line-clamp-2 leading-snug">{subtask.title}</p></td>
+            <td className="px-4 py-2 whitespace-nowrap"><AvatarStack members={subtask.assignedTo} /></td>
+            <td className="px-4 py-2 whitespace-nowrap"><StatusBadge status={subtask.status} /></td>
+            <td className="px-4 py-2 whitespace-nowrap">
+                {subtask.startDate
+                    ? <span className="text-sm font-sfpro text-[#3f3f46] dark:text-[#a1a1aa]">{subtask.startDate}</span>
+                    : <NA />}
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap">
+                {subtask.endDate
+                    ? <span className="text-sm font-sfpro text-[#3f3f46] dark:text-[#a1a1aa]">{subtask.endDate}</span>
+                    : <NA />}
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap">
+                {getDuration(subtask.startDate, subtask.endDate)
+                    ? <span className="text-sm font-sfpro text-[#3f3f46] dark:text-[#a1a1aa]">{getDuration(subtask.startDate, subtask.endDate)}</span>
+                    : <NA />}
+            </td>
+            <td className="px-4 py-2 whitespace-nowrap">
                 <div className="flex items-center gap-2">
                     <div className="w-20 h-1 rounded-full bg-[#f0f0f0] dark:bg-[#27272a] overflow-hidden">
                         <div className="h-full rounded-full transition-all duration-300 bg-[#212121] dark:bg-white" style={{ width: `${subtask.completionPercent}%` }} />
@@ -224,7 +249,7 @@ function SubTaskRow({ subtask, onClick, onEdit, onDelete, onManageMembers, onUpd
                     <span className={`text-sm font-sfpro-medium ${completionColor} min-w-9.5`}>{subtask.completionPercent}%</span>
                 </div>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap">
+            <td className="px-4 py-2 whitespace-nowrap">
                 <div onClick={(e) => e.stopPropagation()} className="inline-block relative z-10">
                     <ThreeDotMenu items={menuItems} size="md" header={menuHeader} />
                 </div>
@@ -253,8 +278,8 @@ function EmptyState() {
 
 export default function SubTasksTable({
     subtasks = [],
-    taskId,  
-    projectId, 
+    taskId,
+    projectId,
     onEdit,
     onDelete,
     projectUsers = [],
@@ -268,7 +293,7 @@ export default function SubTasksTable({
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [membersModalOpen, setMembersModalOpen] = useState(false)
     const [membersSubTask, setMembersSubTask] = useState(null)
-    
+
     const [documentsModalOpen, setDocumentsModalOpen] = useState(false)
     const [documentsSubTask, setDocumentsSubTask] = useState(null)
 
@@ -325,7 +350,7 @@ export default function SubTasksTable({
                         <thead>
                             <tr className="bg-[#f9f9f9] dark:bg-[#18181b] border-b border-[#EAEAEA] dark:border-[#252525]">
                                 {HEADERS.map((h, i) => (
-                                    <th key={i} className="px-5 py-3.5 text-left text-xs font-sfpro-medium text-[#a1a1aa] dark:text-[#71717a] whitespace-nowrap tracking-wide uppercase">{h}</th>
+                                    <th key={i} className="px-5 py-3.5 text-left text-xs font-sfpro-bold text-[#929292] dark:text-[#71717a] whitespace-nowrap tracking-wide uppercase">{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -346,7 +371,7 @@ export default function SubTasksTable({
                                         onDelete={onDelete}
                                         onManageMembers={handleManageMembers}
                                         onUpdateProgress={onUpdateProgress}
-                                        onViewDocuments={handleViewDocuments}  
+                                        onViewDocuments={handleViewDocuments}
                                     />
                                 ))
                             )}
@@ -368,7 +393,7 @@ export default function SubTasksTable({
                             onDelete={onDelete}
                             onManageMembers={handleManageMembers}
                             onUpdateProgress={onUpdateProgress}
-                            onViewDocuments={handleViewDocuments}  
+                            onViewDocuments={handleViewDocuments}
                         />
                     ))
                 )}

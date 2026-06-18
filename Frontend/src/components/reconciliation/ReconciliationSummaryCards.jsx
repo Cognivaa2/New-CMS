@@ -44,7 +44,7 @@ function SkeletonCard() {
 export default function ReconciliationSummaryCards({ cards = [], isLoading = false }) {
   if (isLoading || cards.length === 0) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-2">
         {Array.from({ length: 5 }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -53,7 +53,7 @@ export default function ReconciliationSummaryCards({ cards = [], isLoading = fal
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 mb-2">
       {cards.map((card) => {
         const Icon = ICON_MAP[card.icon] || Activity;
         return (

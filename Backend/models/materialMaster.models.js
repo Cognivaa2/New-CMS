@@ -29,6 +29,11 @@ const materialMasterSchema = new Schema(
             trim: true,
             default: null,
         },
+        sacNumber: {
+            type: String,
+            trim: true,
+            default: null,
+        },
         isActive: {
             type: Boolean,
             default: true,

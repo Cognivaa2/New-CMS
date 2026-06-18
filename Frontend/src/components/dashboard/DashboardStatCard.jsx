@@ -13,7 +13,7 @@ export default function DashboardStatCard({
   trendUp,
 }) {
   return (
-    <div className="group bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-[1.75rem] p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 flex flex-col justify-center">
+    <div className="group bg-white dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-zinc-200 dark:hover:border-zinc-700 hover:-translate-y-0.5 flex flex-col justify-center">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <span className="text-[32px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-none">

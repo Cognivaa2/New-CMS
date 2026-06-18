@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Search, X } from "lucide-react"
 import FilterOptions from "@/components/ui/FilterOptions"
+import Tooltip from "@/components/ui/Tooltip"
 const DEBOUNCE_DELAY = 300
 export default function PageHeader({
   title,
@@ -103,12 +104,12 @@ export default function PageHeader({
           {title}
         </h1>
         {description && (
-          <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-3 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
+          <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-2 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
             {description}
           </p>
         )}
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
         <div className="relative flex items-center w-full sm:w-[320px] lg:w-65 shrink-0">
           <Search
             className={`w-4 h-4 absolute left-3 transition-colors duration-200 ${isFocused ? "text-gray-700 dark:text-[#f4f4f5]" : "text-gray-400"
@@ -153,6 +154,7 @@ export default function PageHeader({
             />
           )}
 
+          <Tooltip content="Add a new role" side="left">
           <button
             onClick={onAction}
             className="flex items-center justify-center gap-2 h-9 bg-[#222222] dark:bg-white hover:bg-black dark:hover:bg-gray-200 text-white dark:text-black px-4 rounded-xl text-[13.5px] font-sfpro-medium transition-colors duration-300 flex-1 sm:flex-initial shrink-0"
@@ -160,6 +162,7 @@ export default function PageHeader({
             {ActionIcon && <ActionIcon className="w-4 h-4 shrink-0" />}
             <span className="truncate">{actionText}</span>
           </button>
+          </Tooltip>
         </div>
       </div>
     </div>

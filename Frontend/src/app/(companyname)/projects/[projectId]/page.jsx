@@ -147,23 +147,23 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-6 lg:p-10 font-sfpro transition-colors duration-300">
+    <main className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212] rounded-lg p-4 font-sfpro transition-colors duration-300">
       <ProjectHeader
-        // activeTab={activeTab}
-        // setActiveTab={setActiveTab}
+      // activeTab={activeTab}
+      // setActiveTab={setActiveTab}
       />
 
       {/* Tab-based rendering — commented out for now */}
       {/* {activeTab === "Overview" ? ( */}
-        <OverviewTab
-          data={overviewData}
-          rawDetails={details}
-          isLoading={detailsLoading || kpisLoading || phasesLoading || alertsLoading}
-          phasesLoading={phasesLoading}
-          alertsLoading={alertsLoading}
-          projectId={projectId}
-          onRefresh={loadAll}
-        />
+      <OverviewTab
+        data={overviewData}
+        rawDetails={details}
+        isLoading={detailsLoading || kpisLoading || phasesLoading || alertsLoading}
+        phasesLoading={phasesLoading}
+        alertsLoading={alertsLoading}
+        projectId={projectId}
+        onRefresh={loadAll}
+      />
       {/* ) : (
         <ExecutionTab
           data={executionData}

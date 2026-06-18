@@ -5,17 +5,18 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts"
 import BarChartSection from "./BarChartSection"
 import ManageMembersModal from "./ManageMembersModal"
 import EditProjectDrawer from "./EditProjectDrawer"
+import Tooltip from "@/components/ui/Tooltip"
 
 function SummaryCard({ item }) {
     return (
-        <div className={`p-6 rounded-[2.5rem] transition-all duration-300 font-sfpro flex flex-col justify-center min-h-40 border border-transparent dark:border-white/5 shadow-sm ${item.colorClass}`}>
-            <h2 className="text-[34px] font-sfpro-bold leading-none mb-2 text-gray-800 dark:text-gray-100">
+        <div className={`p-4 rounded-2xl transition-all duration-300 font-sfpro flex flex-col justify-center min-h-40 border border-transparent dark:border-white/5 shadow-sm ${item.colorClass}`}>
+            <h2 className="text-[34px] font-sfpro-bold leading-none mb-1 text-gray-800 dark:text-gray-100">
                 {item.value}
             </h2>
             <p className={`text-[16px] font-sfpro-bold dark:text-gray-200 ${item.highlight ? "text-blue-600 underline underline-offset-4" : "text-gray-800/80"}`}>
                 {item.title}
             </p>
-            <p className="text-[12px] text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-[12px] text-gray-400 dark:text-gray-500">
                 {item.subtitle}
             </p>
         </div>
@@ -69,11 +70,10 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
     const pct = Math.min(100, Math.max(0, data.completionPercent || 0))
 
     return (
-        <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
+        <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
                 <div className="lg:col-span-3 flex items-center justify-center">
-                    <div className="w-64 h-64 rounded-full overflow-hidden border-8 border-white dark:border-neutral-900 shadow-xl bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center">
+                    <div className="w-sm h-sm rounded-full overflow-hidden border-8 border-white dark:border-neutral-900 bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center">
                         {data.coverImage ? (
                             <img
                                 src={data.coverImage}
@@ -88,13 +88,15 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                     </div>
                 </div>
 
-                <div className="lg:col-span-5 bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50 relative">
+                <div className="lg:col-span-5 bg-white dark:bg-[#0d0d0d] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-neutral-800/50 relative">
                     <div className="flex justify-between items-start mb-6">
                         <h3 className="text-xl font-sfpro-bold text-[#1e1e1e] dark:text-white">Project Details</h3>
-                        <Edit
-                            onClick={() => setIsProjectDrawerOpen(true)}
-                            className="w-5 h-5 text-gray-400 cursor-pointer hover:text-black dark:hover:text-white transition-colors"
-                        />
+                        <Tooltip content="Edit Project Details" side="top">
+                            <Edit
+                                onClick={() => setIsProjectDrawerOpen(true)}
+                                className="w-5 h-5 text-gray-400 cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+                            />
+                        </Tooltip>
                     </div>
 
                     {isLoading ? (
@@ -104,7 +106,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                             ))}
                         </div>
                     ) : (
-                        <div className="space-y-4 text-sm font-sfpro">
+                        <div className="space-y-2 text-sm font-sfpro">
                             <div className="flex gap-2"><span className="text-gray-400">Name :</span><span className="font-sfpro-bold dark:text-gray-200">{data.title}</span></div>
                             <div className="flex gap-2"><span className="text-gray-400">Code :</span><span className="font-sfpro-bold dark:text-gray-200">{data.code}</span></div>
                             <div className="flex gap-2">
@@ -127,7 +129,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                         </div>
                     )}
 
-                    <div className="absolute bottom-8 right-8 w-20 h-20">
+                    <div className="absolute bottom-10 right-8 w-20 h-20">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie data={[{ v: 100 }]} innerRadius={30} outerRadius={38} stroke="none" className="fill-gray-100 dark:fill-white/5" dataKey="v" />
@@ -141,13 +143,15 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                     </div>
                 </div>
 
-                <div className="lg:col-span-4 bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
-                    <div className="flex justify-between items-start mb-6">
+                <div className="lg:col-span-4 bg-white dark:bg-[#0d0d0d] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-neutral-800/50">
+                    <div className="flex justify-between items-start mb-10">
                         <h3 className="text-xl font-sfpro-bold text-[#1e1e1e] dark:text-white">Assigned Members</h3>
-                        <Edit
-                            onClick={() => setIsMembersModalOpen(true)}
-                            className="w-5 h-5 text-gray-400 cursor-pointer hover:text-black dark:hover:text-white transition-colors"
-                        />
+                        <Tooltip content="Manage Members" side="left">
+                            <Edit
+                                onClick={() => setIsMembersModalOpen(true)}
+                                className="w-5 h-5 text-gray-400 cursor-pointer hover:text-black dark:hover:text-white transition-colors"
+                            />
+                        </Tooltip>
                     </div>
 
                     {isLoading ? (
@@ -193,15 +197,15 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
             </div>
 
             {metrics.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {metrics.map((item, i) => (
                         <SummaryCard key={i} item={item} />
                     ))}
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-4">
-                <div className="lg:col-span-2 bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                <div className="lg:col-span-2 bg-white dark:bg-[#0d0d0d] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-neutral-800/50">
                     {phasesLoading ? (
                         <div className="h-72 bg-gray-100 dark:bg-[#1a1a1a] rounded-2xl animate-pulse" />
                     ) : (
@@ -214,7 +218,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                     )}
                 </div>
 
-                <div className="bg-white dark:bg-[#0d0d0d] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-neutral-800/50">
+                <div className="bg-white dark:bg-[#0d0d0d] rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-neutral-800/50">
                     <h3 className="text-xl font-sfpro-bold text-[#1e1e1e] dark:text-white">Alerts</h3>
                     <p className="text-xs text-gray-400 mt-1 mb-6">
                         {data.alertSummary?.total > 0
@@ -228,7 +232,7 @@ export default function OverviewTab({ data, rawDetails, isLoading = false, phase
                                 <div key={i} className="h-5 bg-gray-100 dark:bg-[#1a1a1a] rounded animate-pulse" />
                             ))
                         ) : (data.alerts || []).length === 0 ? (
-                            <p className="text-sm text-gray-400 font-sfpro text-center py-4">No active alerts</p>
+                            <p className="text-sm text-gray-400 font-sfpro text-center py-2">No active alerts</p>
                         ) : (
                             data.alerts.map((alert, i) => (
                                 <div key={i} className="flex items-center gap-4 text-xs font-sfpro-bold text-gray-700 dark:text-gray-300">

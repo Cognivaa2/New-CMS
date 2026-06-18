@@ -76,8 +76,8 @@ function StatusPill({ isActive }) {
   return (
     <span
       className={`inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-sfpro-medium uppercase tracking-wider transition-colors whitespace-nowrap ${isActive
-          ? "bg-[#f0faf0] dark:bg-[#1a2e1a] text-[#16a34a] dark:text-[#4ade80] border-[#16a34a]/30"
-          : "bg-[#fff1f1] dark:bg-[#2e1a1a] text-[#dc2626] dark:text-[#f87171] border-[#dc2626]/30"
+        ? "bg-[#f0faf0] dark:bg-[#1a2e1a] text-[#16a34a] dark:text-[#4ade80] border-[#16a34a]/30"
+        : "bg-[#fff1f1] dark:bg-[#2e1a1a] text-[#dc2626] dark:text-[#f87171] border-[#dc2626]/30"
         }`}
     >
       {isActive ? (
@@ -134,7 +134,7 @@ function SkeletonRow() {
     <div
       className="grid gap-4 px-6 py-4 items-center border-b border-gray-50 dark:border-gray-800/50"
       style={{
-        gridTemplateColumns: "1.3fr 2fr 120px 90px 130px 1.6fr 130px 60px",
+        gridTemplateColumns: "1.4fr 2fr 140px 140px 90px 160px 180px 120px 70px",
       }}
     >
       {Array.from({ length: 8 }).map((_, i) => (
@@ -326,6 +326,12 @@ export default function MaterialTable({
                     </span>
                   </div>
                   <div>
+                    <RowLabel text="SAC Number" />
+                    <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-gray-200">
+                      {row.sacNumber || "Not provided"}
+                    </span>
+                  </div>
+                  <div>
                     <RowLabel text="Unit" />
                     <UnitBadge unit={row.unit} />
                   </div>
@@ -354,11 +360,12 @@ export default function MaterialTable({
               className="grid gap-4 px-6 py-4 bg-gray-50 dark:bg-[#1c1c1f] border-b border-gray-200 dark:border-[#272727] items-center text-[11px] font-sfpro-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
               style={{
                 gridTemplateColumns:
-                  "1.3fr 2fr 120px 90px 130px 1.6fr 130px 60px",
+                  "1.4fr 2fr 140px 140px 90px 160px 180px 120px 70px",
               }}
             >
               <div>Material</div>
               <div>Description</div>
+              <div>SAC</div>
               <div>Category</div>
               <div>Unit</div>
               <div>Status</div>
@@ -377,11 +384,11 @@ export default function MaterialTable({
                 data.map((row, index) => (
                   <div
                     key={row.id}
-                    className={`grid gap-4 px-6 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 hover:bg-[#fafafa] dark:hover:bg-[#131313] transition-colors ${index === data.length - 1 ? "border-b-0" : ""
+                    className={`grid gap-4 px-6 py-2 items-center border-b border-gray-50 dark:border-gray-800/50 hover:bg-[#fafafa] dark:hover:bg-[#131313] transition-colors ${index === data.length - 1 ? "border-b-0" : ""
                       }`}
                     style={{
                       gridTemplateColumns:
-                        "1.3fr 2fr 120px 90px 130px 1.6fr 130px 60px",
+                        "1.4fr 2fr 140px 140px 90px 160px 180px 120px 70px",
                     }}
                   >
                     <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white truncate">
@@ -389,6 +396,9 @@ export default function MaterialTable({
                     </span>
                     <span className="text-[13px] text-gray-500 dark:text-gray-400 truncate pr-2">
                       {row.description || "Not provided"}
+                    </span>
+                    <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">
+                      {row.sacNumber || "Not provided"}
                     </span>
                     <span className="text-[13px] font-sfpro-bold text-gray-700 dark:text-gray-200">
                       {row.category || "Not provided"}

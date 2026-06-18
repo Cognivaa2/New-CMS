@@ -362,7 +362,7 @@ export default function WorkOrderPage() {
     if (isInitialLoad) return <Loading />
 
     return (
-        <div className="w-full mx-auto py-8 px-4 sm:px-8 flex flex-col gap-6 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen font-sfpro">
+        <div className="w-full mx-auto p-4 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen font-sfpro">
             <WOHeader
                 title="Work Orders"
                 description={<>Manage and track work orders<br />for your project</>}
@@ -372,7 +372,7 @@ export default function WorkOrderPage() {
                 isRefreshing={isRefreshing}
             />
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                 {stats.map((stat) => <SummaryCard key={stat.id} item={stat} />)}
             </div>
 
