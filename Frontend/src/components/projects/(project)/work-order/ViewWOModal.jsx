@@ -245,9 +245,8 @@ function MilestonesTable({ milestones, totalContractValue }) {
                             {["#", "Title", "Trigger %", "Payment %", "Amount", "Status", "Triggered At"].map((h, i) => (
                                 <th
                                     key={i}
-                                    className={`px-3 py-2.5 text-[10px] font-sfpro-bold text-gray-400 dark:text-[#52525b] uppercase tracking-wide whitespace-nowrap ${
-                                        i === 0 ? "text-center w-8" : i >= 2 && i <= 4 ? "text-right" : "text-left"
-                                    }`}
+                                    className={`px-3 py-2.5 text-[10px] font-sfpro-bold text-gray-400 dark:text-[#52525b] uppercase tracking-wide whitespace-nowrap ${i === 0 ? "text-center w-8" : i >= 2 && i <= 4 ? "text-right" : "text-left"
+                                        }`}
                                 >
                                     {h}
                                 </th>
@@ -284,7 +283,7 @@ function MilestonesTable({ milestones, totalContractValue }) {
                                 <td className="px-3 py-3 text-right font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
                                     ₹{(ms.amount ?? 0).toLocaleString("en-IN")}
                                 </td>
-                                
+
                                 <td className="px-3 py-3">
                                     <MilestoneStatusPill status={ms.status} />
                                 </td>
@@ -300,13 +299,12 @@ function MilestonesTable({ milestones, totalContractValue }) {
                                 Total Payment %
                             </td>
                             <td className="px-3 py-3 text-right">
-                                <span className={`text-[12px] font-sfpro-bold ${
-                                    totalPaymentPercent === 100
-                                        ? "text-green-600 dark:text-green-400"
-                                        : totalPaymentPercent > 100
-                                            ? "text-red-500 dark:text-red-400"
-                                            : "text-amber-600 dark:text-amber-400"
-                                }`}>
+                                <span className={`text-[12px] font-sfpro-bold ${totalPaymentPercent === 100
+                                    ? "text-green-600 dark:text-green-400"
+                                    : totalPaymentPercent > 100
+                                        ? "text-red-500 dark:text-red-400"
+                                        : "text-amber-600 dark:text-amber-400"
+                                    }`}>
                                     {totalPaymentPercent}%
                                 </span>
                             </td>
@@ -439,12 +437,26 @@ export default function ViewWOModal({ open, onClose, wo, isLoading = false }) {
                                             label="Total Contract Value"
                                             value={wo.totalContractValue ? `₹${wo.totalContractValue.toLocaleString("en-IN")}` : null}
                                         />
+                                        <InfoRow
+                                            icon={CreditCard}
+                                            label="GST Amount"
+                                            value={wo.gstAmount ? `₹${wo.gstAmount.toLocaleString("en-IN")} (${wo.gst}%)` : null}
+                                        />
+                                        <InfoRow
+                                            icon={CreditCard}
+                                            label="Discount"
+                                            value={wo.discountAmount ? `₹${wo.discountAmount.toLocaleString("en-IN")} (${wo.discount}%)` : null}
+                                        />
+                                        <InfoRow
+                                            icon={CreditCard}
+                                            label="Final Payable Amount"
+                                            value={wo.finalAmount ? `₹${wo.finalAmount.toLocaleString("en-IN")}` : null}
+                                        />
                                         <InfoRow icon={Calendar} label="Created At" value={formatDate(wo.createdAt)} />
                                     </div>
 
                                     {wo.description && (
                                         <>
-                                            <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                             <div className="flex flex-col gap-2">
                                                 <SectionHeader title="Description" />
                                                 <p className="text-[13px] text-gray-700 dark:text-[#d4d4d8] font-sfpro leading-relaxed whitespace-pre-wrap">
@@ -456,7 +468,6 @@ export default function ViewWOModal({ open, onClose, wo, isLoading = false }) {
 
                                     {wo.specialInstructions && (
                                         <>
-                                            <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                             <div className="flex flex-col gap-2">
                                                 <SectionHeader title="Special Instructions" />
                                                 <p className="text-[13px] text-gray-700 dark:text-[#d4d4d8] font-sfpro leading-relaxed whitespace-pre-wrap">
@@ -468,7 +479,6 @@ export default function ViewWOModal({ open, onClose, wo, isLoading = false }) {
 
                                     {wo.status === "Rejected" && wo.rejectionRemarks && (
                                         <>
-                                            <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                             <div className="rounded-2xl border border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10 p-4">
                                                 <div className="flex items-start gap-3">
                                                     <ThumbsDown className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
@@ -487,7 +497,6 @@ export default function ViewWOModal({ open, onClose, wo, isLoading = false }) {
 
                                     {wo.status === "Cancelled" && wo.cancellationRemarks && (
                                         <>
-                                            <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                             <div className="rounded-2xl border border-gray-200 dark:border-[#333] bg-gray-50 dark:bg-[#1a1a1a] p-4">
                                                 <div className="flex items-start gap-3">
                                                     <Ban className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
@@ -504,35 +513,31 @@ export default function ViewWOModal({ open, onClose, wo, isLoading = false }) {
                                         </>
                                     )}
 
-                                    <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                     <div className="flex flex-col gap-3">
                                         <SectionHeader title={`Work Items (${wo.workItems?.length ?? 0})`} />
                                         <ItemsTable items={wo.workItems} />
                                     </div>
 
                                     {wo.hasMilestones && wo.milestones?.length > 0 && (
-    <>
-        <div className="h-px bg-gray-100 dark:bg-[#252525]" />
-        <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-                <SectionHeader title={`Payment Milestones (${wo.milestones.length})`} />
-                <span className={`text-[11px] px-2 py-0.5 rounded-full font-sfpro-bold shrink-0 mb-3 ${
-                    wo.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0) === 100
-                        ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
-                        : "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
-                }`}>
-                    {wo.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0)}% allocated
-                </span>
-            </div>
-            <MilestonesTable
-                milestones={wo.milestones}
-                totalContractValue={wo.totalContractValue}
-            />
-        </div>
-    </>
-)}
+                                        <>
+                                            <div className="flex flex-col gap-3">
+                                                <div className="flex items-center gap-3">
+                                                    <SectionHeader title={`Payment Milestones (${wo.milestones.length})`} />
+                                                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-sfpro-bold shrink-0 mb-3 ${wo.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0) === 100
+                                                        ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+                                                        : "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
+                                                        }`}>
+                                                        {wo.milestones.reduce((s, m) => s + (m.paymentPercent || 0), 0)}% allocated
+                                                    </span>
+                                                </div>
+                                                <MilestonesTable
+                                                    milestones={wo.milestones}
+                                                    totalContractValue={wo.totalContractValue}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
 
-                                    <div className="h-px bg-gray-100 dark:bg-[#252525]" />
                                     <div className="flex flex-col gap-4">
                                         <SectionHeader title="Activity Timeline" />
                                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

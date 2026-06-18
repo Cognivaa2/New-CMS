@@ -159,7 +159,7 @@ function WOPill({ value }) {
 }
 
 function Cell({ children, className = "" }) {
-  return <td className={`px-5 py-4 align-middle ${className}`}>{children}</td>;
+  return <td className={`px-5 py-2 align-middle ${className}`}>{children}</td>;
 }
 
 function renderCell(row, column) {
@@ -342,7 +342,7 @@ export default function WorkTable({
             ))}
       </div>
 
-      <div className="hidden lg:block w-full rounded-2xl border border-[#EAEAEA] dark:border-[#252525] overflow-hidden shadow-sm">
+      <div className="hidden lg:block w-full rounded-2xl border border-[#EAEAEA] dark:border-[#252525] overflow-hidden">
         <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           <table className="w-full min-w-250 border-collapse">
             <thead>

@@ -368,7 +368,7 @@ export function WorkItemsList({ items = [], onChange, disabled = false }) {
 }
 function MilestoneRow({ milestone, index, onChange, onRemove, disabled, canRemove, totalValue }) {
     const amount = totalValue > 0
-        ? ((milestone.paymentPercent || 0) / 100) * totalValue 
+        ? ((milestone.paymentPercent || 0) / 100) * totalValue
         : 0
 
     return (
@@ -474,7 +474,7 @@ export function MilestonesList({ milestones = [], onChange, disabled = false, to
         ])
     }
 
-    const totalPaymentPercent = milestones.reduce((sum, m) => sum + (m.paymentPercent || 0), 0) 
+    const totalPaymentPercent = milestones.reduce((sum, m) => sum + (m.paymentPercent || 0), 0)
 
     return (
         <div className="col-span-full">
@@ -484,15 +484,14 @@ export function MilestonesList({ milestones = [], onChange, disabled = false, to
                         Payment Milestones <span className="text-red-500">*</span>
                     </div>
                     <span
-                        className={`text-[11px] px-2 py-0.5 rounded-full font-sfpro-bold ${
-                            totalPaymentPercent === 100  
-                                ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
-                                : totalPaymentPercent > 100  
-                                    ? "bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400"
-                                    : "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
-                        }`}
+                        className={`text-[11px] px-2 py-0.5 rounded-full font-sfpro-bold ${totalPaymentPercent === 100
+                            ? "bg-green-50 text-green-600 dark:bg-green-500/10 dark:text-green-400"
+                            : totalPaymentPercent > 100
+                                ? "bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400"
+                                : "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
+                            }`}
                     >
-                        Payment: {totalPaymentPercent}% / 100%  
+                        Payment: {totalPaymentPercent}% / 100%
                     </span>
                 </div>
                 <button
@@ -598,6 +597,58 @@ export function WOFormContent({ form, setForm, disabled = false, projectId, isEd
                     onChange={(items) => setForm((p) => ({ ...p, workItems: items }))}
                     disabled={disabled}
                 />
+                <div className="col-span-1 md:col-span-1">
+                    <div className="text-xs lg:text-sm font-sfpro text-black dark:text-white mb-1.5">
+                        GST (%)
+                    </div>
+                    <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="0"
+                        value={form.gst ?? ""}
+                        onChange={(e) => setForm(p => ({ ...p, gst: parseFloat(e.target.value) }))}
+                        disabled={disabled}
+                        onWheel={(e) => e.target.blur()}
+                        className="w-full h-9 px-3 rounded-lg text-[13.5px] font-sfpro bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#252525] text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-[#414141] disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                </div>
+                <div className="col-span-1 md:col-span-1">
+                    <div className="text-xs lg:text-sm font-sfpro text-black dark:text-white mb-1.5">
+                        Discount (%)
+                    </div>
+                    <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        placeholder="0"
+                        value={form.discount ?? ""}
+                        onChange={(e) => setForm(p => ({ ...p, discount: parseFloat(e.target.value) }))}
+                        disabled={disabled}
+                        onWheel={(e) => e.target.blur()}
+                        className="w-full h-9 px-3 rounded-lg text-[13.5px] font-sfpro bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#252525] text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-[#414141] disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                </div>
+                {(() => {
+                    const subtotal = (form.workItems || []).reduce((s, i) => s + (i.quantity || 0) * (i.unitRate || 0), 0);
+                    const disc = ((form.discount || 0) / 100) * subtotal;
+                    const gstAmt = ((form.gst || 0) / 100) * subtotal;
+                    const final = subtotal - disc + gstAmt;
+                    return subtotal > 0 ? (
+                        <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-4 px-1 py-2 rounded-lg bg-gray-50 dark:bg-[#1a1a1a] border border-gray-100 dark:border-[#252525]">
+                            <span className="text-[12px] text-gray-500 dark:text-[#71717a] font-sfpro">
+                                Subtotal: ₹{subtotal.toFixed(2)}
+                                {(form.discount || 0) > 0 && ` − Disc: ₹${disc.toFixed(2)}`}
+                                {(form.gst || 0) > 0 && ` + GST: ₹${gstAmt.toFixed(2)}`}
+                            </span>
+                            <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">
+                                Final: ₹{final.toFixed(2)}
+                            </span>
+                        </div>
+                    ) : null;
+                })()}
                 <div className="col-span-1 md:col-span-2">
                     <button
                         type="button"

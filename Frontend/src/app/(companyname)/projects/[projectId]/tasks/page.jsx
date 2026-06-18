@@ -577,7 +577,7 @@ export default function AllTasksPage() {
     if (isInitialLoad) return <TaskPageSkeleton />
 
     return (
-        <div className="w-full  mx-auto py-8 px-4 flex flex-col gap-6 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
+        <div className="w-full mx-auto p-4 flex flex-col gap-2 bg-[#FAFAFA] dark:bg-[#121212] rounded-lg min-h-screen transition-colors duration-300">
             <TaskHeader
                 count={displayedTasks.length}
                 total={allTasks.length}

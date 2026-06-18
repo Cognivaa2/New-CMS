@@ -75,7 +75,7 @@ function Avatar({ user, size = "md", className = "", isSelected = false, onClick
           "rounded-full ring-2 overflow-hidden shrink-0 transition-all duration-200 cursor-pointer",
           isSelected
             ? "ring-[#212121] dark:ring-white scale-110"
-            : "ring-white dark:ring-[#09090b] hover:scale-105 hover:ring-[#a1a1aa] dark:hover:ring-[#52525b]",
+            : "ring-white dark:ring-[#09090b] hover:scale-105",
           className,
         ].join(" ")}
       >
@@ -276,8 +276,8 @@ export default function TaskHeader({
   isRefreshing = false,
   assignedUsers = [],
   isLoadingUsers = false,
-  selectedUserKeycloakId = null,   
-  onUserAvatarClick,               
+  selectedUserKeycloakId = null,
+  onUserAvatarClick,
 }) {
   const [searchValue, setSearchValue] = useState("")
   const [isPhaseDropdownOpen, setIsPhaseDropdownOpen] = useState(false)
@@ -338,9 +338,9 @@ export default function TaskHeader({
         : null
 
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 w-full mb-8 font-sans">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 w-full mb-4">
       <div className="min-w-0">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <h1 className="text-[30px] sm:text-[36px] lg:text-[42px] font-sfpro-bold leading-none tracking-tight transition-colors break-word">
             <span className="text-[#a3a3a3] dark:text-[#858585]">All Tasks</span>
           </h1>
@@ -351,11 +351,11 @@ export default function TaskHeader({
           )}
           {isRefreshing && <Loader2 className="w-4 h-4 text-[#71717a] animate-spin mt-1" />}
         </div>
-        <p className="text-[13px] sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-3 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
+        <p className="text-[13px] font-sfpro sm:text-[14px] text-[#a3a3a3] dark:text-[#71717a] mt-1 max-w-full sm:max-w-105 lg:max-w-70 leading-snug transition-colors">
           View and manage all tasks across every phase
         </p>
       </div>
-      <div className="flex flex-wrap lg:flex-nowrap items-center gap-2">
+      <div className="flex flex-wrap lg:flex-nowrap items-center gap-1">
         <AvatarStack
           users={assignedUsers}
           isLoading={isLoadingUsers}
@@ -364,21 +364,22 @@ export default function TaskHeader({
         />
         <div className="relative" ref={dropdownRef}>
           <div className="flex items-center border border-[#e4e4e7] dark:border-[#27272a] rounded-lg overflow-hidden h-10 bg-white dark:bg-[#18181b]">
-            <button
-              onClick={() => setIsPhaseDropdownOpen(!isPhaseDropdownOpen)}
-              className="px-3 text-sm font-medium font-sfpro-bold text-[#18181b] dark:text-[#f4f4f5] hover:bg-gray-50 dark:hover:bg-[#27272a] transition-colors h-full flex items-center gap-2"
-            >
-              {selectedPhaseName}
-              <ChevronDown className={`w-4 h-4 text-[#71717a] transition-transform duration-200 ${isPhaseDropdownOpen ? "rotate-180" : ""}`} />
-            </button>
+            <Tooltip content="Select any phase to get the tasks of that phase" side="top">
+              <button
+                onClick={() => setIsPhaseDropdownOpen(!isPhaseDropdownOpen)}
+                className="cursor-pointer px-3 text-sm font-medium font-sfpro-bold text-[#18181b] dark:text-[#f4f4f5] hover:bg-gray-50 dark:hover:bg-[#27272a] transition-colors h-full flex items-center gap-1"
+              >
+                {selectedPhaseName}
+                <ChevronDown className={`w-4 h-4 text-[#71717a] transition-transform duration-200 ${isPhaseDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+            </Tooltip>
           </div>
           {isPhaseDropdownOpen && (
             <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-[#18181b] border border-[#e4e4e7] dark:border-[#27272a] rounded-lg shadow-lg z-50 py-1 max-h-64 overflow-y-auto">
               <button
                 onClick={() => handlePhaseSelect("all")}
-                className={`w-full px-3 py-2 text-left text-sm font-sfpro hover:bg-gray-50 dark:hover:bg-[#27272a] transition-colors ${
-                  !selectedPhase ? "text-[#18181b] dark:text-white font-sfpro-medium" : "text-[#71717a]"
-                }`}
+                className={`w-full px-3 py-2 text-left text-sm font-sfpro hover:bg-gray-50 dark:hover:bg-[#27272a] transition-colors ${!selectedPhase ? "text-[#18181b] dark:text-white font-sfpro-medium" : "text-[#71717a]"
+                  }`}
               >
                 All Phases
               </button>
@@ -386,9 +387,8 @@ export default function TaskHeader({
                 <button
                   key={phase.id}
                   onClick={() => handlePhaseSelect(phase.id)}
-                  className={`w-full px-3 py-2 text-left text-sm font-sfpro hover:bg-gray-50 dark:hover:bg-[#27272a] transition-colors ${
-                    selectedPhase === phase.id ? "text-[#18181b] dark:text-white font-sfpro-medium" : "text-[#71717a]"
-                  }`}
+                  className={`cursor-pointer w-full px-3 py-2 text-left text-sm font-sfpro-medium hover:bg-gray-100 dark:hover:bg-[#27272a] transition-colors ${selectedPhase === phase.id ? "text-[#212121] dark:text-white font-sfpro" : "text-[#505050]"
+                    }`}
                 >
                   {phase.name}
                 </button>
@@ -422,7 +422,6 @@ export default function TaskHeader({
           </div>
         </div>
 
-        {/* ── Filter ── */}
         <div className="shrink-0 flex items-center">
           <FilterOptions
             filters={ALL_TASK_FILTERS}
