@@ -12,16 +12,16 @@ import { v4 as uuidv4 } from "uuid";
 // ─── POST /helpdesk — Raise a new ticket ──────────────────────────────────────
 export const raiseTicket = async (req, res) => {
     try {
-        const userId = req.user?.userId;
-        const companyId = req.user?.companyId;
-
-        if (!userId || !companyId) {
-            return res.status(401).json(new ApiErrors(401, "Unauthorized", "Authentication required"));
+        const companyUUID = req.headers["x-company-id"];
+        if (!companyUUID || !companyUUID.trim()) {
+            return res.status(400).json(
+                new ApiErrors(400, "Missing Header", "x-company-id header is required")
+            );
         }
-
-        const { category, priority, subject, description, attachments } = req.body;
-
-        // Validation
+        const { category, priority, subject, description, attachments, createdBy } = req.body;
+        if (!createdBy || !createdBy.trim()) {
+            return res.status(400).json(new ApiErrors(400, "Validation Error", "createdBy is required"));
+        }
         if (!category || !HELPDESK_CATEGORIES.includes(category)) {
             return res.status(400).json(
                 new ApiErrors(400, "Validation Error", `category must be one of: ${HELPDESK_CATEGORIES.join(", ")}`)
@@ -38,26 +38,27 @@ export const raiseTicket = async (req, res) => {
                 new ApiErrors(400, "Validation Error", `priority must be one of: ${HELPDESK_PRIORITIES.join(", ")}`)
             );
         }
-
-        // Fetch company and user info for the email
-        const [company, user] = await Promise.all([
-            Company.findById(companyId).select("companyName email phone").lean(),
-            User.findById(userId).select("name email phone").lean(),
-        ]);
-
+        const company = await Company.findOne({
+            companyId: companyUUID.trim(),
+            isDeleted: false,
+        }).lean();
         if (!company) {
-            return res.status(404).json(new ApiErrors(404, "Not Found", "Company not found"));
+            return res.status(404).json(new ApiErrors(404, "Company Not Found", "Invalid company"));
         }
+        const companyObjectId = company._id;
+        const user = await User.findOne({
+            keycloakId: createdBy.trim(),
+            companyId: companyObjectId,
+            isDeleted: false,
+        }).lean();
         if (!user) {
-            return res.status(404).json(new ApiErrors(404, "Not Found", "User not found"));
+            return res.status(404).json(new ApiErrors(404, "Invalid createdBy", `No user found with keycloakId: ${createdBy}`));
         }
-
-        // Handle file uploads
         const uploadedAttachments = [];
         if (req.files && Array.isArray(req.files) && req.files.length > 0) {
             for (const file of req.files) {
                 const ext = file.originalname.split(".").pop();
-                const key = `helpdesk/${companyId}/${uuidv4()}.${ext}`;
+                const key = `helpdesk/${companyObjectId}/${uuidv4()}.${ext}`;
                 const result = await uploadToR2({
                     buffer: file.buffer,
                     mimeType: file.mimetype,
@@ -66,24 +67,18 @@ export const raiseTicket = async (req, res) => {
                 uploadedAttachments.push(result.url);
             }
         }
-
-        // Also merge any text-based attachment URLs sent in the body if needed
         if (Array.isArray(attachments)) {
             uploadedAttachments.push(...attachments);
         }
-
-        // Create ticket
         const ticket = await Helpdesk.create({
-            companyId,
-            raisedBy: userId,
+            companyId: companyObjectId,
+            raisedBy: user._id,
             category,
             priority: priority || "Medium",
             subject: subject.trim(),
             description: description.trim(),
             attachments: uploadedAttachments,
         });
-
-        // Send email to super admin (non-blocking — failure won't reject the ticket creation)
         const superAdminEmail = process.env.SENDGRID_FROM_EMAIL;
         try {
             await sendEmail({
@@ -91,8 +86,6 @@ export const raiseTicket = async (req, res) => {
                 subject: `[${ticket.priority}] New Helpdesk Ticket ${ticket.ticketNumber} — ${company.companyName}`,
                 html: buildHelpdeskEmailHtml({ ticket, company, user }),
             });
-
-            // Track that the email was sent
             ticket.emailNotifiedAt = new Date();
             await ticket.save();
         } catch (emailErr) {
@@ -100,16 +93,13 @@ export const raiseTicket = async (req, res) => {
                 ticketId: ticket._id,
                 error: emailErr.message,
             });
-            // Continue — ticket is already saved, email is best-effort
         }
-
         logger.info("Helpdesk ticket raised", {
             ticketId: ticket._id,
             ticketNumber: ticket.ticketNumber,
-            companyId,
-            userId,
+            companyId: companyObjectId,
+            userId: user._id,
         });
-
         return res.status(201).json(
             new ApiResponse(
                 201,
@@ -131,16 +121,37 @@ export const raiseTicket = async (req, res) => {
     }
 };
 
+
 // ─── GET /helpdesk — Fetch tickets for the logged-in company ─────────────────
 export const getMyTickets = async (req, res) => {
     try {
-        const userId = req.user?.userId;
-        const companyId = req.user?.companyId;
-
-        if (!userId || !companyId) {
-            return res.status(401).json(new ApiErrors(401, "Unauthorized", "Authentication required"));
+        const companyUUID = req.headers["x-company-id"];
+        const { keycloakId } = req.params;
+        if (!companyUUID || !companyUUID.trim()) {
+            return res.status(400).json(
+                new ApiErrors(400, "Missing Header", "x-company-id header is required")
+            );
         }
-
+        if (!keycloakId) {
+            return res.status(400).json(
+                new ApiErrors(400, "Missing Param", "keycloakId is required in the URL")
+            );
+        }
+        const company = await Company.findOne({
+            companyId: companyUUID.trim(),
+            isDeleted: false,
+        }).lean();
+        if (!company) {
+            return res.status(404).json(new ApiErrors(404, "Company Not Found", "Invalid company"));
+        }
+        const user = await User.findOne({
+            keycloakId: keycloakId.trim(),
+            companyId: company._id,
+            isDeleted: false,
+        }).lean();
+        if (!user) {
+            return res.status(404).json(new ApiErrors(404, "User Not Found", `No active user found with keycloakId: ${keycloakId}`));
+        }
         const {
             page = 1,
             limit = 20,
@@ -148,15 +159,12 @@ export const getMyTickets = async (req, res) => {
             priority,
             category,
         } = req.query;
-
         const pageNumber = Math.max(1, parseInt(page));
         const pageSize = Math.min(100, Math.max(1, parseInt(limit)));
-
-        const filter = { companyId, isDeleted: false };
+        const filter = { companyId: company._id, isDeleted: false };
         if (status) filter.status = status;
         if (priority) filter.priority = priority;
         if (category) filter.category = category;
-
         const [tickets, total] = await Promise.all([
             Helpdesk.find(filter)
                 .sort({ createdAt: -1 })
@@ -167,7 +175,6 @@ export const getMyTickets = async (req, res) => {
                 .lean(),
             Helpdesk.countDocuments(filter),
         ]);
-
         return res.status(200).json(
             new ApiResponse(
                 200,
