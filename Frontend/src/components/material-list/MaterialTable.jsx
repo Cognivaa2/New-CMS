@@ -384,7 +384,7 @@ export default function MaterialTable({
                 data.map((row, index) => (
                   <div
                     key={row.id}
-                    className={`grid gap-4 px-6 py-4 items-center border-b border-gray-50 dark:border-gray-800/50 hover:bg-[#fafafa] dark:hover:bg-[#131313] transition-colors ${index === data.length - 1 ? "border-b-0" : ""
+                    className={`grid gap-4 px-6 py-2 items-center border-b border-gray-50 dark:border-gray-800/50 hover:bg-[#fafafa] dark:hover:bg-[#131313] transition-colors ${index === data.length - 1 ? "border-b-0" : ""
                       }`}
                     style={{
                       gridTemplateColumns:
