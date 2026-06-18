@@ -202,42 +202,42 @@ function CERow({ row, menuItems, isLast, onView }) {
                 !isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""
             }`}
         >
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">{row.ceNumber}</span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.poNumber}</span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.vendorName}</span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[12px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.typeLabel}</span>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <DirectionPill direction={row.direction} isDebit={row.isDebit} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">{row.adjustmentAmountFormatted}</span>
             </td>
-            <td className="px-5 py-4">
+            <td className="px-5 py-2">
                 <p className="text-[13px] font-sfpro text-gray-600 dark:text-[#a1a1aa] truncate max-w-32">{row.reason}</p>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <StatusPill status={row.status} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <UserCell user={row.createdBy} />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <ActionedByCell row={row} />
             </td>
 
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.createdAt}</span>
             </td>
-            <td className="px-4 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+            <td className="px-4 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-center">
                     <ThreeDotMenu items={menuItems} size="sm"
                         header={{ title: row.ceNumber, subtitle: row.vendorName, statusColor: row.statusConfig.color }} />

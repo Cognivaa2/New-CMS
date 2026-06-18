@@ -346,7 +346,7 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
             className={`cursor-pointer group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""
                 }`}
         >
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <div className="flex items-center gap-2">
                     {row.inspectionNumber ? (
                         <span className="text-[14px] font-sfpro-bold text-gray-900 dark:text-white">
@@ -360,10 +360,10 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
                     )}
                 </div>
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <StatusBadge status={row.overallStatus} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 {getFirstCategory(row) ? (
                     <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                         {getFirstCategory(row)}
@@ -372,7 +372,7 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
                     <NotProvided />
                 )}
             </td>
-            <td className="px-5 py-4">
+            <td className="px-5 py-2">
                 {row.entrySummary ? (
                     <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-50">
                         {row.entrySummary}
@@ -381,10 +381,10 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
                     <NotProvided />
                 )}
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <SeverityBadge severity={getFirstSeverity(row)} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 {row.unresolvedCount > 0 ? (
                     <span className="inline-flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-[12px] font-sfpro-bold bg-gray-50 text-gray-600 dark:bg-gray-500/10 dark:text-gray-200">
                         {row.unresolvedCount}
@@ -395,7 +395,7 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
                     </span>
                 )}
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 {getFirstLocation(row) ? (
                     <span className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-32 block">
                         {getFirstLocation(row)}
@@ -404,10 +404,10 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
                     <NotProvided />
                 )}
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 <UserCell user={getFirstInspector(row)} />
             </td>
-            <td className="px-5 py-4 whitespace-nowrap">
+            <td className="px-5 py-2 whitespace-nowrap">
                 {row.createdAtFormatted ? (
                     <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">
                         {row.createdAtFormatted}
@@ -417,7 +417,7 @@ function SafetyRow({ row, menuItems, isLast, onRowClick }) {
                 )}
             </td>
             <td
-                className="px-4 py-4 whitespace-nowrap"
+                className="px-4 py-2 whitespace-nowrap"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-center">

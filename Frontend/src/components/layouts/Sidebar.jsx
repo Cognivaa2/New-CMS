@@ -109,7 +109,7 @@ function SkeletonItem({ isOpen, inverted, index = 0 }) {
 
   return (
     <div
-      className={`flex items-center ${isOpen ? "justify-start px-3 w-full gap-3" : "justify-center"} py-2 rounded-lg mb-0.5 animate-pulse`}
+      className={`flex items-center ${isOpen ? "justify-start px-3 w-full gap-3" : "justify-center"} py-1.75 rounded-lg mb-0.5 animate-pulse`}
     >
       <div
         className={`w-5 h-5 rounded-md shrink-0 ${inverted
@@ -371,7 +371,7 @@ useEffect(() => {
           />
         )}
 
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-2">
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1.75">
           {isLoadingPermissions ? (
             <SidebarSkeleton isOpen={isOpen} inverted={invertedWhenCollapsed} />
           ) : (
@@ -478,7 +478,7 @@ function SidebarItem({ icon, label, active, isOpen, inverted, hasChevron, isExpa
       <div
         onClick={onClick}
         className={`flex items-center ${isOpen ? "justify-start px-3 w-full gap-3" : "justify-center"
-          } py-2 rounded-lg cursor-pointer mb-0.5 transition-colors overflow-hidden
+          } py-1.75 rounded-lg cursor-pointer mb-0.5 transition-colors overflow-hidden
           ${active
             ? "font-sfpro-medium bg-[#f4f4f5] dark:bg-[#27272a] text-black dark:text-[#f4f4f5]"
             : inverted

@@ -87,19 +87,90 @@ export function buildConsumptionPayload(form, recordedBy) {
     }
 }
 
+function abbreviateCount(num) {
+    if (num == null || isNaN(num)) return "0"
+    const abs = Math.abs(num)
+    const sign = num < 0 ? "-" : ""
+    if (abs >= 1_000_000_000) {
+        const v = abs / 1_000_000_000
+        return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "B"
+    }
+    if (abs >= 1_000_000) {
+        const v = abs / 1_000_000
+        return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "M"
+    }
+    if (abs >= 1_000) {
+        const v = abs / 1_000
+        return sign + (Number.isInteger(v) ? v : +v.toFixed(1)) + "K"
+    }
+    return sign + String(abs)
+}
+
+function abbreviateIndianCurrency(num) {
+    if (num == null || isNaN(num)) return "₹0"
+    const abs = Math.abs(num)
+    const sign = num < 0 ? "-" : ""
+    if (abs >= 1_00_00_000) {
+        const v = abs / 1_00_00_000
+        const formatted = +v.toFixed(2) % 1 === 0 ? Math.round(v) : +v.toFixed(2)
+        return sign + "₹" + formatted + " Cr"
+    }
+    if (abs >= 1_00_000) {
+        const v = abs / 1_00_000
+        const formatted = +v.toFixed(2) % 1 === 0 ? Math.round(v) : +v.toFixed(2)
+        return sign + "₹" + formatted + " L"
+    }
+    if (abs >= 1_000) {
+        const v = abs / 1_000
+        const formatted = +v.toFixed(1) % 1 === 0 ? Math.round(v) : +v.toFixed(1)
+        return sign + "₹" + formatted + "K"
+    }
+    return sign + "₹" + abs.toLocaleString("en-IN")
+}
+
 export function computeConsumptionStats(records) {
-    const totalCost = records.reduce((sum, r) => sum + (r.totalCost || 0), 0)
-    const totalQty = records.reduce((sum, r) => sum + (r.quantityConsumed || 0), 0)
+    const totalCost       = records.reduce((sum, r) => sum + (r.totalCost        || 0), 0)
+    const totalQty        = records.reduce((sum, r) => sum + (r.quantityConsumed || 0), 0)
     const uniqueMaterials = new Set(records.map((r) => r.materialName)).size
-    const woCount = records.filter((r) => r.isWOConsumption).length
-    const stockCount = records.filter((r) => !r.isWOConsumption).length
+    const woCount         = records.filter((r) =>  r.isWOConsumption).length
+    const stockCount      = records.filter((r) => !r.isWOConsumption).length
 
     return [
-        { id: 1, title: "Total Records", value: records.length, subtitle: "Consumption entries", colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
-        { id: 2, title: "Total Cost", value: `₹${totalCost.toLocaleString("en-IN")}`, subtitle: "Material spend", colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]" },
-        { id: 3, title: "Total Quantity", value: totalQty.toLocaleString("en-IN"), subtitle: "Units consumed", colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
-        { id: 4, title: "Unique Materials", value: uniqueMaterials, subtitle: "Distinct materials", colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]" },
-        { id: 5, title: "WO Consumption", value: woCount, subtitle: `${stockCount} stock issues`, colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]" },
+        {
+            id: 1,
+            title: "Total Records",
+            value: abbreviateCount(records.length),        
+            subtitle: "Consumption entries",
+            colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
+        },
+        {
+            id: 2,
+            title: "Total Cost",
+            value: abbreviateIndianCurrency(totalCost),     
+            subtitle: "Material spend",
+            colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
+        },
+        {
+            id: 3,
+            title: "Total Quantity",
+            value: abbreviateCount(totalQty),               
+            subtitle: "Units consumed",
+            colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
+        },
+        {
+            id: 4,
+            title: "Unique Materials",
+            value: abbreviateCount(uniqueMaterials),        
+            subtitle: "Distinct materials",
+            colorClass: "bg-[#eef5fc] dark:bg-[#1a202c]",
+        },
+        {
+            id: 5,
+            title: "WO Consumption",
+            value: abbreviateCount(woCount),                 
+            subtitle: `${abbreviateCount(stockCount)} stock issues`,  
+            colorClass: "bg-[#f2f3fa] dark:bg-[#1e1e2e]",
+        },
     ]
 }
 

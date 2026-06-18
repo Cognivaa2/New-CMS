@@ -243,7 +243,7 @@ function TableRow({ row, headers }) {
   return (
     <tr className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors">
       {headers.map((h, j) => (
-        <td key={j} className="px-6 py-4 align-middle">
+        <td key={j} className="px-6 py-2 align-middle">
           {renderCell(row, h)}
         </td>
       ))}

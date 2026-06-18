@@ -180,7 +180,7 @@ function CountsCell({ row }) {
 }
 
 function Cell({ children }) {
-  return <td className="px-5 py-4 align-middle">{children}</td>;
+  return <td className="px-5 py-2 align-middle">{children}</td>;
 }
 
 function renderCell(row, column) {
