@@ -7,8 +7,8 @@ const C = {
     mid: "#000000",
     muted: "#444444",
     light: "#000000",
-    border: "#efefef",
-    borderFaint: "#efefef",
+    border: "#000000",
+    borderFaint: "#000000",
     rowAlt: "#FFFFFF",
     headerBg: "#FFFFFF",
     negative: "#000000",
@@ -23,8 +23,8 @@ const F = {
 
 const PW = 595.28;
 const PH = 841.89;
-const MX = 44;
-const CW = PW - MX * 2;
+const MX = 72;
+const CW = PW - MX - 44;
 const MT = 44;
 const MB = 44;
 const FZONE = 26;
@@ -56,6 +56,11 @@ function fmtN(n, dp = 2) {
     });
 }
 
+function fmtCurrency(n) {
+    if (n === null || n === undefined || isNaN(n)) return null;
+    return `Rs. ${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function textH(doc, text, w, font, size) {
     doc.save();
     const isNA = !text || text === "—" || text === "Not Available";
@@ -70,15 +75,15 @@ function fillRect(doc, x, y, w, h, color) {
     doc.save().rect(x, y, w, h).fill(color).restore();
 }
 
-function strokeRect(doc, x, y, w, h, color = C.border, lw = 0.3) {
+function strokeRect(doc, x, y, w, h, color = C.border, lw = 0.5) {
     doc.save().rect(x, y, w, h).lineWidth(lw).stroke(color).restore();
 }
 
-function hLine(doc, x1, x2, y, color = C.border, lw = 0.3) {
+function hLine(doc, x1, x2, y, color = C.border, lw = 0.5) {
     doc.save().moveTo(x1, y).lineTo(x2, y).lineWidth(lw).stroke(color).restore();
 }
 
-function vLine(doc, x, y1, y2, color = C.border, lw = 0.3) {
+function vLine(doc, x, y1, y2, color = C.border, lw = 0.5) {
     doc.save().moveTo(x, y1).lineTo(x, y2).lineWidth(lw).stroke(color).restore();
 }
 
@@ -88,34 +93,37 @@ function absText(doc, text, x, y, opts = {}) {
     const fontStr = isNA ? F.italic : (opts.font || F.regular);
     const colorStr = isNA ? C.muted : (opts.color || C.dark);
     const opacityStr = isNA ? 0.55 : (opts.opacity || 1);
-
     doc.font(fontStr)
         .fontSize(opts.size || 9)
         .fillColor(colorStr)
         .fillOpacity(opacityStr);
-
     doc.text(isNA ? "Not Available" : String(text), x, y, {
         width: opts.width,
         align: opts.align || "left",
         lineBreak: opts.lineBreak !== false,
     });
-    if (isNA) {
-        doc.fillOpacity(1);
-    }
+    if (isNA) doc.fillOpacity(1);
     doc.restore();
+}
+
+function drawInitials(doc, name, x, y, size) {
+    const init = (name || "CO").split(/\s+/).slice(0, 2).map((w) => (w[0] || "").toUpperCase()).join("");
+    fillRect(doc, x, y, size, size, "#ffffff");
+    strokeRect(doc, x, y, size, size, C.border, 0.5);
+    absText(doc, init, x, y + size * 0.28, { font: F.bold, size: size * 0.34, color: C.mid, width: size, align: "center" });
 }
 
 function drawFooter(doc, ctx) {
     const fy = PH - MB + 4;
-    hLine(doc, MX, MX + CW, fy - 2, C.border, 0.3);
-    absText(doc, `${ctx.companyName}  ·  GRN ${ctx.grnNumber}`, MX, fy + 4, {
-        size: 7, color: C.muted, width: CW * 0.55,
+    hLine(doc, MX, MX + CW, fy - 2, C.border, 0.5);
+    absText(doc, `${ctx.companyName}  ·  GRN ${ctx.grnNumber}  ·  Subject to Kolkata jurisdiction`, MX, fy + 4, {
+        size: 7, color: C.muted, width: CW * 0.6,
     });
-    absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.55, fy + 4, {
-        size: 7, color: C.muted, width: CW * 0.27, align: "center",
+    absText(doc, `Generated ${new Date().toLocaleString("en-IN")}`, MX + CW * 0.6, fy + 4, {
+        size: 7, color: C.muted, width: CW * 0.2, align: "center",
     });
-    absText(doc, `Page ${ctx.page}`, MX + CW * 0.82, fy + 4, {
-        size: 7, color: C.muted, width: CW * 0.18, align: "right",
+    absText(doc, `Page ${ctx.page} / ${ctx.totalPages}`, MX + CW * 0.8, fy + 4, {
+        size: 7, color: C.muted, width: CW * 0.2, align: "right",
     });
 }
 
@@ -129,10 +137,8 @@ function space(doc, y, needed, ctx) {
     return y;
 }
 
-function label(doc, y, text) {
-    absText(doc, text, MX, y, {
-        font: F.bold, size: 7.5, color: C.black,
-    });
+function sectionLabel(doc, y, text) {
+    absText(doc, text, MX, y, { font: F.bold, size: 7.5, color: C.black });
     y += 11;
     return y + 7;
 }
@@ -145,8 +151,11 @@ function measureBlockHeight(doc, items, width) {
             doc.font(F.bold).fontSize(7.5);
             h += doc.heightOfString(item.text, { width }) + 2;
         } else if (item.type === "header") {
-            doc.font(F.bold).fontSize(9.5);
+            doc.font(F.bold).fontSize(11);
             h += doc.heightOfString(item.text, { width }) + 3;
+        } else if (item.type === "bigheader") {
+            doc.font(F.bold).fontSize(13);
+            h += doc.heightOfString(item.text, { width }) + 4;
         } else if (item.type === "pair") {
             const valStr = item.value || "Not Available";
             const LBL_MAX_W = 85;
@@ -175,8 +184,13 @@ function drawBlock(doc, items, x, y, width) {
             const th = doc.heightOfString(item.text, { width });
             doc.text(item.text, x, currentY, { width });
             currentY += th + 2;
+        } else if (item.type === "bigheader") {
+            doc.font(F.bold).fontSize(13).fillColor(C.black);
+            const th = doc.heightOfString(item.text, { width });
+            doc.text(item.text, x, currentY, { width });
+            currentY += th + 4;
         } else if (item.type === "header") {
-            doc.font(F.bold).fontSize(9.5).fillColor(C.black);
+            doc.font(F.bold).fontSize(11).fillColor(C.black);
             const th = doc.heightOfString(item.text, { width });
             doc.text(item.text, x, currentY, { width });
             currentY += th + 3;
@@ -184,11 +198,9 @@ function drawBlock(doc, items, x, y, width) {
             const labelStr = item.label;
             const valStr = item.value || "Not Available";
             const LBL_MAX_W = 85;
-
             doc.font(F.bold).fontSize(8).fillColor(C.black);
             doc.text(labelStr, x, currentY, { width: LBL_MAX_W - 10 });
             doc.text(":", x + LBL_MAX_W - 8, currentY);
-
             if (item.value) {
                 doc.font(F.regular).fontSize(8).fillColor(C.black);
                 const valH = doc.heightOfString(valStr, { width: width - LBL_MAX_W });
@@ -220,10 +232,10 @@ function drawBlock(doc, items, x, y, width) {
     doc.restore();
 }
 
-function measureFieldHeight(doc, label, value, width) {
+function measureFieldHeight(doc, lbl, value, width) {
     doc.save();
     doc.font(F.bold).fontSize(7.5);
-    const lblH = doc.heightOfString(label, { width }) + 2;
+    const lblH = doc.heightOfString(lbl, { width }) + 2;
     doc.font(value ? F.regular : F.italic).fontSize(8);
     const valStr = value || "Not Available";
     const valH = doc.heightOfString(valStr, { width });
@@ -231,12 +243,11 @@ function measureFieldHeight(doc, label, value, width) {
     return lblH + valH + 8;
 }
 
-function drawField(doc, label, value, x, y, width, height) {
+function drawField(doc, lbl, value, x, y, width) {
     doc.save();
     doc.font(F.bold).fontSize(7.5).fillColor(C.black);
-    doc.text(label, x + 6, y + 4, { width: width - 12 });
-    const lblH = doc.heightOfString(label, { width: width - 12 }) + 2;
-
+    doc.text(lbl, x + 6, y + 4, { width: width - 12 });
+    const lblH = doc.heightOfString(lbl, { width: width - 12 }) + 2;
     const valStr = value || "Not Available";
     if (value) {
         doc.font(F.regular).fontSize(8).fillColor(C.black);
@@ -250,33 +261,31 @@ function drawField(doc, label, value, x, y, width, height) {
 }
 
 function drawRightRow(doc, leftField, rightField, x, y, width, height) {
-    hLine(doc, x, x + width, y + height, C.border, 0.3);
-
+    hLine(doc, x, x + width, y + height, C.border, 0.5);
     if (rightField) {
         const hw = width / 2;
-        drawField(doc, leftField.lbl, leftField.val, x, y, hw, height);
-        drawField(doc, rightField.lbl, rightField.val, x + hw, y, hw, height);
-        vLine(doc, x + hw, y, y + height, C.border, 0.3);
+        drawField(doc, leftField.lbl, leftField.val, x, y, hw);
+        drawField(doc, rightField.lbl, rightField.val, x + hw, y, hw);
+        vLine(doc, x + hw, y, y + height, C.border, 0.5);
     } else {
-        drawField(doc, leftField.lbl, leftField.val, x, y, width, height);
+        drawField(doc, leftField.lbl, leftField.val, x, y, width);
     }
 }
 
 const COLS = [
-    { k: "no", lbl: "#", fr: 0.04, a: "center" },
-    { k: "name", lbl: "Material", fr: 0.27, a: "left" },
-    { k: "unit", lbl: "Unit", fr: 0.07, a: "center" },
-    { k: "ord", lbl: "Ordered", fr: 0.12, a: "right" },
-    { k: "prev", lbl: "Prev. Rcvd", fr: 0.12, a: "right" },
-    { k: "this", lbl: "This GRN", fr: 0.12, a: "right" },
-    { k: "bal", lbl: "Balance", fr: 0.12, a: "right" },
-    { k: "rmk", lbl: "Remarks", fr: 0.14, a: "left" },
+    { k: "no",   lbl: "#",         fr: 0.04, a: "center" },
+    { k: "name", lbl: "Material",  fr: 0.31, a: "left"   },
+    { k: "unit", lbl: "Unit",      fr: 0.08, a: "center" },
+    { k: "ord",  lbl: "Ordered",   fr: 0.13, a: "right"  },
+    { k: "prev", lbl: "Prev. Rcvd", fr: 0.13, a: "right"  },
+    { k: "this", lbl: "This GRN",  fr: 0.13, a: "right"  },
+    { k: "bal",  lbl: "Balance",   fr: 0.13, a: "right"  },
 ];
 COLS.forEach((c) => { c.w = Math.round(c.fr * CW * 10) / 10; });
 const drift = CW - COLS.reduce((s, c) => s + c.w, 0);
 COLS[COLS.length - 1].w = Math.round((COLS[COLS.length - 1].w + drift) * 10) / 10;
 
-const TH = 19;
+const TH = 22;
 const TPX = 5;
 const TPY = 5;
 const TFS = 8;
@@ -287,26 +296,24 @@ function rowHeight(doc, item, i) {
         String(i + 1),
         String(item.materialName || ""),
         String(item.unit || ""),
-        fmtN(item.orderedQuantity),
-        fmtN(item.previouslyReceivedQuantity),
-        fmtN(item.receivedQuantity),
-        fmtN(bal),
-        String(item.remarks || ""),
+        fmtN(item.orderedQuantity) || "",
+        fmtN(item.previouslyReceivedQuantity) || "",
+        fmtN(item.receivedQuantity) || "",
+        fmtN(bal) || "",
     ];
     let maxH = 0;
     COLS.forEach((col, ci) => {
         const h = textH(doc, vals[ci], col.w - TPX * 2, F.regular, TFS);
         if (h > maxH) maxH = h;
     });
-    return Math.max(maxH + TPY * 2, 16);
+    return Math.max(maxH + TPY * 2, 18);
 }
 
 function tableHeader(doc, y) {
-    strokeRect(doc, MX, y, CW, TH, C.border, 0.3);
-
+    strokeRect(doc, MX, y, CW, TH, C.border, 0.7);
     let cx = MX;
     COLS.forEach((col) => {
-        absText(doc, col.lbl, cx + TPX, y + TPY, {
+        absText(doc, col.lbl, cx + TPX, y + (TH - TFS) / 2, {
             font: F.bold, size: TFS, color: C.black,
             width: col.w - TPX * 2, align: col.a, lineBreak: false,
         });
@@ -315,9 +322,8 @@ function tableHeader(doc, y) {
     cx = MX;
     COLS.slice(0, -1).forEach((col) => {
         cx += col.w;
-        vLine(doc, cx, y, y + TH, C.border, 0.3);
+        vLine(doc, cx, y, y + TH, C.border, 0.7);
     });
-
     return y + TH;
 }
 
@@ -326,33 +332,30 @@ function tableRow(doc, y, item, i) {
     const bal = (item.orderedQuantity || 0) - (item.previouslyReceivedQuantity || 0) - (item.receivedQuantity || 0);
     const vals = [
         String(i + 1),
-        String(item.materialName || ""),
-        String(item.unit || ""),
-        fmtN(item.orderedQuantity),
-        fmtN(item.previouslyReceivedQuantity),
-        fmtN(item.receivedQuantity),
-        fmtN(bal),
-        String(item.remarks || ""),
+        String(item.materialName || "—"),
+        String(item.unit || "—"),
+        fmtN(item.orderedQuantity) || "—",
+        fmtN(item.previouslyReceivedQuantity) || "—",
+        fmtN(item.receivedQuantity) || "—",
+        fmtN(bal) || "—",
     ];
-
     let cx = MX;
     COLS.forEach((col, ci) => {
-        const color = (col.k === "bal" && bal < 0) ? C.negative : C.black;
+        const color = (col.k === "bal" && bal < 0) ? "#cc0000" : C.black;
         absText(doc, vals[ci], cx + TPX, y + TPY, {
             size: TFS, color,
             width: col.w - TPX * 2, align: col.a, lineBreak: true,
         });
         cx += col.w;
     });
-    hLine(doc, MX, MX + CW, y + rh, C.border, 0.3);
+    hLine(doc, MX, MX + CW, y + rh, C.border, 0.7);
     cx = MX;
     COLS.slice(0, -1).forEach((col) => {
         cx += col.w;
-        vLine(doc, cx, y, y + rh, C.border, 0.3);
+        vLine(doc, cx, y, y + rh, C.border, 0.7);
     });
-    vLine(doc, MX, y, y + rh, C.border, 0.3);
-    vLine(doc, MX + CW, y, y + rh, C.border, 0.3);
-
+    vLine(doc, MX, y, y + rh, C.border, 0.7);
+    vLine(doc, MX + CW, y, y + rh, C.border, 0.7);
     return y + rh;
 }
 
@@ -362,29 +365,23 @@ function tableTotals(doc, y, items, totalAmount) {
     const prev = tot("previouslyReceivedQuantity");
     const rcv = tot("receivedQuantity");
     const bal = ord - prev - rcv;
-    const RH = 19;
-    strokeRect(doc, MX, y, CW, RH, C.border, 0.3);
+    const RH = 22;
+    strokeRect(doc, MX, y, CW, RH, C.border, 0.7);
     const vals = [
         "",
         `Total (${items.length} item${items.length !== 1 ? "s" : ""})`,
         "",
-        fmtN(ord),
-        fmtN(prev),
-        fmtN(rcv),
-        fmtN(bal),
-        "",
+        fmtN(ord) || "",
+        fmtN(prev) || "",
+        fmtN(rcv) || "",
+        fmtN(bal) || "",
     ];
-
     let cx = MX;
     COLS.forEach((col, ci) => {
         if (vals[ci]) {
             absText(doc, vals[ci], cx + TPX, y + (RH - TFS) / 2, {
-                font: F.bold,
-                size: TFS,
-                color: C.black,
-                width: col.w - TPX * 2,
-                align: col.a,
-                lineBreak: false,
+                font: F.bold, size: TFS, color: C.black,
+                width: col.w - TPX * 2, align: col.a, lineBreak: false,
             });
         }
         cx += col.w;
@@ -392,36 +389,55 @@ function tableTotals(doc, y, items, totalAmount) {
     cx = MX;
     COLS.slice(0, -1).forEach((col) => {
         cx += col.w;
-        vLine(doc, cx, y, y + RH, C.border, 0.3);
+        vLine(doc, cx, y, y + RH, C.border, 0.7);
     });
-    absText(
-        doc,
-        `GRN Amount : Rs. ${fmtN(totalAmount || 0, 2)}`,
-        MX + CW - 180,
-        y + RH + 8,
-        {
-            font: F.bold,
-            size: 9,
-            color: C.black,
-            width: 180,
-            align: "right",
-        }
-    );
 
-    return y + RH + 22;
+    const summaryWidth = 270;
+    const summaryX = MX + CW - summaryWidth;
+    const labelWidth = 165;
+    const valueWidth = 95;
+    const SRH = 22;
+
+    const amountRows = [
+        { label: "GRN Total Amount", value: fmtCurrency(totalAmount || 0) || "Rs. 0.00", bold: true },
+    ];
+
+    let sy = y + RH;
+    amountRows.forEach((row, i) => {
+        const isLast = i === amountRows.length - 1;
+        strokeRect(doc, summaryX, sy, summaryWidth, SRH, C.border, isLast ? 0.9 : 0.7);
+        absText(doc, row.label, summaryX + 8, sy + (SRH - (row.bold ? 10 : 8)) / 2, {
+            font: row.bold ? F.bold : F.regular,
+            size: row.bold ? 10 : 8,
+            width: labelWidth,
+            align: "left",
+            lineBreak: false,
+        });
+        absText(doc, row.value, summaryX + summaryWidth - valueWidth - 8, sy + (SRH - (row.bold ? 10 : 8)) / 2, {
+            font: row.bold ? F.bold : F.regular,
+            size: row.bold ? 10 : 8,
+            width: valueWidth,
+            align: "right",
+            lineBreak: false,
+        });
+        sy += SRH;
+    });
+
+    return sy;
 }
 
 export async function generateGRNPdf(res, { grn, company, vendor, project, createdByUser }) {
     const logoBuffer = await fetchImageBuffer(company?.logo);
     const ctx = {
         page: 1,
+        totalPages: 1,
         grnNumber: grn.grnNumber,
         companyName: company?.companyName || "",
     };
 
     const doc = new PDFDocument({
         size: "A4",
-        margins: { top: MT, bottom: 4, left: MX, right: MX },
+        margins: { top: MT, bottom: 4, left: MX, right: 44 },
         info: {
             Title: `GRN ${grn.grnNumber}`,
             Author: company?.companyName || "System",
@@ -439,30 +455,43 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
     doc.addPage();
     let y = MT;
 
-    // Title Section
-    absText(doc, "Goods Receipt Note", MX, y, {
-        font: F.bold, size: 12, color: C.black, width: CW * 0.6,
-    });
-    absText(doc, `Original Copy`, MX + CW * 0.6, y + 2, {
-        font: F.regular, size: 8, color: C.muted,
-        width: CW * 0.4, align: "right",
-    });
+    absText(doc, "Goods Receipt Note", MX, y, { font: F.bold, size: 14, color: C.black, width: CW * 0.65 });
 
-    y += 28;
+    const logoSize = 40;
+    if (logoBuffer) {
+        try {
+            doc.image(logoBuffer, MX + CW - logoSize, y, { fit: [logoSize, logoSize] });
+        } catch {
+            drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize);
+        }
+    } else {
+        drawInitials(doc, company?.companyName, MX + CW - logoSize, y, logoSize);
+    }
 
-    // Prepare Grid Contents
+    y += logoSize + 16;
+
     const leftWidth = CW * 0.55;
     const rightWidth = CW - leftWidth;
 
     const itemsL1 = [
-        { type: "header", text: company?.companyName || "Company Name" },
-        { type: "text", text: [company?.address?.city, company?.address?.state, company?.address?.country].filter(Boolean).join(", ") },
-        { type: "pair", label: "Contact", value: (company?.phone || company?.email) ? `${company.phone || ""} ${company.email || ""}`.trim() : null },
+        { type: "bigheader", text: company?.companyName || "Company Name" },
+        {
+            type: "text",
+            text: [company?.address?.city, company?.address?.state, company?.address?.country]
+                .filter(Boolean).join(", "),
+        },
+        {
+            type: "pair",
+            label: "Contact",
+            value: (company?.phone || company?.email)
+                ? `${company.phone || ""} ${company.email || ""}`.trim()
+                : null,
+        },
         { type: "pair", label: "GSTIN/UIN", value: company?.gstin },
     ];
 
     const itemsL2 = [
-        { type: "title", text: "Consignee (Ship to) / Project details" },
+        { type: "title", text: "Consignee (Ship to) / Project Details" },
         { type: "header", text: project?.projectName || "Project Name" },
         { type: "text", text: project?.location },
         { type: "pair", label: "Client Name", value: project?.clientName },
@@ -471,9 +500,9 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
 
     const itemsL3 = [
         { type: "title", text: "Vendor (Supplier)" },
-        { type: "header", text: vendor?.name || "Vendor Name" },
+        { type: "bigheader", text: vendor?.name || "Vendor Name" },
         { type: "text", text: vendor?.address },
-        { type: "pair", label: "Contact", value: vendor?.contactPerson },
+        { type: "pair", label: "Contact Person", value: vendor?.contactPerson },
         { type: "pair", label: "Phone", value: vendor?.phone },
         { type: "pair", label: "Email", value: vendor?.email },
         { type: "pair", label: "GSTIN", value: vendor?.legalDetails?.gstin },
@@ -485,10 +514,9 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
         { left: { lbl: "Delivery Date", val: fmt(grn.deliveryDate) }, right: { lbl: "PO Reference", val: grn.poNumber } },
         { left: { lbl: "Challan Number", val: grn.deliveryChallanNumber }, right: { lbl: "Challan Date", val: fmt(grn.deliveryChallanDate) } },
         { left: { lbl: "Vehicle Number", val: grn.vehicleNumber } },
-        { left: { lbl: "Created by", val: createdByUser?.name }, right: { lbl: "Status", val: "RECEIVED" } },
+        { left: { lbl: "Created By", val: createdByUser?.name }, right: { lbl: "Status", val: "Received" } },
     ];
 
-    // Responsive Spacing calculations
     const paddingOffset = 12;
     const H_L1 = measureBlockHeight(doc, itemsL1, leftWidth - paddingOffset) + 12;
     const H_L2 = measureBlockHeight(doc, itemsL2, leftWidth - paddingOffset) + 12;
@@ -510,40 +538,24 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
     const H_RIGHT = rowHeights.reduce((sum, h) => sum + h, 0);
     const H_MAX = Math.max(H_LEFT, H_RIGHT);
 
-    // Dynamic grid extension for Right Column to stretch to bottom boundary
     if (H_MAX > H_RIGHT) {
         rowHeights[rowHeights.length - 1] += (H_MAX - H_RIGHT);
     }
 
-    // Draw Grid borders
-    strokeRect(doc, MX, y, CW, H_MAX, C.border, 0.3);
-    vLine(doc, MX + leftWidth, y, y + H_MAX, C.border, 0.3);
+    strokeRect(doc, MX, y, CW, H_MAX, C.border, 0.5);
+    vLine(doc, MX + leftWidth, y, y + H_MAX, C.border, 0.5);
 
-    // Draw Left Column Blocks
     let curL_y = y;
-
-    // Draw L1
-    let logoSize = 34;
-    let logoDrawWidth = 0;
-    if (logoBuffer) {
-        try {
-            doc.image(logoBuffer, MX + 6, curL_y + 6, { fit: [logoSize, logoSize] });
-            logoDrawWidth = logoSize + 8;
-        } catch { }
-    }
-    drawBlock(doc, itemsL1, MX + 6 + logoDrawWidth, curL_y + 6, leftWidth - 12 - logoDrawWidth);
-    hLine(doc, MX, MX + leftWidth, curL_y + H_L1, C.border, 0.3);
+    drawBlock(doc, itemsL1, MX + 6, curL_y + 6, leftWidth - 12);
+    hLine(doc, MX, MX + leftWidth, curL_y + H_L1, C.border, 0.5);
     curL_y += H_L1;
 
-    // Draw L2
     drawBlock(doc, itemsL2, MX + 6, curL_y + 6, leftWidth - 12);
-    hLine(doc, MX, MX + leftWidth, curL_y + H_L2, C.border, 0.3);
+    hLine(doc, MX, MX + leftWidth, curL_y + H_L2, C.border, 0.5);
     curL_y += H_L2;
 
-    // Draw L3
     drawBlock(doc, itemsL3, MX + 6, curL_y + 6, leftWidth - 12);
 
-    // Draw Right Column Rows
     let curR_y = y;
     rightRows.forEach((row, idx) => {
         const h = rowHeights[idx];
@@ -553,9 +565,8 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
 
     y += H_MAX + 16;
 
-    // Draw Table
     y = space(doc, y, TH + 30, ctx);
-    y = label(doc, y, "Order items");
+    y = sectionLabel(doc, y, "Received Items");
     y = tableHeader(doc, y);
 
     grn.items.forEach((item, i) => {
@@ -570,48 +581,38 @@ export async function generateGRNPdf(res, { grn, company, vendor, project, creat
         y = tableRow(doc, y, item, i);
     });
 
-    y = space(doc, y, 19, ctx);
+    y = space(doc, y, 22, ctx);
     y = tableTotals(doc, y, grn.items, grn.totalAmount);
-    y += 14;
+    y += 16;
 
-    // Remarks
     if (grn.remarks?.trim()) {
         const rmkW = CW - 12;
-        const rmkH = textH(doc, grn.remarks, rmkW, F.regular, 8) + 12;
-
-        y = space(doc, y, rmkH + 20, ctx);
-        y = label(doc, y, "Remarks & Notes");
-
-        strokeRect(doc, MX, y, CW, rmkH, C.border, 0.3);
-        absText(doc, grn.remarks, MX + 6, y + 6, {
-            size: 8, color: C.black, width: rmkW,
-        });
-        y += rmkH + 12;
+        const rmkH = textH(doc, grn.remarks, rmkW, F.regular, 8) + 16;
+        y = space(doc, y, rmkH + 24, ctx);
+        y = sectionLabel(doc, y, "Remarks & Notes");
+        strokeRect(doc, MX, y, CW, rmkH, C.border, 0.5);
+        absText(doc, grn.remarks, MX + 6, y + 6, { size: 8, color: C.black, width: rmkW });
+        y += rmkH + 14;
     }
 
-    // Signatures / Authorisation Box
-    const SIG_H = 68;
+    const SIG_H = 72;
     const sigColW = CW / 3;
-
-    y = space(doc, y, SIG_H + 25, ctx);
-    y = label(doc, y, "Authorisation & signatures");
-
-    strokeRect(doc, MX, y, CW, SIG_H, C.border, 0.3);
-
-    ["Prepared by", "Verified by", "Authorised by"].forEach((lbl, s) => {
+    y = space(doc, y, SIG_H + 28, ctx);
+    y = sectionLabel(doc, y, "Authorisation & Signatures");
+    strokeRect(doc, MX, y, CW, SIG_H, C.border, 0.5);
+    ["Prepared By", "Verified By", "Authorised By"].forEach((lbl, s) => {
         const sx = MX + s * sigColW;
-        if (s > 0) {
-            vLine(doc, sx, y, y + SIG_H, C.border, 0.3);
-        }
-        hLine(doc, sx, sx + sigColW, y + SIG_H - 18, C.border, 0.3);
-        absText(doc, lbl, sx, y + SIG_H - 12, {
+        if (s > 0) vLine(doc, sx, y, y + SIG_H, C.border, 0.5);
+        hLine(doc, sx, sx + sigColW, y + SIG_H - 20, C.border, 0.5);
+        absText(doc, lbl, sx, y + SIG_H - 13, {
             font: F.bold, size: 8, color: C.black,
             width: sigColW, align: "center",
         });
     });
 
-    y += SIG_H + 12;
+    y += SIG_H + 14;
 
+    ctx.totalPages = ctx.page;
     drawFooter(doc, ctx);
     doc.end();
 }

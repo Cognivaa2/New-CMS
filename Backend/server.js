@@ -45,6 +45,7 @@ import adjustmentRoutes from "./routes/stockAdjustment.routes.js";
 import reconciliationRoutes from "./routes/reconciliation.routes.js";
 import safetyRoutes from "./routes/safety.routes.js";
 import importRoutes from "./routes/import.routes.js";
+import helpdeskRoutes from "./routes/helpDesk.routes.js";
 
 
 const app = express();
@@ -93,6 +94,7 @@ app.use("/api/v1/adjustments", adjustmentRoutes);
 app.use("/api/v1/reconciliation", reconciliationRoutes);
 app.use("/api/v1/safety", safetyRoutes);
 app.use("/api/v1/import", importRoutes);
+app.use("/api/v1/helpdesk", helpdeskRoutes);
 
 
 app.get("/api/health", (req, res) => {
