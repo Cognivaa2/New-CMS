@@ -252,7 +252,7 @@ export default function ProjectSidebar() {
                         </div>
                     )}
                 </div>
-                <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 space-y-0.5">
+                <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 ">
                     {isLoadingPermissions ? (
                         <ProjectSidebarSkeleton isOpen={isProjectSidebarOpen} />
                     ) : (
@@ -269,7 +269,7 @@ export default function ProjectSidebar() {
                                         }}
                                     >
                                         <div
-                                            className={`flex items-center py-2 rounded-lg cursor-pointer transition-colors overflow-hidden ${isProjectSidebarOpen ? "justify-start px-3 gap-3" : "justify-center"
+                                            className={`flex items-center py-1.75 rounded-lg cursor-pointer transition-colors overflow-hidden ${isProjectSidebarOpen ? "justify-start px-3 gap-3" : "justify-center"
                                                 } ${active
                                                     ? "bg-[#f4f4f5] dark:bg-[#27272a] text-black dark:text-[#f4f4f5] font-sfpro-medium"
                                                     : "text-[#444444] dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-white/5 hover:text-black dark:hover:text-[#f4f4f5]"
