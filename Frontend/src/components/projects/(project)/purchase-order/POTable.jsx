@@ -435,31 +435,31 @@ export default function POTable({
         onClick={() => handleView(row)}
         className={`group hover:bg-[#f9f9f9] dark:hover:bg-[#0d0d0d] transition-colors duration-150 cursor-pointer ${!isLast ? "border-b border-[#f0f0f0] dark:border-[#1e1e1e]" : ""}`}
       >
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           {row.poId
             ? <span className="text-[13.5px] font-sfpro-bold text-gray-900 dark:text-white">{row.poId}</span>
             : <NA />}
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           {row.vendorName
             ? <span className="text-[13px] font-sfpro-medium text-gray-700 dark:text-[#d4d4d8]">{row.vendorName}</span>
             : <NA />}
         </td>
 
-        <td className="px-4 py-3.5">
+        <td className="px-4 py-2">
           {row.materials
             ? <p className="text-[13px] font-sfpro text-gray-500 dark:text-[#a1a1aa] truncate max-w-50">{row.materials}</p>
             : <NA />}
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap text-center">
+        <td className="px-4 py-2 whitespace-nowrap text-center">
           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-[#27272a] text-[11px] font-sfpro-bold text-gray-600 dark:text-[#a1a1aa]">
             {row.items?.length ?? 0}
           </span>
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           <TotalQtyCell
             items={row.items}
             field="orderedQuantity"
@@ -468,7 +468,7 @@ export default function POTable({
           />
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           <TotalQtyCell
             items={row.items}
             field="receivedQuantity"
@@ -477,7 +477,7 @@ export default function POTable({
           />
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           <div className="flex items-center gap-1">
             <IndianRupee className="w-3 h-3 text-gray-400" />
             <span className="text-[13px] font-sfpro-bold text-gray-800 dark:text-[#f4f4f5]">
@@ -486,31 +486,31 @@ export default function POTable({
           </div>
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           <StatusPill status={row.status} />
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           {row.expectedDelivery
             ? <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.expectedDelivery}</span>
             : <NA />}
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           <UserCell user={row.createdBy} />
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           {actioned?.user ? <UserCell user={actioned.user} sublabel={actioned.label} /> : <NA />}
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap">
+        <td className="px-4 py-2 whitespace-nowrap">
           {row.createdAt
             ? <span className="text-[13px] font-sfpro-medium text-gray-600 dark:text-[#a1a1aa]">{row.createdAt}</span>
             : <NA />}
         </td>
 
-        <td className="px-4 py-3.5 whitespace-nowrap" onClick={e => e.stopPropagation()}>
+        <td className="px-4 py-2 whitespace-nowrap" onClick={e => e.stopPropagation()}>
           <div className="flex justify-center">
             <ThreeDotMenu
               items={buildMenuItems(row)} size="sm"
