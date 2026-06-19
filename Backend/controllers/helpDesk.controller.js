@@ -1,4 +1,4 @@
-import Helpdesk, { HELPDESK_CATEGORIES, HELPDESK_PRIORITIES } from "../models/helpdesk.models.js";
+import Helpdesk, { HELPDESK_CATEGORIES, HELPDESK_PRIORITIES } from "../models/helpDesk.models.js";
 import Company from "../models/company.models.js";
 import User from "../models/user.models.js";
 import sendEmail from "../services/email.service.js";

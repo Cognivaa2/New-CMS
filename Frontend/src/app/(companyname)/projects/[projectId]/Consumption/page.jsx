@@ -11,8 +11,8 @@ import {
     formatConsumptionError,
 } from "./api"
 
-import ConsumptionHeader from "@/components/projects/(project)/consumption/ConsumptionHeader"
-import ConsumptionTable from "@/components/projects/(project)/consumption/ConsumptionTable"
+import ConsumptionHeader from "@/components/projects/(project)/Consumption/ConsumptionHeader"
+import ConsumptionTable from "@/components/projects/(project)/Consumption/ConsumptionTable"
 import DeleteModal from "@/components/ui/DeleteModal"
 import SummaryCard from "@/components/ui/SummaryCard"
 import Loading from "./loading"

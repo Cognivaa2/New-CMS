@@ -1,0 +1,42 @@
+name: Deploy to Hetzner
+
+# Deploys the app to the Hetzner VPS after merge to main.
+# Requires repo secrets:
+#   HETZNER_HOST     - server IP / hostname (e.g. 204.168.223.223)
+#   HETZNER_SSH_KEY  - the PRIVATE deploy key (contents of ~/.ssh/hetzner_newcms)
+# Server-side env (/opt/newcms/Backend/.env, Frontend/.env.production) is NOT
+# overwritten — it lives only on the server.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hetzner
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.HETZNER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync source to server
+        run: |
+          rsync -az --delete \
+            --exclude '.git' --exclude 'node_modules' --exclude '.next' \
+            --exclude 'Backend/.env' \
+            --exclude 'Frontend/.env.local' --exclude 'Frontend/.env.production' \
+            -e "ssh -i ~/.ssh/id_deploy" \
+            ./ "root@${{ secrets.HETZNER_HOST }}:/opt/newcms/"
+
+      - name: Install, build & restart
+        run: ssh -i ~/.ssh/id_deploy "root@${{ secrets.HETZNER_HOST }}" 'bash /opt/newcms/deploy/server-deploy.sh'

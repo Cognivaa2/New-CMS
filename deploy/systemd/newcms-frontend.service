@@ -1,0 +1,16 @@
+[Unit]
+Description=New-CMS Frontend (Next.js)
+After=network.target newcms-backend.service
+
+[Service]
+WorkingDirectory=/opt/newcms/Frontend
+ExecStart=/usr/bin/npm run start
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+Restart=on-failure
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

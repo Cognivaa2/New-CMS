@@ -1,0 +1,16 @@
+[Unit]
+Description=New-CMS Backend (Express)
+After=network.target mongod.service keycloak.service
+Wants=mongod.service keycloak.service
+
+[Service]
+WorkingDirectory=/opt/newcms/Backend
+# Backend loads its own /opt/newcms/Backend/.env via dotenv (not committed).
+ExecStart=/usr/bin/node server.js
+Environment=NODE_ENV=production
+Restart=on-failure
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

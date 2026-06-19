@@ -1,0 +1,18 @@
+[Unit]
+Description=Keycloak (New-CMS auth)
+After=network.target
+
+[Service]
+User=keycloak
+Group=keycloak
+# Secrets live here (NOT in git): KC_BOOTSTRAP_ADMIN_USERNAME / KC_BOOTSTRAP_ADMIN_PASSWORD
+EnvironmentFile=/etc/newcms/keycloak.env
+# Bound to localhost: the backend talks to Keycloak server-side; never exposed publicly.
+ExecStart=/opt/keycloak/bin/kc.sh start-dev --http-port=9090 --http-host=127.0.0.1 --hostname-strict=false
+LimitNOFILE=65536
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

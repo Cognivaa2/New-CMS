@@ -1,5 +1,5 @@
 import express from "express";
-import { raiseTicket, getMyTickets } from "../controllers/helpdesk.controller.js";
+import { raiseTicket, getMyTickets } from "../controllers/helpDesk.controller.js";
 import { uploadDocument } from "../middlewares/upload.middlewares.js";
 import { verifyToken } from "../middlewares/verifyToken.middlewares.js";
 

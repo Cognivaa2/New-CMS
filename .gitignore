@@ -1,0 +1,12 @@
+# Local development infrastructure (MongoDB + Keycloak binaries & data)
+/.localinfra/
+
+# Env files
+/Frontend/.env.local
+/Backend/.env
+
+# Local dev helper script
+/start-local.ps1
+
+# Deployment artifacts (app tarball, server scripts, secrets)
+/.deploy/
