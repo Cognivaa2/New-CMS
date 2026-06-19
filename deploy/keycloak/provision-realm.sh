@@ -54,6 +54,15 @@ curl -s -o /dev/null -w "  client http=%{http_code}\n" -X POST "$KC/admin/realms
 
 UUID=$(curl -s "$KC/admin/realms/$R/clients?clientId=$CID" -H "Authorization: Bearer $TOKEN" \
   | python3 -c 'import sys,json;print(json.load(sys.stdin)[0]["id"])')
+
+echo "==> audience mapper (KC24+ introspection requires the client in the token aud)"
+# Without this, every backend introspection of a token returns active=false
+# ("Client '$CID' is not in the token audience") and ALL authenticated routes 401.
+curl -s -o /dev/null -w "  mapper http=%{http_code}\n" -X POST \
+  "$KC/admin/realms/$R/clients/$UUID/protocol-mappers/models" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d "{\"name\":\"$CID-audience\",\"protocol\":\"openid-connect\",\"protocolMapper\":\"oidc-audience-mapper\",\"config\":{\"included.client.audience\":\"$CID\",\"id.token.claim\":\"false\",\"access.token.claim\":\"true\",\"introspection.token.claim\":\"true\"}}" || true
+
 SECRET=$(curl -s "$KC/admin/realms/$R/clients/$UUID/client-secret" -H "Authorization: Bearer $TOKEN" \
   | python3 -c 'import sys,json;print(json.load(sys.stdin)["value"])')
 echo "KEYCLOAK_CLIENT_SECRET=$SECRET"

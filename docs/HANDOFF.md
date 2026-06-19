@@ -64,10 +64,18 @@ No business-logic / feature code was changed.
 
 ---
 
-## 4. Demo account
+## 4. Demo accounts
 
-- Login identifier: **demo@cms.local**  ·  password: **Demo@12345**  (Owner role, full permissions; company "Demo Construction Co").
-- Works on both URLs above.
+All password **`Demo@12345`**, company "Demo Construction Co". Work on both URLs above.
+
+| Email | Role | Access |
+|-------|------|--------|
+| `demo@cms.local` | Owner | full (the actual company owner) |
+| `admin@cms.local` | Owner role | full (admin, not the owner flag) |
+| `manager@cms.local` | Manager | view / create / edit / download on all modules |
+| `viewer@cms.local` | Viewer | view / download only (read-only) |
+
+Created via the app's own API (`deploy/.. create-demo-users` pattern): register → read OTP from the backend log → verify → reset the Keycloak password to a known value. Permission differences are enforced by `verifyToken` + `checkPermission` (verified: Viewer gets 403 on create).
 
 ---
 
@@ -109,5 +117,6 @@ See the team's local runbook. In short: MongoDB on :27017, a Keycloak instance w
 1. **No HTTPS on the Hetzner backend** (plain HTTP on a bare IP). Fine for testing; for production put it behind a domain (Cloudflare proxy / Let's Encrypt via Caddy). The Cloudflare frontend works around this with the server-side `/api` proxy.
 2. **Keycloak runs in dev mode** (`start-dev`, file H2 DB). Fine for a demo; for production use `start` with a proper DB (Postgres) and a hostname.
 3. **KC 26 strict user profile:** `firstName`/`lastName` were made **optional** on the `Test_Cms` realm (the app never sets them, so otherwise every user is "not fully set up" and cannot get a token). Unmanaged attributes are **enabled** (the app stores `companyId`, `roleId`, `isOwner`, etc. as user attributes). Both are applied by `deploy/keycloak/provision-realm.sh`.
+4. **KC 24+ introspection audience (was a hard blocker):** `verifyToken` validates tokens via **introspection**, which on KC 24+ requires the introspecting client (`cms-backend`) to be in the token `aud`. By default it is not, so introspection returns `active=false` and **every authenticated route 401s** ("Token Expired"). Fixed with an **audience protocol-mapper** on the client (now in `provision-realm.sh`). If auth mysteriously breaks after a realm rebuild, check this first.
 4. **Mongo has no auth** and **secrets are dev-grade.** Harden before real production.
 5. **Cloudflare build must be webpack** and is currently built/deployed from a dev machine; wire `CLOUDFLARE_API_TOKEN` into CI to automate it.
