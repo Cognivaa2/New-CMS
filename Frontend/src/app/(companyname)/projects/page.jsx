@@ -288,7 +288,7 @@ export default function Projects() {
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#121212]  rounded-lg p-4 transition-colors duration-300">
       <ProjectsHeader
         count={pagination.total}
-        description="Manage your company projects — create, update, track progress, and export project data from one place."
+        description="Manage your company projects. create, update, track progress, and export project data from one place."
         onAction={handleAddProjectClick}
         onSearch={handleSearch}
         onFilter={handleFilter}

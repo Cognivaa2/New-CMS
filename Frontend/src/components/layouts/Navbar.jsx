@@ -346,7 +346,7 @@ export default function Navbar() {
   return (
     <>
       <div className="sticky top-0 z-30 w-full h-16 md:h-18 bg-white dark:bg-[#121212] border-b-2 border-[#EAEAEA] dark:border-[#27272a] flex items-center justify-between px-4 md:px-8 shrink-0 transition-colors duration-300">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-center gap-1 lg:gap-3">
           <button
             onClick={handleToggle}
             className="hidden md:flex text-[#212121] dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors items-center justify-center"
@@ -392,7 +392,7 @@ export default function Navbar() {
           <Tooltip content="Help & Support" side="bottom">
             <button
               onClick={() => setHelpdeskOpen(true)}
-              className="hidden md:flex text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md text-sm"
+              className="hidden md:flex gap-1 text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md text-sm"
               aria-label="Help & Support"
             >
               <CircleHelp size={18} strokeWidth={2} />
@@ -407,13 +407,12 @@ export default function Navbar() {
           >
             <CircleHelp size={16} strokeWidth={2} />
           </button>
-
           <span className="md:hidden font-sfpro-medium text-gray-900 dark:text-[#f4f4f5] text-[15px] tracking-wide transition-colors">
             {currentPageName}
           </span>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-5 text-[#212121] dark:text-gray-400">
+        <div className="flex items-center gap-2 md:gap-5 text-[#212121] dark:text-gray-400">
           <Tooltip content="Toggle Theme" side="bottom">
             <button
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
