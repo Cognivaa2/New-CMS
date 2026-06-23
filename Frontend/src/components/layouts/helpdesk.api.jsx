@@ -60,7 +60,7 @@ export const helpdeskApi = {
     headers["x-company-id"] = companyId
 
     const { data } = await axios.get(
-      `${API_BASE_URL}/helpdesk/${keycloakId}?${params.toString()}`,
+      `${API_BASE_URL}/helpdesk/${companyId}?${params.toString()}`,
       { headers, signal }
     )
 
