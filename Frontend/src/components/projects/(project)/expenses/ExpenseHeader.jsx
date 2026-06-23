@@ -98,7 +98,7 @@ export default function ExpenseHeader({
           ) : null}
         </div>
         <p className="text-[13.5px] sm:text-[14.5px] text-gray-400 dark:text-gray-500 mt-3 max-w-lg leading-relaxed">
-          {description || "Track all project costs — commitments, actuals, and manual entries."}
+          {description || "Track all project costs - commitments, actuals, and manual entries."}
         </p>
       </div>
 
