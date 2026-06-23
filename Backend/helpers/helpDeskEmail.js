@@ -128,6 +128,23 @@ const buildHelpdeskEmailHtml = ({ ticket, company, user }) => {
                 <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;white-space:pre-wrap;">${ticket.description}</p>
               </div>
 
+              <!-- Attachments -->
+              ${ticket.attachments && ticket.attachments.length > 0 ? `
+              <div style="margin-bottom:28px;">
+                <h2 style="margin:0 0 16px;font-size:16px;color:#1e293b;border-left:4px solid #10b981;padding-left:12px;">Attachments</h2>
+                <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                  ${ticket.attachments.map((url, i) => `
+                    <div style="border:1px solid #e2e8f0; border-radius:6px; overflow:hidden; width:150px;">
+                      <a href="${url}" target="_blank" style="text-decoration:none;">
+                        <img src="${url}" alt="Attachment ${i + 1}" style="width:100%; height:100px; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                        <div style="display:none; padding:12px; text-align:center; font-size:12px; color:#3b82f6; background:#f8fafc;">View File ${i + 1}</div>
+                      </a>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              ` : ""}
+
               <!-- CTA -->
               <div style="text-align:center;margin-top:8px;">
                 <p style="margin:0;font-size:13px;color:#94a3b8;">Please log in to the CMS Pioneer admin panel to respond to this ticket.</p>

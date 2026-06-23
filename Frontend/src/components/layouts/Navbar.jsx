@@ -11,6 +11,7 @@ import {
   LogOut,
   User,
   Building2,
+  CircleHelp,
 } from "lucide-react"
 import { useSidebar } from "@/components/contexts/SidebarContext"
 import { useProjectSidebar } from "@/components/contexts/ProjectSidebarContext"
@@ -22,6 +23,7 @@ import { getRefreshToken } from "@/lib/auth"
 import { logoutUserApi } from "@/app/(auth)/login/api.jsx"
 import { useAuth } from "@/components/contexts/AuthContext"
 import { getAuthHeaders, getBaseUrl } from "@/lib/apiHelper"
+import HelpdeskModal from "./HelpdeskModal" 
 
 const API_BASE_URL = getBaseUrl()
 
@@ -121,6 +123,7 @@ function UserAvatar({ avatar, size = 28, className = "" }) {
     </div>
   )
 }
+
 function CompanyLogo({ company }) {
   const [imgError, setImgError] = useState(false)
 
@@ -284,7 +287,8 @@ export default function Navbar() {
   const { setTheme, resolvedTheme } = useTheme()
 
   const [mounted, setMounted] = useState(false)
-  const [company, setCompany] = useState(null)       
+  const [company, setCompany] = useState(null)
+  const [helpdeskOpen, setHelpdeskOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -340,98 +344,122 @@ export default function Navbar() {
   }
 
   return (
-    <div className="sticky top-0 z-30 w-full h-16 md:h-18 bg-white dark:bg-[#121212] border-b-2 border-[#EAEAEA] dark:border-[#27272a] flex items-center justify-between px-4 md:px-8 shrink-0 transition-colors duration-300">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={handleToggle}
-          className="hidden md:flex text-[#212121] dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors items-center justify-center"
-        >
-          <Tooltip
-            content={isInProject ? "Collapse Project Menu" : "Collapse Sidebar"}
-            side="right"
-          >
-            <PanelLeftClose size={22} strokeWidth={2} className="cursor-pointer" />
-          </Tooltip>
-        </button>
-
-        {!isHome && (
+    <>
+      <div className="sticky top-0 z-30 w-full h-16 md:h-18 bg-white dark:bg-[#121212] border-b-2 border-[#EAEAEA] dark:border-[#27272a] flex items-center justify-between px-4 md:px-8 shrink-0 transition-colors duration-300">
+        <div className="flex items-center justify-center gap-1 lg:gap-3">
           <button
-            onClick={() => router.back()}
-            className="md:hidden flex text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md"
-            aria-label="Go back"
+            onClick={handleToggle}
+            className="hidden md:flex text-[#212121] dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors items-center justify-center"
           >
-            <ChevronLeft size={16} strokeWidth={2} />
+            <Tooltip
+              content={isInProject ? "Collapse Project Menu" : "Collapse Sidebar"}
+              side="right"
+            >
+              <PanelLeftClose size={22} strokeWidth={2} className="cursor-pointer" />
+            </Tooltip>
           </button>
-        )}
 
-        <button
-          onClick={handleToggle}
-          className="md:hidden flex items-center justify-center"
-          aria-label="Open menu"
-        >
-          <CompanyLogo company={company} />
-        </button>
-
-        {!isHome && (
-          <Tooltip content="Go Back" side="bottom">
+          {!isHome && (
             <button
               onClick={() => router.back()}
-              className="hidden md:flex text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md text-sm"
+              className="md:hidden flex text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md"
               aria-label="Go back"
             >
-              <ChevronLeft size={18} strokeWidth={2} />
-              Back
+              <ChevronLeft size={16} strokeWidth={2} />
+            </button>
+          )}
+
+          <button
+            onClick={handleToggle}
+            className="md:hidden flex items-center justify-center"
+            aria-label="Open menu"
+          >
+            <CompanyLogo company={company} />
+          </button>
+
+          {!isHome && (
+            <Tooltip content="Go Back" side="bottom">
+              <button
+                onClick={() => router.back()}
+                className="hidden md:flex text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md text-sm"
+                aria-label="Go back"
+              >
+                <ChevronLeft size={18} strokeWidth={2} />
+                Back
+              </button>
+            </Tooltip>
+          )}
+          <Tooltip content="Help & Support" side="bottom">
+            <button
+              onClick={() => setHelpdeskOpen(true)}
+              className="hidden md:flex gap-1 text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md text-sm"
+              aria-label="Help & Support"
+            >
+              <CircleHelp size={18} strokeWidth={2} />
+              Help
             </button>
           </Tooltip>
-        )}
 
-        <span className="md:hidden font-sfpro-medium text-gray-900 dark:text-[#f4f4f5] text-[15px] tracking-wide transition-colors">
-          {currentPageName}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-4 md:gap-5 text-[#212121] dark:text-gray-400">
-        <Tooltip content="Toggle Theme" side="bottom">
           <button
-            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-            className="dark:hover:text-white transition-colors flex items-center justify-center w-5 h-5 cursor-pointer"
+            onClick={() => setHelpdeskOpen(true)}
+            className="md:hidden flex text-[#000000] dark:text-[#ffffff] hover:text-gray-600 dark:hover:text-gray-300 transition-colors items-center justify-center cursor-pointer bg-transparent p-1 border border-[#dfdfdf] dark:border-[#313131] rounded-md"
+            aria-label="Help & Support"
           >
-            {mounted ? (
-              resolvedTheme === "dark" ? (
-                <Sun size={20} strokeWidth={2} />
+            <CircleHelp size={16} strokeWidth={2} />
+          </button>
+          <span className="md:hidden font-sfpro-medium text-gray-900 dark:text-[#f4f4f5] text-[15px] tracking-wide transition-colors">
+            {currentPageName}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-5 text-[#212121] dark:text-gray-400">
+          <Tooltip content="Toggle Theme" side="bottom">
+            <button
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className="dark:hover:text-white transition-colors flex items-center justify-center w-5 h-5 cursor-pointer"
+            >
+              {mounted ? (
+                resolvedTheme === "dark" ? (
+                  <Sun size={20} strokeWidth={2} />
+                ) : (
+                  <MoonStar size={20} strokeWidth={2} />
+                )
               ) : (
-                <MoonStar size={20} strokeWidth={2} />
-              )
-            ) : (
-              <div className="w-5 h-5" />
-            )}
-          </button>
-        </Tooltip>
-
-        <Tooltip content="Your Profile" side="bottom">
-          <ProfileMenu userId={userId} avatar={avatar} />
-        </Tooltip>
-
-        <Tooltip content="Notification Panel" side="left">
-          <button
-            onClick={toggleNotification}
-            className="relative hover:text-black dark:hover:text-white transition-colors flex items-center justify-center cursor-pointer"
-          >
-            <span className="md:hidden relative flex items-center justify-center">
-              <Bell size={20} strokeWidth={2} />
-              {hasNewNotification && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#22c55e]" />
+                <div className="w-5 h-5" />
               )}
-            </span>
-            <span className="hidden md:inline-flex relative items-center justify-center">
-              <Bell size={22} strokeWidth={2} />
-              {hasNewNotification && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#22c55e]" />
-              )}
-            </span>
-          </button>
-        </Tooltip>
+            </button>
+          </Tooltip>
+
+          <Tooltip content="Your Profile" side="bottom">
+            <ProfileMenu userId={userId} avatar={avatar} />
+          </Tooltip>
+
+          <Tooltip content="Notification Panel" side="left">
+            <button
+              onClick={toggleNotification}
+              className="relative hover:text-black dark:hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+            >
+              <span className="md:hidden relative flex items-center justify-center">
+                <Bell size={20} strokeWidth={2} />
+                {hasNewNotification && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#22c55e]" />
+                )}
+              </span>
+              <span className="hidden md:inline-flex relative items-center justify-center">
+                <Bell size={22} strokeWidth={2} />
+                {hasNewNotification && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#22c55e]" />
+                )}
+              </span>
+            </button>
+          </Tooltip>
+        </div>
       </div>
-    </div>
+
+      <HelpdeskModal
+        isOpen={helpdeskOpen}
+        onClose={() => setHelpdeskOpen(false)}
+      />
+    </>
   )
 }
