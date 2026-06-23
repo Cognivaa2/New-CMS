@@ -7,6 +7,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import logger from "../utils/logger.utils.js";
 import buildHelpdeskEmailHtml from "../helpers/helpDeskEmail.js";
 import { uploadToR2 } from "../utils/uploadToR2.utils.js";
+import keycloakService from "../services/keycloak.service.js";
 import { v4 as uuidv4 } from "uuid";
 
 // ─── POST /helpdesk — Raise a new ticket ──────────────────────────────────────
@@ -50,7 +51,7 @@ export const raiseTicket = async (req, res) => {
             keycloakId: createdBy.trim(),
             companyId: companyObjectId,
             isDeleted: false,
-        }).lean();
+        }).select("+name +email +phone").lean();
         if (!user) {
             return res.status(404).json(new ApiErrors(404, "Invalid createdBy", `No user found with keycloakId: ${createdBy}`));
         }
@@ -79,12 +80,26 @@ export const raiseTicket = async (req, res) => {
             description: description.trim(),
             attachments: uploadedAttachments,
         });
+        let kcUser = null;
+        try {
+            kcUser = await keycloakService.getUserById(createdBy.trim());
+        } catch (err) {
+            logger.warn("Could not fetch Keycloak user for helpdesk email", { error: err.message });
+        }
+
+        const emailUserObj = {
+            name: kcUser?.attributes?.name?.[0] || (kcUser?.firstName ? `${kcUser.firstName} ${kcUser.lastName || ''}`.trim() : null) || user.name || "Unknown User",
+            email: kcUser?.email || user.email || "Unknown Email",
+            phone: kcUser?.attributes?.phone?.[0] || user.phone || "",
+        };
+        console.log("Prepared emailUserObj:", emailUserObj);
+
         const superAdminEmail = process.env.SENDGRID_FROM_EMAIL;
         try {
             await sendEmail({
                 to: superAdminEmail,
                 subject: `[${ticket.priority}] New Helpdesk Ticket ${ticket.ticketNumber} — ${company.companyName}`,
-                html: buildHelpdeskEmailHtml({ ticket, company, user }),
+                html: buildHelpdeskEmailHtml({ ticket, company, user: emailUserObj }),
             });
             ticket.emailNotifiedAt = new Date();
             await ticket.save();
