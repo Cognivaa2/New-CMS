@@ -140,7 +140,8 @@ export const raiseTicket = async (req, res) => {
 // ─── GET /helpdesk — Fetch tickets for the logged-in company ─────────────────
 export const getMyTickets = async (req, res) => {
     try {
-        const { companyId: companyUUID, keycloakId } = req.params;
+        const { companyId: companyUUID } = req.params;
+        const keycloakId = req.user?.keycloakId;
         if (!companyUUID || !companyUUID.trim()) {
             return res.status(400).json(
                 new ApiErrors(400, "Missing Param", "companyId is required in the URL")
