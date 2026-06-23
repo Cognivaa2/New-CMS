@@ -19,7 +19,6 @@ export const helpdeskApi = {
     formData.append("description", description.trim())
     formData.append("createdBy", keycloakId)
 
-    // Append file attachments
     if (attachments && attachments.length > 0) {
       attachments.forEach((file) => {
         if (file instanceof File) {
