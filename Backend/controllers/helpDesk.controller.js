@@ -140,11 +140,10 @@ export const raiseTicket = async (req, res) => {
 // ─── GET /helpdesk — Fetch tickets for the logged-in company ─────────────────
 export const getMyTickets = async (req, res) => {
     try {
-        const companyUUID = req.headers["x-company-id"];
-        const { keycloakId } = req.params;
+        const { companyId: companyUUID, keycloakId } = req.params;
         if (!companyUUID || !companyUUID.trim()) {
             return res.status(400).json(
-                new ApiErrors(400, "Missing Header", "x-company-id header is required")
+                new ApiErrors(400, "Missing Param", "companyId is required in the URL")
             );
         }
         if (!keycloakId) {
