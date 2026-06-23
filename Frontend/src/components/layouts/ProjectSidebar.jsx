@@ -38,7 +38,7 @@ const projectMenu = [
     { label: "Consumption", icon: TrendingDown, href: "/Consumption", moduleKey: "project-consumption" },
     { label: "Safety", icon: ShieldAlert , href: "/safety", moduleKey: "project-safety" },
     { label: "Gantt", icon: BarChart3, href: "/gantt", moduleKey: "project-gantt" },
-    { label: "Chat", icon: MessageSquare, href: "/chat", moduleKey: "project-chat" },
+    // { label: "Chat", icon: MessageSquare, href: "/chat", moduleKey: "project-chat" },
 ]
 async function fetchRolePermissions(roleId, signal = null) {
     if (!roleId) return null
