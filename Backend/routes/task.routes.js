@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { addTask, allTasks, getTask, editTask, deleteTask, updateTaskMember, getTaskDocuments, getAllUniqueAssignedUsers, getTaskDates, getTasksByUser, getAllTasksByUser } from "../controllers/task.controller.js";
-import { linkTaskToWO } from "../controllers/linkTaskToWO.controller.js";
+import { linkTaskToWO } from "../controllers/linkTaskToWo.controller.js";
 import { verifyToken } from "../middlewares/verifyToken.middlewares.js";
 import { checkPermission } from "../middlewares/checkPermission.middlewares.js";
 
